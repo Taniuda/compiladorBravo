@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISC - Analizador Léxico</title>
+<link id="themeStylesheet" rel="stylesheet" href="estiloOscuro.css">
+</head>
+<body>
+
+<div class="fondo">
+    <div class="container">
+
+        <div class="header">
+            <img src="logouat.jpg" alt="Logo Izquierdo" class="logoIzquierda">
+            <p class="titulo">Analizador Léxico</p>
+            <p class="titulo">Grupo: 8°EJF - Equipo: Bravo</p>
+            <img src="logogrifo.jpg" alt="Logo Derecho" class="logoDerecha">
+        </div>
+        
+        
+
+        <div id="container">
+            <div class="columnaVertical">
+
+                <div class="contenedorConsola">
+                    <div id="lineas" class="lineNumbers"></div> <!-- Div para los números de línea -->
+                    
+                    <div class="editorWrapper">
+                        <textarea id="input" rows="4" cols="50"></textarea>
+                    </div>
+                </div>
+
+                <div class="consolaSalida" id="erroresSintaxis">
+
+                </div>                
+            </div>
+            
+            <!-- Contenedor para los botones -->
+            <div class="botonesConsola">
+
+                <button class="boton" onclick="analizar()">Analizar</button>
+                <button class="boton" onclick="limpiar()">Limpiar</button>
+                <button class="boton" onclick="equipo()">Equipo</button>
+                
+                
+                <button class="boton" onclick="ingresarInstruccion()">Sintaxis</button>
+                <button class="boton" onclick="salir()">Salir</button>
+                
+                <div id="TEMITA" class="tema-container">
+                    <p>Cambiar tema</p>
+                    <div class="toggle-container">
+                        <input type="checkbox" id="tema" class="toggle-input">
+                        <label for="tema" class="toggle-label"></label>
+                    </div>
+                </div>
+
+
+                
+            </div>
+
+        </div>
+
+        
+
+        <br>
+
+        <!-- TABLA DE RESULTADOS -->
+        <div id="output">
+            <table class="custom-table" id="tablaTokens">
+                <thead>
+                    <tr>
+                        <th>Linea</th>
+                        <th>Token</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Aquí se agregarán los resultados -->
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+<script src="codigo.js"></script>
+</body>
+</html>

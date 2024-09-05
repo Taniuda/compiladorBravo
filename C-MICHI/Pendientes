@@ -1,0 +1,93 @@
+ContenedorConsola:
+
+usaremos el borde para indicar
+cuando este incorrecta la sintaxis
+de lo contrario sera del color predeterminado
+
+
+
+
+
+
+
+
+
+
+
+1. Análisis Léxico
+El análisis léxico es la primera etapa de un compilador. Su función principal es tomar el código fuente (el texto que escribes en un lenguaje de programación) y dividirlo en unidades más pequeñas llamadas tokens. Estos tokens son elementos básicos como palabras clave, identificadores, operadores, números, y símbolos.
+
+Entrada: Código fuente (texto en un lenguaje de programación).
+Proceso: El analizador léxico escanea el código, reconociendo patrones que corresponden a los diferentes tokens.
+Salida: Una lista de tokens, cada uno con su tipo (como palabra clave, identificador, número) y, a veces, su valor.
+2. Análisis Sintáctico
+El análisis sintáctico es la segunda etapa del proceso de compilación. Aquí, se toma la secuencia de tokens generada por el análisis léxico y se organiza en una estructura que refleja la gramática del lenguaje de programación, típicamente un árbol de sintaxis (AST, por sus siglas en inglés).
+
+Entrada: Lista de tokens generada por el análisis léxico.
+Proceso: El analizador sintáctico revisa si los tokens siguen la sintaxis correcta del lenguaje (las reglas de cómo los elementos del lenguaje deben combinarse).
+Salida: Un árbol de sintaxis o árbol de derivación, que muestra la estructura jerárquica del código fuente.
+3. Análisis Semántico
+El análisis semántico es la tercera etapa y se encarga de verificar que el programa no solo sea sintácticamente correcto, sino que también tenga sentido en cuanto a su significado. Aquí se realizan comprobaciones de tipos, se asegura que las variables sean utilizadas correctamente, y se verifica que las operaciones sean válidas.
+
+Entrada: Árbol de sintaxis generado por el análisis sintáctico.
+Proceso: El analizador semántico revisa el árbol de sintaxis para detectar errores semánticos, como intentar asignar un valor de tipo incorrecto a una variable, o llamar a una función con un número incorrecto de argumentos.
+Salida: Un árbol de sintaxis anotado con información adicional, o un informe de errores si se encuentran problemas semánticos.
+En resumen, estas tres etapas se encargan de descomponer, organizar y validar el código fuente antes de que pueda ser traducido a un código máquina o un código intermedio, que luego se ejecutará.
+
+
+
+
+
+si yo por ejemplo ingreso este codigo:
+
+int x = 10;
+x int = 24;
+string x = 11;
+double variable = "hola";
+
+¿quien se encarga de verificar que esto este correcto?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+En el proceso de compilación, diferentes etapas se encargan de verificar distintos aspectos de un código como el que mencionas. Aquí te explico cómo se procesarían los errores que están presentes en el código de ejemplo:
+
+1. Análisis Léxico
+El analizador léxico leería el código línea por línea y lo dividiría en tokens. Por ejemplo:
+
+int x = 10; se dividiría en los tokens: int, x, =, 10, ;.
+x int = 24; se dividiría en los tokens: x, int, =, 24, ;.
+string x = 11; se dividiría en los tokens: string, x, =, 11, ;.
+double variable = "hola"; se dividiría en los tokens: double, variable, =, "hola", ;.
+En esta etapa, no se verificaría si el código tiene sentido en cuanto a las reglas del lenguaje, solo se identificarían y clasificarían los tokens.
+
+2. Análisis Sintáctico
+El analizador sintáctico tomaría los tokens generados y trataría de organizarlos según las reglas gramaticales del lenguaje. Aquí se detectarían errores de sintaxis, como una estructura incorrecta en el código.
+
+En tu código de ejemplo, se podría detectar un error en la línea x int = 24;, ya que no sigue la sintaxis correcta para una declaración de variable. En este punto, el compilador probablemente marcaría un error de sintaxis.
+
+3. Análisis Semántico
+El analizador semántico se encargaría de verificar si el código tiene sentido lógico, es decir, si cumple con las reglas semánticas del lenguaje.
+
+En el código de ejemplo:
+
+Línea 2 (x int = 24;): Aquí se marcaría un error durante el análisis sintáctico antes de llegar al análisis semántico, como mencioné anteriormente.
+Línea 3 (string x = 11;): El analizador semántico detectaría que se está intentando asignar un valor numérico (11) a una variable declarada como string, lo cual es un error semántico.
+Línea 4 (double variable = "hola";): Se detectaría que se está intentando asignar una cadena de texto ("hola") a una variable de tipo double, lo cual también es un error semántico.
+
+Resumen
+Errores de sintaxis (como en x int = 24;) son detectados por el analizador sintáctico.
+Errores de tipo y otros errores semánticos (como en string x = 11; y double variable = "hola";) son detectados por el analizador semántico.
+Estas tres etapas colaboran para asegurarse de que el código fuente sea válido tanto en su estructura como en su significado antes de que pueda ser compilado o ejecutado.
