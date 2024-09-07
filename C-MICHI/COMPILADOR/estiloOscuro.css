@@ -72,23 +72,22 @@ p {
 
 .consolaSalida {
     margin-top: 15px;
-    flex: 1; /* Permite que las columnas ocupen espacio igual */
     padding: 10px; /* Espacio interno */
-    display: flex;
     border: 10px solid #444444; /* Borde oscuro */
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 93.5%;
     height: 100px;
-    overflow: hidden;
+    overflow: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
     font-size: 20px;
     color: #ffffff;
     background-color: #222222; /* Fondo oscuro */
-    flex: 1; /* Asegura que ocupe el espacio disponible */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-
-    overflow: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra del contenedor */
+    white-space: pre-line; /* Respeta saltos de línea */
+    display: block; /* Muestra los elementos en una sola columna */
 }
+
+
 
 
 
@@ -265,7 +264,6 @@ p {
     font-weight: bold;
     font-size: 25px;
 }
-
 
 
 

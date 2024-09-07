@@ -200,6 +200,7 @@ function validarSintaxis(tokensPorLinea) {
     const divErrores = document.getElementById("erroresSintaxis");
     divErrores.innerHTML = ""; // Limpiar el contenido previo
     let hayError = false;
+    
 
     tokensPorLinea.forEach(lineaObj => {
         const { linea, tokens } = lineaObj;
@@ -233,8 +234,7 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-        // Verificar si es la instrucción escribir.consola()
-
+       
 
         // Verificar otras gramáticas como "while", "if", etc.
         const elementosMientras = ["Identificador", "Literal Numerico"];
@@ -252,18 +252,26 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-        // Si la línea no coincide con ninguna de las gramáticas, marcar error
-        const mensajeError = `<span style="color: red;">Error de Sintaxis Encontrado en la Línea: # ${linea}</span>`;
-        divErrores.innerHTML += mensajeError + "<br>";
-        hayError = true;
-    });
+       // Si la línea no coincide con ninguna de las gramáticas, marcar error
+       const mensajeError = `<p style="color: red;">Error de Sintaxis Encontrado en la Línea: ${linea}</p>`;
+       divErrores.innerHTML += mensajeError; // Usar innerHTML para permitir HTML y saltos de línea
+       hayError = true;
+   });
 
-    // Si no hay errores, mostrar que la sintaxis es correcta
-    if (!hayError) {
-        const mensajeExito = `<span style="color: lime;">Sintaxis correcta</span>`;
-        divErrores.innerHTML = mensajeExito + "<br>";
-    }
+   // Si no hay errores, mostrar que la sintaxis es correcta
+   if (!hayError) {
+       const mensajeExito = `<p style="color: green;">Sintaxis correcta</p>`;
+       divErrores.innerHTML = mensajeExito; // Usar innerHTML para permitir HTML
+   }
 }
+
+
+
+
+
+
+
+
 
 function esElemento(token, elementosPermitidos) {
     return elementosPermitidos.includes(token.tipo);
