@@ -211,7 +211,9 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-        // Verificar si es una declaración de variable
+        
+
+        // GRAMATICA PARA Verificar si es una declaración de variable
         if (
             tiposPresentes.length === 5 &&
             tiposPresentes[0] === "Tipos de Dato" &&
@@ -223,7 +225,7 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-        // Verificar si es la instrucción equipo();
+        // GRAMATICA PARA Verificar si es la instrucción equipo();
         if (
             tiposPresentes.length === 4 &&
             tiposPresentes[0] === "Palabra Reservada - Equipo" &&
@@ -234,9 +236,62 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-       
+       //GRAMATICA PARA Verificar gramatica de MATH.MAX Y MATH.MIN
 
-        // Verificar otras gramáticas como "while", "if", etc.
+       const elementos_mathmin_mathmax = ["Palabra Reservada - Mayor","Palabra Reservada - Menor"];
+       const variable_o_numero=["Identificador","Literal Numerico"];
+        if(
+        tiposPresentes.length === 9 &&
+        tiposPresentes[0]==="Palabra Reservada - Mate"&&
+        tiposPresentes[1]==="Conector"&&
+        esElemento(tokens[2],elementos_mathmin_mathmax)&&
+        tiposPresentes[3]==="Parentesis de Apertura"&&
+        esElemento(tokens[4],variable_o_numero)&&
+        tiposPresentes[5]==="Separador"&&
+        esElemento(tokens[6],variable_o_numero)&&
+        tiposPresentes[7]==="Parentesis de Cierre"&&
+        tiposPresentes[8]==="Delimitador"
+       )    {
+        return;
+       }
+
+
+       //GRAMATICA PARA LEER.CONSOLA
+       if(
+        tiposPresentes.length===5&&
+        tiposPresentes[0]==="Palabra Reservada - Leer"&&
+        tiposPresentes[1]==="Conector"&&
+        tiposPresentes[2]==="Palabra Reservada - Consola"&&
+        tiposPresentes[3]==="Parentesis de Apertura"&&
+        tiposPresentes[4]==="Parentesis de Cierre"
+       ) { return;}
+
+
+       
+       //GRAMATICA PARA COMPROBADO Y NO COMPROBADO
+       const elementos_comprobados_nocomprobados=["Palabra Reservada - Comprobado","Palabra Reservada - NoComprobar"]
+       if(
+        tiposPresentes.length===3 &&
+        esElemento(tokens[0],elementos_comprobados_nocomprobados)&&
+        tiposPresentes[1]==="Llaves de Apertura"&&
+        tiposPresentes[2]==="Llaves de Cierre"
+        ){return;}
+
+
+
+    if(
+        tiposPresentes.length===3&&
+        tiposPresentes[0]==="Identificador"&&
+        tiposPresentes[1]==="Palabra Reservada - ES"&&
+        tiposPresentes[2]==="Tipos de Dato"
+
+    ){return;}
+
+
+
+
+
+        // GRAMATICA PARA Verificar otras gramáticas como "while", "if", etc.
         const elementosMientras = ["Identificador", "Literal Numerico"];
         if (
             tiposPresentes.length === 8 &&
