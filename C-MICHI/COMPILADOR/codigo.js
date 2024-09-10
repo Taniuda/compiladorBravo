@@ -306,6 +306,37 @@ function validarSintaxis(tokensPorLinea) {
         ) {
             return; // Es válido, no es necesario marcarlo como error
         }
+        
+
+        // Verificar si es la instrucción escribir.consola
+const esCadenaOVariable = (tipo) => tipo === "Literal de Cadena" || tipo === "Identificador";
+
+if (
+    tiposPresentes.length >= 5 && // Al menos debe tener la forma básica escribir.consola("algo");
+    tiposPresentes[0] === "Palabra Reservada - Escribir" &&
+    tiposPresentes[1] === "Conector" &&
+    tiposPresentes[2] === "Palabra Reservada - Consola" &&
+    tiposPresentes[3] === "Parentesis de Apertura" &&
+    esCadenaOVariable(tiposPresentes[4])
+) {
+    let esValido = true;
+    for (let i = 5; i < tiposPresentes.length - 1; i += 2) {
+        if (i % 2 === 0 && !esCadenaOVariable(tiposPresentes[i])) {
+            esValido = false;
+            break;
+        }
+        if (i % 2 === 1 && tiposPresentes[i] !== "Separador") {
+            esValido = false;
+            break;
+        }
+    }
+    if (esValido && tiposPresentes[tiposPresentes.length - 1] === "Parentesis de Cierre") {
+        return; // Es válido, no es necesario marcarlo como error
+    }
+}
+
+
+
 
        // Si la línea no coincide con ninguna de las gramáticas, marcar error
        const mensajeError = `<p style="color: red;">Error de Sintaxis Encontrado en la Línea: ${linea}</p>`;
