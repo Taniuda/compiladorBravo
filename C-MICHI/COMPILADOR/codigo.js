@@ -235,6 +235,64 @@ function validarSintaxis(tokensPorLinea) {
 
         // Verificar si es la instrucción escribir.consola()
 
+         function analizarSintaxis(tiposPresentes) {
+    // GRAMÁTICA PARA leer.consola
+    if (
+        tiposPresentes.length === 5 &&
+        tiposPresentes[0] === "Palabra Reservada - Leer" &&
+        tiposPresentes[1] === "Conector" &&
+        tiposPresentes[2] === "Palabra Reservada - Consola" &&
+        tiposPresentes[3] === "Parentesis de Apertura" &&
+        tiposPresentes[4] === "Parentesis de Cierre"
+    ) {
+        return "Sintaxis correcta para leer.consola";
+    }
+    // GRAMÁTICA PARA arreglo.tamanio
+    else if (
+        tiposPresentes.length === 5 &&
+        tiposPresentes[0] === "Palabra Reservada - Arreglo" &&
+        tiposPresentes[1] === "Conector" &&
+        tiposPresentes[2] === "Palabra Reservada - Tamanio" &&
+        tiposPresentes[3] === "Parentesis de Apertura" &&
+        tiposPresentes[4] === "Parentesis de Cierre"
+    ) {
+        return "Sintaxis correcta para arreglo.tamanio";
+    }
+    // GRAMÁTICA PARA arreglo.copia
+    else if (
+        tiposPresentes.length === 5 &&
+        tiposPresentes[0] === "Palabra Reservada - Arreglo" &&
+        tiposPresentes[1] === "Conector" &&
+        tiposPresentes[2] === "Palabra Reservada - Copia" &&
+        tiposPresentes[3] === "Parentesis de Apertura" &&
+        tiposPresentes[4] === "Parentesis de Cierre"
+    ) {
+        return "Sintaxis correcta para arreglo.copia";
+    } else {
+        return "Error de sintaxis";
+    }
+}
+
+// Ejemplo de uso
+const tiposPresentesTamanio = [
+    "Palabra Reservada - Arreglo",
+    "Conector",
+    "Palabra Reservada - Tamanio",
+    "Parentesis de Apertura",
+    "Parentesis de Cierre"
+];
+
+const tiposPresentesCopia = [
+    "Palabra Reservada - Arreglo",
+    "Conector",
+    "Palabra Reservada - Copia",
+    "Parentesis de Apertura",
+    "Parentesis de Cierre"
+];
+
+console.log(analizarSintaxis(tiposPresentesTamanio)); // Sintaxis correcta para arreglo.tamanio
+console.log(analizarSintaxis(tiposPresentesCopia)); // Sintaxis correcta para arreglo.copia
+
 
         // Verificar otras gramáticas como "while", "if", etc.
         const elementosMientras = ["Identificador", "Literal Numerico"];
