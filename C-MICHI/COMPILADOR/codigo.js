@@ -235,63 +235,85 @@ function validarSintaxis(tokensPorLinea) {
 
         // Verificar si es la instrucción escribir.consola()
 
-         function analizarSintaxis(tiposPresentes) {
-    // GRAMÁTICA PARA leer.consola
+        function analizarSintaxis(tiposPresentes) {
+    // GRAMÁTICA PARA leer.consola();
     if (
-        tiposPresentes.length === 5 &&
+        tiposPresentes.length === 6 &&
         tiposPresentes[0] === "Palabra Reservada - Leer" &&
         tiposPresentes[1] === "Conector" &&
         tiposPresentes[2] === "Palabra Reservada - Consola" &&
         tiposPresentes[3] === "Parentesis de Apertura" &&
-        tiposPresentes[4] === "Parentesis de Cierre"
+        tiposPresentes[4] === "Parentesis de Cierre" &&
+        tiposPresentes[5] === "Punto y Coma"
     ) {
-        return "Sintaxis correcta para leer.consola";
+        return "Sintaxis correcta para leer.consola();";
     }
-    // GRAMÁTICA PARA arreglo.tamanio
+    // GRAMÁTICA PARA arreglitoVar.tamanio();
     else if (
-        tiposPresentes.length === 5 &&
-        tiposPresentes[0] === "Palabra Reservada - Arreglo" &&
+        tiposPresentes.length === 6 &&
+        tiposPresentes[0] === "Identificador" &&
         tiposPresentes[1] === "Conector" &&
         tiposPresentes[2] === "Palabra Reservada - Tamanio" &&
         tiposPresentes[3] === "Parentesis de Apertura" &&
-        tiposPresentes[4] === "Parentesis de Cierre"
+        tiposPresentes[4] === "Parentesis de Cierre" &&
+        tiposPresentes[5] === "Punto y Coma"
     ) {
-        return "Sintaxis correcta para arreglo.tamanio";
+        return "Sintaxis correcta para arreglitoVar.tamanio();";
     }
-    // GRAMÁTICA PARA arreglo.copia
+    // GRAMÁTICA PARA arreglitoVar.copia(destino, longitud);
     else if (
-        tiposPresentes.length === 5 &&
-        tiposPresentes[0] === "Palabra Reservada - Arreglo" &&
+        tiposPresentes.length === 9 &&
+        tiposPresentes[0] === "Identificador" &&
         tiposPresentes[1] === "Conector" &&
         tiposPresentes[2] === "Palabra Reservada - Copia" &&
         tiposPresentes[3] === "Parentesis de Apertura" &&
-        tiposPresentes[4] === "Parentesis de Cierre"
+        tiposPresentes[4] === "Identificador" &&
+        tiposPresentes[5] === "Coma" &&
+        tiposPresentes[6] === "Identificador" &&
+        tiposPresentes[7] === "Parentesis de Cierre" &&
+        tiposPresentes[8] === "Punto y Coma"
     ) {
-        return "Sintaxis correcta para arreglo.copia";
+        return "Sintaxis correcta para arreglitoVar.copia(destino, longitud);";
     } else {
         return "Error de sintaxis";
     }
 }
 
 // Ejemplo de uso
+const tiposPresentesLeerConsola = [
+    "Palabra Reservada - Leer",
+    "Conector",
+    "Palabra Reservada - Consola",
+    "Parentesis de Apertura",
+    "Parentesis de Cierre",
+    "Punto y Coma"
+];
+
 const tiposPresentesTamanio = [
-    "Palabra Reservada - Arreglo",
+    "Identificador",
     "Conector",
     "Palabra Reservada - Tamanio",
     "Parentesis de Apertura",
-    "Parentesis de Cierre"
+    "Parentesis de Cierre",
+    "Punto y Coma"
 ];
 
 const tiposPresentesCopia = [
-    "Palabra Reservada - Arreglo",
+    "Identificador",
     "Conector",
     "Palabra Reservada - Copia",
     "Parentesis de Apertura",
-    "Parentesis de Cierre"
+    "Identificador",
+    "Coma",
+    "Identificador",
+    "Parentesis de Cierre",
+    "Punto y Coma"
 ];
 
-console.log(analizarSintaxis(tiposPresentesTamanio)); // Sintaxis correcta para arreglo.tamanio
-console.log(analizarSintaxis(tiposPresentesCopia)); // Sintaxis correcta para arreglo.copia
+console.log(analizarSintaxis(tiposPresentesLeerConsola)); // Sintaxis correcta para leer.consola();
+console.log(analizarSintaxis(tiposPresentesTamanio)); // Sintaxis correcta para arreglitoVar.tamanio();
+console.log(analizarSintaxis(tiposPresentesCopia)); // Sintaxis correcta para arreglitoVar.copia(destino, longitud);
+
 
 
         // Verificar otras gramáticas como "while", "if", etc.
