@@ -233,8 +233,97 @@ function validarSintaxis(tokensPorLinea) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
-        // Verificar si es la instrucción escribir.consola()
+        // Verificar si es la instrucción mate.mayor(x, y) o mate.menor(x, y)
+        if (
+            tiposPresentes.length === 9 && 
+            tiposPresentes[0] === "Palabra Reservada - Mate" &&
+            tiposPresentes[1] === "Conector" &&
+            (tiposPresentes[2] === "Palabra Reservada - Mayor" || tiposPresentes[2] === "Palabra Reservada - Menor") &&
+            tiposPresentes[3] === "Parentesis de Apertura" &&
+            (tiposPresentes[4] === "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
+            tiposPresentes[5] === "Separador" &&
+            (tiposPresentes[6] === "Literal Numerico" || tiposPresentes[6] === "Identificador") &&
+            tiposPresentes[7] === "Parentesis de Cierre" &&
+            tiposPresentes[8] === "Delimitador"
+        ) {        
+            return; // Es válido
+        }
 
+        // Verificar si es una declaración de variable con asignación de mate.mayor(x, y) o mate.menor(x, y)
+        if (
+            tiposPresentes.length === 12 &&
+            tiposPresentes[0] === "Tipos de Dato" &&
+            tiposPresentes[1] === "Identificador" &&
+            tiposPresentes[2] === "Operador de Asignacion" &&
+            tiposPresentes[3] === "Palabra Reservada - Mate" &&
+            tiposPresentes[4] === "Conector" &&
+            (tiposPresentes[5] === "Palabra Reservada - Mayor" || tiposPresentes[5] === "Palabra Reservada - Menor") &&
+            tiposPresentes[6] === "Parentesis de Apertura" &&
+            (tiposPresentes[7] === "Literal Numerico" || tiposPresentes[7] === "Identificador") &&
+            tiposPresentes[8] === "Separador" &&
+            (tiposPresentes[9] === "Literal Numerico" || tiposPresentes[9] === "Identificador") &&
+            tiposPresentes[10] === "Parentesis de Cierre" &&
+            tiposPresentes[11] === "Delimitador"
+        ) {
+            return; // Es válido
+        }
+        
+        // Verificar si es la instrucción comprobado{} o nocomprobado{}
+        if (
+            tiposPresentes.length >= 3 &&
+            (tiposPresentes[0] === "Palabra Reservada - Comprobado" || tiposPresentes[0] === "Palabra Reservada - NoComprobar") &&
+            tiposPresentes[1] === "Llaves de Apertura" &&
+            tiposPresentes[tiposPresentes.length - 1] === "Llaves de Cierre"
+        ) {
+            return; // Es válido
+        }
+
+        // Verificar si es una declaración de método
+        if (
+            (tiposPresentes.length >= 6 &&
+            (tokens[0].valor === "public" || tokens[0].valor === "private" || tokens[0].valor === "protected") &&
+            (tokens[1].valor === "static" || tokens[1].tipo === "Identificador" || tokens[1].valor === "void") &&
+            (tokens[2].valor === "void" || tokens[2].tipo === "Identificador") &&
+            tokens[3].tipo === "Identificador" &&
+            tokens[4].tipo === "Parentesis de Apertura" &&
+            tokens.some(token => token.tipo === "Parentesis de Cierre") &&
+            tokens.some(token => token.tipo === "Llaves de Apertura") &&
+            tokens.some(token => token.tipo === "Llaves de Cierre")) ||
+            tiposPresentes.length >= 6 &&
+            (tokens[0].valor === "public" || tokens[0].valor === "private" || tokens[0].valor === "protected") &&
+            (tokens[1].valor === "static" || tokens[1].tipo === "Identificador" || tokens[1].valor === "void") &&
+            tokens[2].tipo === "Identificador" &&
+            tokens[3].tipo === "Parentesis de Apertura" &&
+            tokens.some(token => token.tipo === "Parentesis de Cierre") &&
+            tokens.some(token => token.tipo === "Llaves de Apertura") &&
+            tokens.some(token => token.tipo === "Llaves de Cierre")
+        ) {
+            // Verificar si el método no tiene "void" y debe tener una devolución obligatoria
+            if (!tokens.some(token => token.valor === "void") && !tokens.some(token => token.valor === "return")) {
+                console.error('Error: El método debe tener una devolución obligatoria');
+                return;
+            }
+            return; // Es válido
+        }
+
+        // Verificar si es una declaración de método con parámetros
+        if (
+            tiposPresentes.length >= 10 &&
+            (tokens[0].valor === "public" || tokens[0].valor === "private" || tokens[0].valor === "protected") &&
+            tokens[1].tipo === "Identificador" &&
+            tokens[2].tipo === "Parentesis de Apertura" &&
+            tokens.some(token => token.tipo === "Parentesis de Cierre") &&
+            tokens.some(token => token.tipo === "Llaves de Apertura") &&
+            tokens.some(token => token.tipo === "Llaves de Cierre") &&
+            tokens.some(token => token.tipo === "Separador")
+        ) {
+            // Verificar si el método no tiene "void" y debe tener una devolución obligatoria
+            if (!tokens.some(token => token.valor === "void") && !tokens.some(token => token.valor === "return")) {
+                console.error('Error: El método debe tener una devolución obligatoria');
+                return;
+            }
+            return; // Es válido
+        }
 
         // Verificar otras gramáticas como "while", "if", etc.
         const elementosMientras = ["Identificador", "Literal Numerico"];
@@ -264,6 +353,7 @@ function validarSintaxis(tokensPorLinea) {
         divErrores.innerHTML = mensajeExito + "<br>";
     }
 }
+
 
 function esElemento(token, elementosPermitidos) {
     return elementosPermitidos.includes(token.tipo);
@@ -361,3 +451,4 @@ document.getElementById('tema').addEventListener('change', function() {
         themeStylesheet.setAttribute('href', 'estiloClaro.css');
     }
 });
+                    
