@@ -69,7 +69,14 @@ const palabrasReservadas = {
     "este": "Palabra Reservada - Este",
     "tarea": "Palabra Reservada - Tarea",
     "Sistema": "Palabra Reservada - Sistema",
-    "ES": "Palabra Reservada - ES"
+    "ES": "Palabra Reservada - ES",
+
+
+    // Agregar la palabra reservada al diccionario
+    "tamaniode": "Palabra Reservada - Funcion TamañoDe",
+    "event": "Palabra Reservada - Event",
+    "NombreDe": "Palabra Reservada - NombreDe",
+    "nombre": "Identificador", // Añadir nombre como identificador genérico
 };
 
 const operadores = {
@@ -201,6 +208,61 @@ function validarSintaxis(tokensPorLinea) {
     divErrores.innerHTML = ""; // Limpiar el contenido previo
     let hayError = false;
 
+
+
+    //______________________________________________________________________-
+    // Función para verificar si falta algún operador, delimitador o paréntesis
+    function verificarElementosFaltantes(tipos, tokens, linea, enBloque) {
+        let errores = [];
+        // Verificar si la estructura es 'bloquear(variable){}'
+        const esBloquear = tokens.length >= 6 &&
+            tokens[0].valor === "bloquear" &&
+            tipos[1] === "Parentesis de Apertura" &&
+            tipos[2] === "Identificador" &&
+            tipos[3] === "Parentesis de Cierre" &&
+            tipos[4] === "Llave de Apertura" &&
+            (tipos[5] === "Llave de Cierre" || (tipos.length === 5 && enBloque)); // 'Llave de Cierre' o se puede estar en un bloque
+
+        if (esBloquear) {
+            console.log("La estructura es un bloque de tipo 'bloquear(variable){}'");
+        } else {
+            console.log("La estructura no es un bloque de tipo 'bloquear(variable){}'");
+        }
+
+        // Si no es un bloque y la estructura no es 'bloquear', verificar delimitador
+        if (!enBloque && !esBloquear) {
+            const ultimoTipo = tipos[tipos.length - 1];
+            if (ultimoTipo !== "Delimitador" && ultimoTipo !== "Llave de Cierre") {
+                errores.push("Falta delimitador ';'");
+            }
+        }
+
+        // Verificar si falta paréntesis de apertura o cierre
+        if (tipos.includes("Parentesis de Apertura") && !tipos.includes("Parentesis de Cierre")) {
+            errores.push("Falta paréntesis de cierre ')'");
+        }
+        if (tipos.includes("Parentesis de Cierre") && !tipos.includes("Parentesis de Apertura")) {
+            errores.push("Falta paréntesis de apertura '('");
+        }
+
+        // Verificar si hay operadores de asignación cuando se espera uno
+        if (tipos.includes("Operador de Asignacion") && !tokens.some(token => token.tipo === "Operador de Asignacion")) {
+            errores.push("Falta operador de asignación '='");
+        }
+
+        // Verificar si falta la llave de cierre después de un bloque abrir '{'
+        if (enBloque && !tipos.includes("Llave de Cierre")) {
+            errores.push(`Error en la línea ${linea}: Falta la llave de cierre '}' para cerrar el bloque`);
+        }
+
+        return errores;
+    }
+
+
+    //______________________________________________________________________
+
+
+
     tokensPorLinea.forEach(lineaObj => {
         const { linea, tokens } = lineaObj;
         let tiposPresentes = tokens.map(token => token.tipo);
@@ -240,18 +302,90 @@ function validarSintaxis(tokensPorLinea) {
         const elementosMientras = ["Identificador", "Literal Numerico"];
         if (
             tiposPresentes.length === 8 &&
-            tiposPresentes[0] === "Palabra Reservada - Mientras" && 
-            tiposPresentes[1] === "Parentesis de Apertura" && 
-            tiposPresentes[2] === "Identificador" && 
-            tiposPresentes[3] === "Operador de Comparacion" && 
-            esElemento(tokens[4], elementosMientras) && 
-            tiposPresentes[5] === "Parentesis de Cierre" && 
-            tiposPresentes[6] === "Llaves de Apertura" && 
+            tiposPresentes[0] === "Palabra Reservada - Mientras" &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+            tiposPresentes[2] === "Identificador" &&
+            tiposPresentes[3] === "Operador de Comparacion" &&
+            esElemento(tokens[4], elementosMientras) &&
+            tiposPresentes[5] === "Parentesis de Cierre" &&
+            tiposPresentes[6] === "Llaves de Apertura" &&
             tiposPresentes[7] === "Llaves de Cierre"
         ) {
             return; // Es válido, no es necesario marcarlo como error
         }
 
+
+
+        //_____________________________________________________ CARLOS ________________________________________
+
+        // Verificar si es una función TamañoDe 'TamañoDe(variable);'
+        if (
+            tiposPresentes.length === 5 &&
+            tiposPresentes[0] === "Palabra Reservada - Funcion TamañoDe" &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+            tiposPresentes[2] === "Identificador" &&  // Variable entre paréntesis
+            tiposPresentes[3] === "Parentesis de Cierre" &&
+            tiposPresentes[4] === "Delimitador"
+        ) {
+            return; // Es válido, no es necesario marcarlo como error
+        } else {
+            const erroresTamañoDe = verificarElementosFaltantes(tiposPresentes, tokens);
+            if (erroresTamañoDe.length > 0) {
+                erroresTamañoDe.forEach(error => {
+                    divErrores.innerHTML += `<p>Error en la línea ${linea}: ${error}</p>`;
+                    hayError = true;
+                });
+                return;
+            }
+        }
+
+        // Verificar si es una declaración de variable tipo 'var nombre = nombreDe MiSimbolo;'
+        if (
+            tiposPresentes.length === 6 &&
+            tokens[0].valor === "var" && // La primera palabra debe ser 'var'
+            tiposPresentes[1] === "Identificador" && // El segundo debe ser un identificador
+            tiposPresentes[2] === "Operador de Asignacion" && // Tercero debe ser el operador '='
+            tokens[3].valor === "nombreDe" && // La palabra reservada debe ser 'nombreDe'
+            tiposPresentes[4] === "Identificador" && // El siguiente debe ser otro identificador
+            tiposPresentes[5] === "Delimitador" // Debe terminar con un ';'
+        ) {
+            return; // Es válido, no es necesario marcarlo como error
+        } else {
+            const erroresVariable = verificarElementosFaltantes(tiposPresentes, tokens);
+            if (erroresVariable.length > 0) {
+                erroresVariable.forEach(error => {
+                    divErrores.innerHTML += `<p>Error en la línea ${linea}: ${error}</p>`;
+                    hayError = true;
+                });
+                return;
+            }
+        }
+
+        // Verificar si es una declaración de evento tipo 'event MiDelegado MiEvento;'
+        if (
+            tiposPresentes.length === 4 &&
+            tokens[0].valor === "event" && // La primera palabra debe ser 'event'
+            tiposPresentes[1] === "Identificador" && // El segundo debe ser un identificador (tipo de delegado)
+            tiposPresentes[2] === "Identificador" && // El tercero debe ser un identificador (nombre del evento)
+            tiposPresentes[3] === "Delimitador" // Debe terminar con un ';'
+        ) {
+            return; // Es válido, no es necesario marcarlo como error
+        } else {
+            const erroresEvento = verificarElementosFaltantes(tiposPresentes, tokens);
+            if (erroresEvento.length > 0) {
+                erroresEvento.forEach(error => {
+                    divErrores.innerHTML += `<p>Error en la línea ${linea}: ${error}</p>`;
+                    hayError = true;
+                });
+                return;
+            }
+        }
+
+
+
+
+
+        //________________________________________________________________________________________________________
         // Si la línea no coincide con ninguna de las gramáticas, marcar error
         const mensajeError = `<span style="color: red;">Error de Sintaxis Encontrado en la Línea: # ${linea}</span>`;
         divErrores.innerHTML += mensajeError + "<br>";
@@ -323,7 +457,7 @@ function ingresarInstruccion() {
     var instruccion18 = '\nid es cadena;';
     var instruccion19 = '\ndevuelve var;';
     var instruccion20 = '\npublico estatico hueco Metodo(){}';
-    
+
     var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
     document.getElementById("input").value = cadInst;
 }
@@ -331,7 +465,7 @@ function ingresarInstruccion() {
 //-------------------FUNCIONES EXTRA DE LA CONSOLA ---------------
 
 // Sincronizacion de la linea de los numeros de linea en la consola.
-document.getElementById('input').addEventListener('input', function() {
+document.getElementById('input').addEventListener('input', function () {
     const textarea = this;
     const lineas = document.getElementById('lineas');
     const lineCount = textarea.value.split('\n').length;
@@ -344,17 +478,17 @@ document.getElementById('input').addEventListener('input', function() {
 });
 
 // Sincronizar el desplazamiento del textarea con el contenedor de números de línea
-document.getElementById('input').addEventListener('scroll', function() {
+document.getElementById('input').addEventListener('scroll', function () {
     const textarea = this;
     const lineas = document.getElementById('lineas');
     lineas.scrollTop = textarea.scrollTop;
 });
 
 //--------------------- CAMBIO DE TEMA -----------------------
-document.getElementById('tema').addEventListener('change', function() {
+document.getElementById('tema').addEventListener('change', function () {
     const themeStylesheet = document.getElementById('themeStylesheet');
     const currentTheme = themeStylesheet.getAttribute('href');
-    
+
     if (currentTheme === 'estiloClaro.css') {
         themeStylesheet.setAttribute('href', 'estiloOscuro.css');
     } else {
