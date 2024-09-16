@@ -215,14 +215,6 @@ function validarSintaxis(tokensPorLinea) {
     function verificarElementosFaltantes(tipos, tokens, linea, enBloque) {
         let errores = [];
         // Verificar si la estructura es 'bloquear(variable){}'
-        const esBloquear = tokens.length >= 6 &&
-            tokens[0].valor === "bloquear" &&
-            tipos[1] === "Parentesis de Apertura" &&
-            tipos[2] === "Identificador" &&
-            tipos[3] === "Parentesis de Cierre" &&
-            tipos[4] === "Llave de Apertura" &&
-            (tipos[5] === "Llave de Cierre" || (tipos.length === 5 && enBloque)); // 'Llave de Cierre' o se puede estar en un bloque
-
         // Verificar si la línea actual está dentro de un bloque, en ese caso no es necesario verificar el delimitador
         if (!enBloque) {
             const ultimoTipo = tipos[tipos.length - 1];
