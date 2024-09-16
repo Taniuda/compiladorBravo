@@ -223,15 +223,10 @@ function validarSintaxis(tokensPorLinea) {
             tipos[4] === "Llave de Apertura" &&
             (tipos[5] === "Llave de Cierre" || (tipos.length === 5 && enBloque)); // 'Llave de Cierre' o se puede estar en un bloque
 
-        if (esBloquear) {
-            console.log("La estructura es un bloque de tipo 'bloquear(variable){}'");
-        } else {
-            console.log("La estructura no es un bloque de tipo 'bloquear(variable){}'");
-        }
-
-        // Si no es un bloque y la estructura no es 'bloquear', verificar delimitador
-        if (!enBloque && !esBloquear) {
+        // Verificar si la línea actual está dentro de un bloque, en ese caso no es necesario verificar el delimitador
+        if (!enBloque) {
             const ultimoTipo = tipos[tipos.length - 1];
+            // Verificar si el último tipo no es un delimitador o llave de cierre
             if (ultimoTipo !== "Delimitador" && ultimoTipo !== "Llave de Cierre") {
                 errores.push("Falta delimitador ';'");
             }
