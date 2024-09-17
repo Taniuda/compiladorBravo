@@ -234,9 +234,7 @@ function validarSintaxis(tokensPorLinea) {
         }
 
         // Verificar si es la instrucción escribir.consola()
-
-        function analizarSintaxis(tiposPresentes) {
-    // GRAMÁTICA PARA leer.consola();
+        // GRAMÁTICA PARA leer.consola();
     if (
         tiposPresentes.length === 6 &&
         tiposPresentes[0] === "Palabra Reservada - Leer" &&
@@ -244,7 +242,7 @@ function validarSintaxis(tokensPorLinea) {
         tiposPresentes[2] === "Palabra Reservada - Consola" &&
         tiposPresentes[3] === "Parentesis de Apertura" &&
         tiposPresentes[4] === "Parentesis de Cierre" &&
-        tiposPresentes[5] === "Punto y Coma"
+        tiposPresentes[5] === "Delimitador"
     ) {
         return "Sintaxis correcta para leer.consola();";
     }
@@ -256,7 +254,7 @@ function validarSintaxis(tokensPorLinea) {
         tiposPresentes[2] === "Palabra Reservada - Tamanio" &&
         tiposPresentes[3] === "Parentesis de Apertura" &&
         tiposPresentes[4] === "Parentesis de Cierre" &&
-        tiposPresentes[5] === "Punto y Coma"
+        tiposPresentes[5] === "Delimitador"
     ) {
         return "Sintaxis correcta para arreglitoVar.tamanio();";
     }
@@ -271,7 +269,7 @@ function validarSintaxis(tokensPorLinea) {
         tiposPresentes[5] === "Coma" &&
         tiposPresentes[6] === "Identificador" &&
         tiposPresentes[7] === "Parentesis de Cierre" &&
-        tiposPresentes[8] === "Punto y Coma"
+        tiposPresentes[8] === "Delimitador"
     ) {
         return "Sintaxis correcta para arreglitoVar.copia(destino, longitud);";
     } else {
@@ -286,7 +284,7 @@ const tiposPresentesLeerConsola = [
     "Palabra Reservada - Consola",
     "Parentesis de Apertura",
     "Parentesis de Cierre",
-    "Punto y Coma"
+    "Delimitador"
 ];
 
 const tiposPresentesTamanio = [
@@ -295,7 +293,7 @@ const tiposPresentesTamanio = [
     "Palabra Reservada - Tamanio",
     "Parentesis de Apertura",
     "Parentesis de Cierre",
-    "Punto y Coma"
+    "Delimitador"
 ];
 
 const tiposPresentesCopia = [
@@ -307,13 +305,12 @@ const tiposPresentesCopia = [
     "Coma",
     "Identificador",
     "Parentesis de Cierre",
-    "Punto y Coma"
+    "Delimitador"
 ];
 
 console.log(analizarSintaxis(tiposPresentesLeerConsola)); // Sintaxis correcta para leer.consola();
 console.log(analizarSintaxis(tiposPresentesTamanio)); // Sintaxis correcta para arreglitoVar.tamanio();
 console.log(analizarSintaxis(tiposPresentesCopia)); // Sintaxis correcta para arreglitoVar.copia(destino, longitud);
-
 
 
         // Verificar otras gramáticas como "while", "if", etc.
