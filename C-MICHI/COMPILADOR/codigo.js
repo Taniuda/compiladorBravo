@@ -234,6 +234,8 @@ function validarSintaxis(tokensPorLinea) {
         }
 
         // Verificar si es la instrucción escribir.consola()
+        function analizarSintaxis(tiposPresentes) {
+            console.log("Tipos presentes:", tiposPresentes);
         // GRAMÁTICA PARA leer.consola();
     if (
         tiposPresentes.length === 6 &&
