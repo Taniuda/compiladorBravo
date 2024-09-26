@@ -380,7 +380,7 @@ p {
 }
 
 .tab-content {
-    padding: 20px;
+    padding: 10px;
     border: 1px solid #2a2a37; /* Borde del contenido de las pestañas */
     border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
     background-color: #ffffff; /* Fondo del contenido de las pestañas */

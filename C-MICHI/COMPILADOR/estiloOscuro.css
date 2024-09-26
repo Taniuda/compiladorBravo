@@ -257,18 +257,12 @@ p {
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
 }
 
-.custom-table th {
-    min-height: 300px;
-    background-color: #00e1708a; /* Fondo un poco más claro */
-    text-align: left;
-    color: #ffffff;
-    font-weight: bold;
-    font-size: 25px;
-}
+
 
 .custom-table td {
+    text-align: center;
     min-height: 400px; /* Establecer una altura mínima */
-    vertical-align: top; /* Alinear el contenido en la parte superior */
+    vertical-align: center; /* Alinear el contenido en la parte superior */
     padding: 16px;
 }
 

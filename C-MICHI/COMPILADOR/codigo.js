@@ -296,16 +296,14 @@ function validarSintaxis(tokensPorLinea) {
 
 
 
-
-
-
 // Definir las jerarquías de los operadores
 const jerarquiaOperadores = {
-    '=': 1,  // Menor jerarquía (asignación)
-    '+': 2,  // Suma y resta con jerarquía media
+    '=': 1,
+    '+': 2,
     '-': 2,
-    '*': 3,  // Multiplicación y división con jerarquía mayor
-    '/': 3
+    '*': 3,
+    '/': 3,
+    
 };
 
 // Función para encontrar el operador principal, ajustado para manejar paréntesis
@@ -315,7 +313,6 @@ function encontrarOperadorPrincipal(expr) {
     let posicionOperador = -1;
     let menorJerarquia = Infinity;
 
-    // Recorrer de izquierda a derecha para respetar la precedencia correcta de los operadores
     for (let i = expr.length - 1; i >= 0; i--) {
         const char = expr[i];
 
@@ -325,10 +322,8 @@ function encontrarOperadorPrincipal(expr) {
             nivelParentesis--;
         }
 
-        // Solo evaluamos operadores fuera de los paréntesis
         if (nivelParentesis === 0 && jerarquiaOperadores[char] !== undefined) {
             const jerarquia = jerarquiaOperadores[char];
-            // Priorizamos el operador de menor jerarquía encontrado
             if (jerarquia < menorJerarquia) {
                 menorJerarquia = jerarquia;
                 operadorPrincipal = char;
@@ -354,10 +349,9 @@ function construirArbol(expr) {
         return construirArbol(expr.slice(1, -1));
     }
 
-    // Encontrar el operador principal con la jerarquía más baja
+    // Encontrar el operador principal
     const { operador, posicion } = encontrarOperadorPrincipal(expr);
 
-    // Si encontramos un operador principal, dividir la expresión
     if (operador) {
         const izquierda = expr.slice(0, posicion);
         const derecha = expr.slice(posicion + 1);
@@ -377,23 +371,23 @@ function construirArbol(expr) {
 
 // Crear un conjunto para almacenar las expresiones procesadas
 const expresionesProcesadas = new Set();
+
 // Función para generar el árbol binario de una línea de código
 function generarArbolBinario(tokensPorLinea) {
+    document.getElementById('arbolesSintacticos').innerHTML = "";
+
     tokensPorLinea.forEach((lineaObj, index) => {
         const { tokens } = lineaObj;
 
-        // Obtener el identificador (variable) y la expresión
         const identificador = tokens[0].valor; // Nombre de la variable
         const operador = tokens[1].valor; // Operador de asignación
         const expresion = tokens.slice(2).map(token => token.valor).join(""); // Expresión completa
 
-          // Verificar si la expresión ya fue procesada
-          if (expresionesProcesadas.has(expresion)) {
+        if (expresionesProcesadas.has(expresion)) {
             console.log(`La expresión "${expresion}" ya ha sido procesada.`);
-            return; // Salir de la función si la expresión ya existe
+            return; 
         }
 
-        // Añadir la expresión al conjunto de expresiones procesadas
         expresionesProcesadas.add(expresion);
         
         // Crear el árbol binario de la expresión
@@ -404,36 +398,33 @@ function generarArbolBinario(tokensPorLinea) {
                 construirArbol(expresion)
             ]
         };
-        // Crear una nueva fila en la tabla para cada línea
+
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${index + 1}</td><td id="arbolCell_${index}"></td>`; // Añadir número de línea y un ID para la celda del SVG
+        row.innerHTML = `<td>${index + 1}</td><td id="arbolCell_${index}"></td>`;
         document.getElementById('arbolesSintacticos').appendChild(row);
 
-        // Dibujar el árbol por cada expresión
         dibujarArbol(treeData, index);
     });
 }
 
 // Función para dibujar el árbol sintáctico en SVG
 function dibujarArbol(treeData, index) {
-    const svgWidth = 400, svgHeight = 200;
+    const svgWidth = 400, svgHeight = 300;
 
-    // Crear un nuevo SVG para cada árbol
-    const svg = d3.select(`#arbolCell_${index}`) // Cambiado para seleccionar la celda correspondiente
+    const svg = d3.select(`#arbolCell_${index}`)
         .append('svg')
         .attr('width', svgWidth)
         .attr('height', svgHeight)
         .attr('id', 'arbol_' + index);
 
     const root = d3.hierarchy(treeData);
-    const treeLayout = d3.tree().size([svgWidth - 40, svgHeight - 40]);
+    const treeLayout = d3.tree().size([svgWidth - 50, svgHeight - 60]);
 
     const nodes = treeLayout(root).descendants();
     const links = treeLayout(root).links();
 
-    const g = svg.append('g').attr('transform', 'translate(20, 20)');
+    const g = svg.append('g').attr('transform', 'translate(20, 30)');
 
-    // Dibujar los links (líneas entre nodos)
     g.selectAll('.link')
         .data(links)
         .enter()
@@ -445,7 +436,6 @@ function dibujarArbol(treeData, index) {
         .attr('y2', d => d.target.y)
         .style('stroke', '#aaa');
 
-    // Dibujar los nodos
     g.selectAll('.node')
         .data(nodes)
         .enter()
@@ -456,7 +446,6 @@ function dibujarArbol(treeData, index) {
         .attr('r', 10)
         .style('fill', 'steelblue');
 
-    // Añadir el texto a cada nodo
     g.selectAll('.label')
         .data(nodes)
         .enter()
@@ -468,8 +457,6 @@ function dibujarArbol(treeData, index) {
         .text(d => d.data.name)
         .style('fill', 'white');
 }
-
-
 
 
 
