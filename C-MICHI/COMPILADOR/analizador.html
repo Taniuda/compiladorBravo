@@ -6,7 +6,78 @@
 <title>ISC - Analizador Léxico</title>
 <link id="themeStylesheet" rel="stylesheet" href="estiloOscuro.css">
 </head>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .node circle {
+            fill: #99999927;
+        }
+
+        .node text {
+            font: 12px sans-serif;
+            fill: #ffffff;
+            text-anchor: middle;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ffffff26;
+            stroke-width: 2px;
+        }
+    </style>
 <body>
+
+    <div id="tree-container"></div>
+
+    <script>
+        function dibujarArbol(treeData) {
+            // Configuraciones del SVG
+            const width = 400;
+            const height = 300;
+
+            // Limpiar el contenedor anterior
+            document.getElementById("tree-container").innerHTML = "";
+
+            const svg = d3.select("#tree-container")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height)
+                .append("g")
+                .attr("transform", "translate(40,0)");
+
+            const treeLayout = d3.tree().size([width - 80, height - 50]);
+
+            const root = d3.hierarchy(treeData);
+
+            treeLayout(root);
+
+            // Enlaces (líneas entre nodos)
+            svg.selectAll(".link")
+                .data(root.links())
+                .enter()
+                .append("path")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal()
+                    .x(d => d.y)
+                    .y(d => d.x));
+
+            // Nodos (círculos y texto)
+            const nodes = svg.selectAll(".node")
+                .data(root.descendants())
+                .enter()
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            nodes.append("circle")
+                .attr("r", 20);
+
+            nodes.append("text")
+                .attr("dy", 3)
+                .attr("x", d => d.children ? -25 : 25)
+                .text(d => d.data.name);
+        }
+    </script>
 
 <div class="fondo">
     <div class="container">
@@ -83,11 +154,11 @@
             <table class="custom-table" id="tablaSintactico">
                 <thead>
                     <tr>
-                        <th>Regla</th>
-                        <th>Descripción</th>
+                        <th>Linea</th>
+                        <th>Arbol Sintactico</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="arbolesSintacticos">
                     <!-- Aquí se agregarán los resultados del análisis sintáctico -->
                 </tbody>
             </table>

@@ -249,12 +249,27 @@ p {
 
 .custom-table th, .custom-table td {
     border: 7px solid #17171757; /* Bordes oscuros */
-    padding: 8px;
+    padding: 16px;
     color: #e0e0e0bd; /* Texto claro */
     background-color: #151a20; /* Fondo oscuro */
     font-size: 25px;
     word-wrap: break-word;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
+}
+
+.custom-table th {
+    min-height: 300px;
+    background-color: #00e1708a; /* Fondo un poco más claro */
+    text-align: left;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 25px;
+}
+
+.custom-table td {
+    min-height: 400px; /* Establecer una altura mínima */
+    vertical-align: top; /* Alinear el contenido en la parte superior */
+    padding: 16px;
 }
 
 .custom-table th {
@@ -264,8 +279,6 @@ p {
     font-weight: bold;
     font-size: 25px;
 }
-
-
 
 
 
