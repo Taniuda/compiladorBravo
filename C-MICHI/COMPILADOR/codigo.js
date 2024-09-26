@@ -374,7 +374,6 @@ const expresionesProcesadas = new Set();
 
 // Función para generar el árbol binario de una línea de código
 function generarArbolBinario(tokensPorLinea) {
-    document.getElementById('arbolesSintacticos').innerHTML = "";
 
     tokensPorLinea.forEach((lineaObj, index) => {
         const { tokens } = lineaObj;
