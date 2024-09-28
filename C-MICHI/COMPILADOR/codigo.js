@@ -538,7 +538,8 @@ function validarSintaxis(tokensPorLinea) {
 
     // Si no hay errores, mostrar que la sintaxis es correcta
     if (!hayError) {
-        const mensajeExito = `<span style="color: lime;">Sintaxis correcta</span>`;
+        const mensajeExito = `<span style="color: #32CD32; font-weight: bold;">Sintaxis correcta</span>`;
+
         divErrores.innerHTML = mensajeExito + "<br>";
     }
 }
@@ -906,7 +907,7 @@ function dibujarArbol(treeData, index) {
         .attr('cx', d => d.x)
         .attr('cy', d => d.y)
         .attr('r', 10)
-        .style('fill', 'steelblue');
+        .style('fill', 'cyan');
 
     g.selectAll('.label')
         .data(nodes)
@@ -917,7 +918,7 @@ function dibujarArbol(treeData, index) {
         .attr('y', d => d.y - 10)
         .attr('text-anchor', 'middle')
         .text(d => d.data.name)
-        .style('fill', 'white');
+        .style('fill', 'lime');
 }
 
 

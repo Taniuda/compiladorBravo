@@ -31,7 +31,10 @@ p {
 .header img {
     width: 20%;
     height: auto;
-  
+    border: 10px solid #ffffff;;
+    border-radius: 10px;;
+    
+    border-color: #ffffff00;
 }
 
 .container {

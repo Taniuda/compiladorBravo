@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 body {
-    background-color: #849cf6ce;/*EL MAS OSCURO*/
+    background-color: #9ecdf3;/*EL MAS OSCURO*/
     padding: 0;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     color: #e0e0e0; /* Texto claro */
@@ -69,6 +69,7 @@ p {
     background-color: #dedede; /* Fondo oscuro */
     flex: 1; /* Asegura que ocupe el espacio disponible */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+    
     
 }
 
