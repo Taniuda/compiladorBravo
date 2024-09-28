@@ -918,7 +918,7 @@ function dibujarArbol(treeData, index) {
         .attr('y', d => d.y - 10)
         .attr('text-anchor', 'middle')
         .text(d => d.data.name)
-        .style('fill', 'lime');
+        .style('fill', 'blue');
 }
 
 
