@@ -60,6 +60,8 @@ const palabrasReservadas = {
     "mayor": "Palabra Reservada - Mayor",
     "menor": "Palabra Reservada - Menor",
     "formatoDe": "Palabra Reservada - FormatoDe",
+    "mayus": "Palabra Reservada - MAYUS",
+    "minus": "Palabra Reservada - MINUS",
     "comprobado": "Palabra Reservada - Comprobado",
     "noComprobar": "Palabra Reservada - NoComprobar",
     "objeto": "Palabra Reservada - Objeto",
@@ -90,9 +92,9 @@ const operadores = {
     ">": "Operador de Comparacion",
     "<=": "Operador de Comparacion",
     ">=": "Operador de Comparacion",
-    "&&": "Operador Logico",
-    "||": "Operador Logico",
-    "!": "Operador Logico",
+    "AND": "Operador Logico",
+    "OR": "Operador Logico",
+    "NOT": "Operador Logico",
     "++": "Operador de Incremento/Decremento",
     "--": "Operador de Incremento/Decremento"
 };
@@ -200,6 +202,7 @@ function mostrarTokens(tokensPorLinea) {
 // ---------------------------------------------------------------------------
 // --------------------ANALISIS SINTACTICO (GRAMATICO )-----------------------
 
+
 function validarSintaxis(tokensPorLinea) {
     const divErrores = document.getElementById("erroresSintaxis");
     divErrores.innerHTML = ""; // Limpiar el contenido previo
@@ -211,21 +214,8 @@ function validarSintaxis(tokensPorLinea) {
 
         // -------------------------------------------------------------------------------------
 
-        
-        // Verificar si es una declaración de variable
-        const operadorAsignacion=["Operador de Asignacion"];
-        const tiposdevalor=["Literal Numerico","Literal de Cadena"];
-        if (
-            //tiposPresentes.length === 5 &&
-            tiposPresentes[0] === "Tipo de Dato" &&
-            tiposPresentes[1] === "Identificador" &&
-            elementoOpcional(tiposPresentes.slice(2, tokens.length - 1), operadorAsignacion, tiposdevalor, 1) &&
-            tiposPresentes[tokens.length - 1] === "Delimitador"//esto es para que siempre este en la ultima posicion
-        ) {return;}
-
-
         // Verificar si es una operación aritmética
-        const operadoresAritmeticos = ["Operador de Suma", "Operador de Resta", "Operador de Multiplicacion", "Operador de Division"];
+        const operadoresAritmeticos = ["Operador de Suma", "Operador de Resta", "Operador de Multiplicacion", "Operador de Division", "Operador de Comparacion", "Operador Logico"];
         const elementosVariable = ["Identificador", "Literal Numerico"];
         
         if (
@@ -238,6 +228,305 @@ function validarSintaxis(tokensPorLinea) {
             generarArbolBinario(tokensPorLinea);
             return;
         }
+        
+        // Verificar si es un comentario (una línea o múltiples líneas)
+        if (
+            //tiposPresentes.length === 1 && 
+            tiposPresentes[0] === "Comentario de una linea" || tiposPresentes[0] === "Comentario de múltiples lineas"
+        ) {return; }
+
+        // Verificar si es la instrucción equipo();
+        if (
+            //tiposPresentes.length === 4 &&
+            tiposPresentes[0] === "Palabra Reservada - Equipo" &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+            tiposPresentes[2] === "Parentesis de Cierre" &&
+            tiposPresentes[3] === "Delimitador"
+        ) { return; }
+    
+        //----------------------------------------------------------
+
+        // INSTRUCCIÓN #1 - escribir.consola
+        const separadoresEscribir = ["Separador"];
+        const elementosEscribir = ["Identificador", "Literal de Cadena"];
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Escribir" &&
+            tiposPresentes[1] === "Conector" &&
+            tiposPresentes[2] === "Palabra Reservada - Consola" &&
+            tiposPresentes[3] === "Parentesis de Apertura" &&
+           (tiposPresentes[4] === "Literal de Cadena" || tiposPresentes[4] === "Identificador") &&
+            elementoOpcional(tiposPresentes.slice(5, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
+            tiposPresentes[tokens.length - 2] === "Parentesis de Cierre" &&//penultimo
+            tiposPresentes[tokens.length - 1] === "Delimitador"//ultimo elemento
+        ) { return; }
+
+        //INSTRUCCION #2 - leer.consola
+        if(
+            //tiposPresentes.length===5&&
+            tiposPresentes[0]==="Palabra Reservada - Leer"&&
+            tiposPresentes[1]==="Conector"&&
+            tiposPresentes[2]==="Palabra Reservada - Consola"&&
+            tiposPresentes[3]==="Parentesis de Apertura"&&
+            tiposPresentes[4]==="Parentesis de Cierre"&&
+            tiposPresentes[5]==="Delimitador"
+        ) { return;}
+
+        //INSTRUCCION #3 - leerTecla.consola
+        if(
+            //tiposPresentes.length===5&&
+            tiposPresentes[0]==="Palabra Reservada - LeerTecla"&&
+            tiposPresentes[1]==="Conector"&&
+            tiposPresentes[2]==="Palabra Reservada - Consola"&&
+            tiposPresentes[3]==="Parentesis de Apertura"&&
+            tiposPresentes[4]==="Parentesis de Cierre"&&
+            tiposPresentes[5]==="Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #4 -  para
+        if (
+            tiposPresentes.length === 16 &&
+            tiposPresentes[0] === "Palabra Reservada - Para" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+
+            tiposPresentes[2] === "Tipo de Dato" && 
+            tiposPresentes[3] === "Identificador" && 
+            tiposPresentes[4] === "Operador de Asignacion" && 
+            (tiposPresentes[5] === "Literal Numerico" || tiposPresentes[5] === "Identificador") &&
+            tiposPresentes[6] === "Delimitador" &&
+
+            tiposPresentes[7] === "Identificador" && 
+            tiposPresentes[8] === "Operador de Comparacion" && 
+            (tiposPresentes[9] === "Literal Numerico" || tiposPresentes[9] === "Identificador") &&
+            tiposPresentes[10] === "Delimitador" && 
+
+            tiposPresentes[11] === "Identificador" &&
+            tiposPresentes[12] === "Operador de Incremento/Decremento" && 
+
+            tiposPresentes[13] === "Parentesis de Cierre" && 
+            tiposPresentes[14] === "Llaves de Apertura" && 
+            tiposPresentes[15] === "Llaves de Cierre"
+        ) { return;}
+
+        // INSTRUCCION #5 - mientras
+        const elementosNumID = ["Identificador", "Literal Numerico"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Mientras" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Operador de Comparacion" && 
+            (tiposPresentes[4] === "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
+            tiposPresentes[5] === "Parentesis de Cierre" && 
+            tiposPresentes[6] === "Llaves de Apertura" && 
+            tiposPresentes[7] === "Llaves de Cierre"
+        ) {return;}
+
+        // INSTRUCCION #6 - SINO
+        const elementoElseIf = ["Palabra Reservada - Sino"];
+        const ParInicial = ["Parentesis de Apertura"];
+        const Comparador = ["Operador de Comparacion"];
+        const Id = ["Identificador"];
+        const Comparaciones = ["Identificador", "Literal Numerico", "Literal de Cadena"];
+        const ParFinal = ["Parentesis de Cierre"];
+
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Si" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            // Verificamos el elemento opcional (comparador y valor)
+            elementoOpcional2(tiposPresentes.slice(3, tokens.length - 3), Comparador, Comparaciones, 1) &&
+            // Verificamos los tres últimos tokens
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" && 
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) {
+            return true; // Sintaxis correcta
+        }
+
+        // INSTRUCCION #7 - INTERRUPTOR 
+        const elementosCasos = ["Palabra Reservada - Caso"];
+        const elementosAsignacion = ["Asignacion de Bloque de Codigo"];
+        const elementosValor = ["Identificador", "Literal Numerico", "Literal de Cadena"];
+        const xdefectocaso=["Palabra Reservada - XDefecto"];
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Interruptor" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Llaves de Apertura" && 
+        
+            // Verificamos el primer caso (caso:1, caso:2, etc.)
+            tiposPresentes[5] === "Palabra Reservada - Caso" && 
+            tiposPresentes[6] === "Asignacion de Bloque de Codigo" && 
+            (tiposPresentes[7] === "Literal Numerico" || tiposPresentes[7] === "Literal de Cadena" || tiposPresentes[7] === "Identificador") && 
+        
+            // Validamos los casos opcionales y el posible xDefecto
+            elementoOpcionalDefault(tiposPresentes.slice(8, tokens.length - 1), elementosCasos, elementosAsignacion, elementosValor, 0) && 
+            
+            // Verificamos que la estructura cierre correctamente con llaves de cierre
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) {
+            return true; // Sintaxis correcta
+        }
+
+        // INSTRUCCION #8 - INTENTA ATRAPAR
+        const elementosExcepciones = ["Palabra Reservada - Excepcion", "Palabra Reservada - DivideEntreZeroExcepcion"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Intenta" && 
+            tiposPresentes[1] === "Llaves de Apertura" && 
+            tiposPresentes[2] === "Llaves de Cierre" && 
+            tiposPresentes[3] === "Palabra Reservada - Atrapar" && 
+            tiposPresentes[4] === "Parentesis de Apertura" && 
+            (tiposPresentes[5] === "Palabra Reservada - Excepcion" || tiposPresentes[5] === "Palabra Reservada - DivideEntreZeroExcepcion") &&
+            tiposPresentes[6] === "Identificador" &&
+            tiposPresentes[7] === "Parentesis de Cierre" && 
+            tiposPresentes[8] === "Llaves de Apertura" && 
+            tiposPresentes[9] === "Llaves de Cierre"
+        ) { return;}
+        
+        // INSTRUCCION #9 - arreglo.tamanio
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Identificador" && 
+            tiposPresentes[1] === "Conector" && 
+            tiposPresentes[2] === "Palabra Reservada - Tamanio" && 
+            tiposPresentes[3] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #10 - arreglo.copia
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Identificador" && 
+            tiposPresentes[1] === "Conector" && 
+            tiposPresentes[2] === "Palabra Reservada - Copia" && 
+            tiposPresentes[3] === "Parentesis de Apertura" && 
+            tiposPresentes[4] === "Identificador" && 
+            tiposPresentes[5] === "Separador" && 
+            tiposPresentes[6] === "Identificador" && 
+            tiposPresentes[7] === "Parentesis de Cierre" && 
+            tiposPresentes[8] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #11 - tamanioDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - TamanioDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+        
+        // INSTRUCCION #12 - nombreDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - NombreDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #13 - formatoDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - FormatoDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+           (tiposPresentes[2] === "Palabra Reservada - MAYUS" || tiposPresentes[2] === "Palabra Reservada - MINUS") &&
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #14 - bloquear
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Bloquear" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Llaves de Apertura" &&
+            tiposPresentes[5] === "Llaves de Cierre" 
+        ) { return;}
+
+        // INSTRUCCION #15 - usando
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Usando" && 
+            tiposPresentes[1] === "Palabra Reservada - Sistema" && 
+            tiposPresentes[2] === "Conector" &&
+            tiposPresentes[3] === "Palabra Reservada - ES" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+        
+
+        //INSTRUCCION #16 - MATH.MAX Y MATH.MIN
+        if(
+            //tiposPresentes.length === 9 &&
+            tiposPresentes[0]=== "Palabra Reservada - Mate"&&
+            tiposPresentes[1]=== "Conector"&&
+           (tiposPresentes[2]=== "Palabra Reservada - Mayor" || tiposPresentes[2] === "Palabra Reservada - Menor") &&
+            tiposPresentes[3]=== "Parentesis de Apertura"&&
+           (tiposPresentes[4]=== "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
+            tiposPresentes[5]=== "Separador"&&
+           (tiposPresentes[6]=== "Literal Numerico" || tiposPresentes[6] === "Identificador") &&
+            tiposPresentes[7]=== "Parentesis de Cierre"&&
+            tiposPresentes[8]=== "Delimitador"
+        ) {return;}
+
+        //INSTRUCCION #17 - COMPROBADO Y NO COMPROBADO
+        if(
+            //tiposPresentes.length===3 &&
+           (tiposPresentes[0]=== "Palabra Reservada - Comprobado" || tiposPresentes[0] === "Palabra Reservada - NoComprobar") &&
+            tiposPresentes[1]==="Llaves de Apertura"&&
+            tiposPresentes[2]==="Llaves de Cierre"
+        ){return;}
+
+
+        // INSTRUCCION #18 -metodo
+        const tipoDatoM = ["Tipo de Dato"];
+        const varNombre = ["Identificador"];
+        const separadores = ["Separador"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Modificadores de Acceso" && 
+            tiposPresentes[1] === "Palabra Reservada - Estatico" && 
+           (tiposPresentes[2]=== "Palabra Reservada - Vacio" || tiposPresentes[2] === "Tipo de Dato") &&
+            tiposPresentes[3] === "Identificador" && 
+            tiposPresentes[4] === "Parentesis de Apertura" && 
+            elementoOpcional3(tiposPresentes.slice(5, tokens.length - 3), tipoDatoM, varNombre, separadores, 0) &&
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" &&
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&//penultimo
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) { return;}
+
+        // INSTRUCCION #19 - DECLARACION DE VARIABLE
+        const operadorAsignacion=["Operador de Asignacion"];
+        const tiposdevalor=["Literal Numerico","Literal de Cadena"];
+        if (
+            //tiposPresentes.length === 5 &&
+            tiposPresentes[0] === "Tipo de Dato" &&
+            tiposPresentes[1] === "Identificador" &&
+            elementoOpcional(tiposPresentes.slice(2, tokens.length - 1), operadorAsignacion, tiposdevalor, 1) &&
+            tiposPresentes[tokens.length - 1] === "Delimitador"//esto es para que siempre este en la ultima posicion
+        ) {return;}
+
+        //INSTRUCCION #20 - ES
+        if(
+            //tiposPresentes.length===3&&
+            tiposPresentes[0]==="Identificador"&&
+            tiposPresentes[1]==="Palabra Reservada - ES"&&
+            tiposPresentes[2]==="Tipos de Dato"
+        ){return;}
+
+        
+
+
+
+
+
+
+
 
 
         //---------------------------------------------------------------------------------------------------------------------
@@ -255,7 +544,165 @@ function validarSintaxis(tokensPorLinea) {
 }
 
 
+function elementoOpcional(tokens, permitidosSeparador, permitidosElementos, vecesPermitidas) {
+    if (tokens.length === 0) return true; // No hay elementos opcionales, lo cual es válido.
+    let limite = vecesPermitidas === 0 ? Infinity : vecesPermitidas; // Si vecesPermitidas es 0, no hay límite en cuántas veces podemos usar los tokens
+    let vecesUsadas = 0; // Cada vez que se recorre un par (separador + elemento), cuenta como 1 vez permitida
 
+    // Recorremos los tokens en pares de separador y elemento
+    for (let i = 0; i < tokens.length; i += 2) {
+        // Verificamos que no se excedan las veces permitidas
+        if (vecesUsadas >= limite) {
+            return false; // Se ha superado el número de veces permitidas
+        }
+
+        // Verificamos que haya un separador (ej. coma, operador aritmético)
+        if (!permitidosSeparador.includes(tokens[i])) {
+            return false; // El separador no es válido
+        }
+
+        // Verificamos que el siguiente token sea un identificador o un literal (depende del contexto)
+        if (!permitidosElementos.includes(tokens[i + 1])) {
+            return false; // El elemento no es válido
+        }
+
+        vecesUsadas++;// Incrementamos las veces usadas por cada par de tokens (separador + elemento)
+    }
+
+    return true; // Todos los elementos opcionales son válidos dentro del límite
+}
+
+function elementoOpcional3(tokens, valor1, valor2, valor3, vecesPermitidas) {
+    if (tokens.length === 0) return true; // No hay elementos opcionales, lo cual es válido.
+    let limite = vecesPermitidas === 0 ? Infinity : vecesPermitidas; // Si vecesPermitidas es 0, no hay límite en cuántas veces podemos usar los tokens
+    let vecesUsadas = 0; // Cada vez que se recorre un par (separador + elemento), cuenta como 1 vez permitida
+
+    // Recorremos los tokens en pares de separador y elemento
+    for (let i = 0; i < tokens.length; i += 3) {
+        // Verificamos que no se excedan las veces permitidas
+        if (vecesUsadas >= limite) {
+            return false; // Se ha superado el número de veces permitidas
+        }
+
+        // Verificamos que haya un separador (ej. coma, operador aritmético)
+        if (!valor1.includes(tokens[i])) {
+            return false; // El separador no es válido
+        }
+
+        // Verificamos que el siguiente token sea un identificador o un literal (depende del contexto)
+        if (!valor2.includes(tokens[i + 1])) {
+            return false; // El elemento no es válido
+        }
+
+        if (!valor3.includes(tokens[i + 2])) {
+            return false; // El elemento no es válido
+        }
+
+        vecesUsadas++;// Incrementamos las veces usadas por cada par de tokens (separador + elemento)
+    }
+
+    return true; // Todos los elementos opcionales son válidos dentro del límite
+}
+
+function elementoOpcionalParentesis(tokens, permitidosOperadores, permitidosElementos) {
+    let stackParentesis = [];
+    let esperandoElemento = true;
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (esperandoElemento) {
+            if (token === 'Parentesis de Apertura') {
+                stackParentesis.push(token);
+            } else if (permitidosElementos.includes(token)) {
+                esperandoElemento = false;
+            } else {
+                return false; // Error: se esperaba un elemento
+            }
+        } else {
+            if (permitidosOperadores.includes(token)) {
+                esperandoElemento = true;
+            } else if (token === 'Parentesis de Cierre') {
+                if (stackParentesis.length === 0) {
+                    return false; // Error: paréntesis de cierre sin apertura
+                }
+                stackParentesis.pop();
+            } else {
+                return false; // Error: se esperaba un operador o paréntesis de cierre
+            }
+        }
+    }
+
+    // Al final, no debe haber paréntesis sin cerrar y no debemos estar esperando un elemento
+    return stackParentesis.length === 0 && !esperandoElemento;
+}
+
+
+function elementoOpcionalDefault(tokens, permitidosCasos, permitidosAsignacion, permitidosValores, vecesPermitidas) {
+    let vecesUsadas = 0;
+    let tieneXDefecto = false; // Para verificar si ya se ha encontrado xDefecto
+
+    for (let i = 0; i < tokens.length; ) {
+        // Verificamos si encontramos un xDefecto
+        if (tokens[i] === "Palabra Reservada - XDefecto") {
+            if (tieneXDefecto) return false; // Si ya existe un xDefecto, no puede haber otro
+            tieneXDefecto = true; // Marca que se ha encontrado xDefecto
+
+            // xDefecto debe tener asignación (por ejemplo, xDefecto: )
+            if (tokens[i + 1] !== "Asignacion de Bloque de Codigo") return false;
+
+            // Si hay xDefecto, solo avanzamos 2 posiciones
+            i += 2;
+        } else {
+            // Verificamos el caso
+            if (!permitidosCasos.includes(tokens[i]) || 
+                !permitidosAsignacion.includes(tokens[i + 1]) || 
+                !permitidosValores.includes(tokens[i + 2])) {
+                return false; // Si no es un caso válido, la sintaxis es incorrecta.
+            }
+            vecesUsadas++;
+            // Avanzamos 3 posiciones para el siguiente caso
+            i += 3;
+        }
+    }
+
+    return true; // Si todos los casos y xDefecto son válidos
+}
+
+function elementoOpcionalElse(tokens, permitidosCasos, parI, id, permitidosAsignacion, permitidosValores, parF, vecesPermitidas) {
+    let vecesUsadas = 0;
+    let tieneElse = false; // Para verificar si ya se ha encontrado "Contrario"
+
+    for (let i = 0; i < tokens.length; ) {
+        // Verificamos si encontramos un "Contrario"
+        if (tokens[i] === "Palabra Reservada - Contrario") {
+            if (tieneElse) return false; // Si ya existe "Contrario", no puede haber otro
+            tieneElse = true; // Marca que se ha encontrado "Contrario"
+
+            // Verificamos que "Contrario" tenga llaves de apertura y cierre
+            if (tokens[i + 1] !== "Llaves de Apertura") return false;
+            if (tokens[i + 2] !== "Llaves de Cierre") return false;
+
+            // Si hay "Contrario", avanzamos 3 posiciones
+            i += 3;
+        } else {
+            // Verificamos los casos
+            if (!permitidosCasos.includes(tokens[i]) || 
+                !parI.includes(tokens[i + 1]) ||  // Verificamos el paréntesis de apertura
+                !id.includes(tokens[i + 2]) ||   // Verificamos el identificador
+                !permitidosAsignacion.includes(tokens[i + 3]) ||  // Verificamos la asignación
+                !permitidosValores.includes(tokens[i + 4]) ||  // Verificamos el valor
+                !parF.includes(tokens[i + 5])) {  // Verificamos el paréntesis de cierre
+                return false; // Si no es un caso válido, la sintaxis es incorrecta.
+            }
+            vecesUsadas++;
+            // Avanzamos 6 posiciones para el siguiente caso
+            i += 6;
+        }
+    }
+
+    return true; // Si todos los casos y "Contrario" son válidos
+}
 
 
 
@@ -298,21 +745,30 @@ function validarSintaxis(tokensPorLinea) {
 
 // Definir las jerarquías de los operadores
 const jerarquiaOperadores = {
-    '=': 1,
-    '+': 2,
-    '-': 2,
-    '*': 3,
-    '/': 3,
-    
+    'OR': 1,
+    'AND': 2,
+    '<': 3,
+    '>': 3,
+    '<=': 3,
+    '>=': 3,
+    '==': 3,
+    '!=': 3,
+    'NOT':4,
+    '=': 5,
+    '+': 6,
+    '-': 6,
+    '*': 7,
+    '/': 7,
 };
 
-// Función para encontrar el operador principal, ajustado para manejar paréntesis
+// Función para encontrar el operador principal, ajustada para operadores de múltiples caracteres
 function encontrarOperadorPrincipal(expr) {
     let nivelParentesis = 0;
     let operadorPrincipal = null;
     let posicionOperador = -1;
     let menorJerarquia = Infinity;
 
+    // Iterar sobre la expresión de derecha a izquierda, pero ahora se buscan operadores de varias letras
     for (let i = expr.length - 1; i >= 0; i--) {
         const char = expr[i];
 
@@ -322,12 +778,17 @@ function encontrarOperadorPrincipal(expr) {
             nivelParentesis--;
         }
 
-        if (nivelParentesis === 0 && jerarquiaOperadores[char] !== undefined) {
-            const jerarquia = jerarquiaOperadores[char];
-            if (jerarquia < menorJerarquia) {
-                menorJerarquia = jerarquia;
-                operadorPrincipal = char;
-                posicionOperador = i;
+        if (nivelParentesis === 0) {
+            // Comprobar operadores de más de un carácter (como AND y OR)
+            for (const operador in jerarquiaOperadores) {
+                if (expr.slice(i - operador.length + 1, i + 1) === operador) {
+                    const jerarquia = jerarquiaOperadores[operador];
+                    if (jerarquia < menorJerarquia) {
+                        menorJerarquia = jerarquia;
+                        operadorPrincipal = operador;
+                        posicionOperador = i - operador.length + 1; // Asegurarse de que la posición es el inicio del operador
+                    }
+                }
             }
         }
     }
@@ -344,9 +805,9 @@ function construirArbol(expr) {
         return { name: expr, children: [] };
     }
 
-    // Caso especial: si la expresión está entre paréntesis, analizar lo que hay dentro
+    // Caso especial: si la expresión tiene paréntesis, asegurarnos de desglosar lo que hay dentro
     if (expr[0] === '(' && expr[expr.length - 1] === ')') {
-        return construirArbol(expr.slice(1, -1));
+        return construirArbol(expr.slice(1, -1)); // Procesar el contenido entre los paréntesis
     }
 
     // Encontrar el operador principal
@@ -354,7 +815,7 @@ function construirArbol(expr) {
 
     if (operador) {
         const izquierda = expr.slice(0, posicion);
-        const derecha = expr.slice(posicion + 1);
+        const derecha = expr.slice(posicion + operador.length);
 
         return {
             name: operador,
@@ -374,6 +835,8 @@ const expresionesProcesadas = new Set();
 
 // Función para generar el árbol binario de una línea de código
 function generarArbolBinario(tokensPorLinea) {
+    // Eliminar la línea que borra los árboles previos:
+    // document.getElementById('arbolesSintacticos').innerHTML = "";
 
     tokensPorLinea.forEach((lineaObj, index) => {
         const { tokens } = lineaObj;
@@ -399,10 +862,10 @@ function generarArbolBinario(tokensPorLinea) {
         };
 
         const row = document.createElement('tr');
-        row.innerHTML = `<td>${index + 1}</td><td id="arbolCell_${index}"></td>`;
+        row.innerHTML = `<td>${index + 1}</td><td id="arbolCell_${expresionesProcesadas.size}"></td>`; // Usar el tamaño del set para un id único
         document.getElementById('arbolesSintacticos').appendChild(row);
 
-        dibujarArbol(treeData, index);
+        dibujarArbol(treeData, expresionesProcesadas.size);
     });
 }
 
@@ -467,7 +930,6 @@ function dibujarArbol(treeData, index) {
 
 
 
-
 //----------------------FUNCIONES DE LOS BOTONES---------------------------------
 
 //FUNCION PRINCIPAL
@@ -488,66 +950,6 @@ function analizar() {
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-function elementoOpcional(tokens, permitidosSeparador, permitidosElementos, vecesPermitidas) {
-    if (tokens.length === 0) return true; // No hay elementos opcionales, lo cual es válido.
-    let limite = vecesPermitidas === 0 ? Infinity : vecesPermitidas; // Si vecesPermitidas es 0, no hay límite en cuántas veces podemos usar los tokens
-    let vecesUsadas = 0; // Cada vez que se recorre un par (separador + elemento), cuenta como 1 vez permitida
-
-    // Recorremos los tokens en pares de separador y elemento
-    for (let i = 0; i < tokens.length; i += 2) {
-        // Verificamos que no se excedan las veces permitidas
-        if (vecesUsadas >= limite) {
-            return false; // Se ha superado el número de veces permitidas
-        }
-
-        // Verificamos que haya un separador (ej. coma, operador aritmético)
-        if (!permitidosSeparador.includes(tokens[i])) {
-            return false; // El separador no es válido
-        }
-
-        // Verificamos que el siguiente token sea un identificador o un literal (depende del contexto)
-        if (!permitidosElementos.includes(tokens[i + 1])) {
-            return false; // El elemento no es válido
-        }
-
-        vecesUsadas++;// Incrementamos las veces usadas por cada par de tokens (separador + elemento)
-    }
-
-    return true; // Todos los elementos opcionales son válidos dentro del límite
-}
-
-function elementoOpcionalParentesis(tokens, permitidosOperadores, permitidosElementos) {
-    let stackParentesis = [];
-    let esperandoElemento = true;
-
-    for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i];
-
-        if (esperandoElemento) {
-            if (token === 'Parentesis de Apertura') {
-                stackParentesis.push(token);
-            } else if (permitidosElementos.includes(token)) {
-                esperandoElemento = false;
-            } else {
-                return false; // Error: se esperaba un elemento
-            }
-        } else {
-            if (permitidosOperadores.includes(token)) {
-                esperandoElemento = true;
-            } else if (token === 'Parentesis de Cierre') {
-                if (stackParentesis.length === 0) {
-                    return false; // Error: paréntesis de cierre sin apertura
-                }
-                stackParentesis.pop();
-            } else {
-                return false; // Error: se esperaba un operador o paréntesis de cierre
-            }
-        }
-    }
-
-    // Al final, no debe haber paréntesis sin cerrar y no debemos estar esperando un elemento
-    return stackParentesis.length === 0 && !esperandoElemento;
-}
 
 
 
@@ -581,23 +983,23 @@ function ingresarInstruccion() {
     var instruccion01 = '\nescribir.consola("hola mundo");';
     var instruccion02 = '\npara(entero i=0; i<5; i++){}';
     var instruccion03 = '\nmientras(variable<=10){}';
-    var instruccion04 = '\ninterruptor(var){}';
+    var instruccion04 = '\ninterruptor(var){caso: 1}';
     var instruccion05 = '\nintenta{}atrapar(Excepcion ex){}';
     var instruccion06 = '\nleer.consola();';
-    var instruccion07 = '\narreglitoVar.tamanio();';
+    var instruccion07 = '\narreglitoVar.tamanio;';
     var instruccion08 = '\narreglitoVar.copia(destino,longitud);';
     var instruccion09 = '\ntamanioDe(variable);';
     var instruccion10 = '\nnombreDe(variable);';
-    var instruccion11 = '\npublico evento Accion var;';
+    var instruccion11 = '\nformatoDe(minus);';
     var instruccion12 = '\nbloquear(variable){}';
     var instruccion13 = '\nusando Sistema.ES;';
     var instruccion14 = '\nleerTecla.consola();';
     var instruccion15 = '\nmate.mayor(numero1, numero2);';
-    var instruccion16 = '\ncadenita.formatoDe(0);';
+    var instruccion16 = '\nformatoDe(mayus);';
     var instruccion17 = '\ncomprobado{}';
-    var instruccion18 = '\nid es cadena;';
-    var instruccion19 = '\ndevuelve var;';
-    var instruccion20 = '\npublico estatico hueco Metodo(){}';
+    var instruccion18 = '\n';
+    var instruccion19 = '\n';
+    var instruccion20 = '\n';
     
     var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
     document.getElementById("input").value = cadInst;
