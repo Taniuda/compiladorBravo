@@ -251,7 +251,7 @@ p {
 
 .custom-table th, .custom-table td {
     border: 7px solid #00000015; /* Bordes oscuros */
-    padding: 8px;
+    padding: 16px;
     color: hsl(0, 0%, 0%); /* Texto claro */
     background-color: #ffffff; /* Fondo oscuro */
     font-size: 25px;
@@ -381,7 +381,7 @@ p {
 }
 
 .tab-content {
-    padding: 10px;
+    padding: 20px;
     border: 1px solid #2a2a37; /* Borde del contenido de las pestañas */
     border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
     background-color: #ffffff; /* Fondo del contenido de las pestañas */
