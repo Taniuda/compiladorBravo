@@ -34,7 +34,7 @@ p {
     border: 10px solid #ffffff;;
     border-radius: 10px;;
     
-    border-color: #ffffff;
+    border-color: #ffffff00;
 }
 
 .container {
@@ -72,23 +72,22 @@ p {
 
 .consolaSalida {
     margin-top: 15px;
-    flex: 1; /* Permite que las columnas ocupen espacio igual */
     padding: 10px; /* Espacio interno */
-    display: flex;
     border: 10px solid #444444; /* Borde oscuro */
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 93.5%;
     height: 100px;
-    overflow: hidden;
+    overflow: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
     font-size: 20px;
     color: #ffffff;
     background-color: #222222; /* Fondo oscuro */
-    flex: 1; /* Asegura que ocupe el espacio disponible */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-
-    overflow: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra del contenedor */
+    white-space: pre-line; /* Respeta saltos de línea */
+    display: block; /* Muestra los elementos en una sola columna */
 }
+
+
 
 
 
@@ -250,12 +249,21 @@ p {
 
 .custom-table th, .custom-table td {
     border: 7px solid #17171757; /* Bordes oscuros */
-    padding: 8px;
+    padding: 16px;
     color: #e0e0e0bd; /* Texto claro */
     background-color: #151a20; /* Fondo oscuro */
     font-size: 25px;
     word-wrap: break-word;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
+}
+
+
+
+.custom-table td {
+    text-align: center;
+    min-height: 400px; /* Establecer una altura mínima */
+    vertical-align: center; /* Alinear el contenido en la parte superior */
+    padding: 16px;
 }
 
 .custom-table th {
@@ -265,9 +273,6 @@ p {
     font-weight: bold;
     font-size: 25px;
 }
-
-
-
 
 
 
@@ -339,4 +344,45 @@ p {
     grid-template-columns: auto 50px;
     align-items: center;
     gap: 10px; /* Espacio entre el título y el interruptor */
+}
+
+
+
+
+
+/*PESTAÑAS */
+
+/* Estilos para las pestañas */
+.tabs {
+    margin-top: 20px;
+    display: flex;
+    
+}
+
+.tab-button {
+    background-color: #007ce1; /* Color de fondo de las pestañas */
+    color: #ffffff; /* Color del texto */
+    border: 1px solid #151a20; /* Borde de las pestañas */
+    border-bottom: 2px solid transparent; /* Borde inferior transparente para efecto de selección */
+    padding: 16px 23px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 2px; /* Espacio entre las pestañas */
+    border-radius: 5px 5px 0 0; /* Esquinas redondeadas en la parte superior */
+    transition: background-color 0.3s ease, border-bottom 0.3s ease; /* Transición suave */
+}
+
+
+
+.tab-button:hover {
+    background-color: #e5b71e; /* Fondo de la pestaña al pasar el ratón */
+    color: #000000;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #2a2a37; /* Borde del contenido de las pestañas */
+    border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
+    background-color: #2a2a37; /* Fondo del contenido de las pestañas */
 }

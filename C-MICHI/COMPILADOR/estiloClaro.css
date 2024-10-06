@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
 
 body {
-    background-color: #849cf6ce;/*EL MAS OSCURO*/
+    background-color: #9ecdf3;/*EL MAS OSCURO*/
     padding: 0;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     color: #e0e0e0; /* Texto claro */
@@ -70,28 +70,27 @@ p {
     flex: 1; /* Asegura que ocupe el espacio disponible */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
     
+    
 }
 
 .consolaSalida {
     margin-top: 15px;
-    flex: 1; /* Permite que las columnas ocupen espacio igual */
-    display: flex;
     padding: 10px; /* Espacio interno */
-    
     border: 10px solid #c6c6c6; /* Borde oscuro */
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 93.5%;
     height: 100px;
-    overflow: hidden;
+    overflow: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
     font-size: 20px;
-    color: #000000;
+    color: #ffffff;
     background-color: #dedede; /* Fondo oscuro */
-    flex: 1; /* Asegura que ocupe el espacio disponible */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    overflow: auto;
-    
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra del contenedor */
+    white-space: pre-line; /* Respeta saltos de línea */
+    display: block; /* Muestra los elementos en una sola columna */
 }
+
+
 
 
 .lineNumbers {
@@ -252,7 +251,7 @@ p {
 
 .custom-table th, .custom-table td {
     border: 7px solid #00000015; /* Bordes oscuros */
-    padding: 8px;
+    padding: 16px;
     color: hsl(0, 0%, 0%); /* Texto claro */
     background-color: #ffffff; /* Fondo oscuro */
     font-size: 25px;
@@ -345,3 +344,48 @@ p {
     align-items: center;
     gap: 10px; /* Espacio entre el título y el interruptor */
 }
+
+
+
+
+
+
+/*PESTAÑAS */
+
+/* Estilos para las pestañas */
+.tabs {
+    margin-top: 20px;
+    display: flex;
+    
+}
+
+.tab-button {
+    background-color: #007ce1; /* Color de fondo de las pestañas */
+    color: #ffffff; /* Color del texto */
+    border: 1px solid #151a20; /* Borde de las pestañas */
+    border-bottom: 2px solid transparent; /* Borde inferior transparente para efecto de selección */
+    padding: 16px 23px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 2px; /* Espacio entre las pestañas */
+    border-radius: 5px 5px 0 0; /* Esquinas redondeadas en la parte superior */
+    transition: background-color 0.3s ease, border-bottom 0.3s ease; /* Transición suave */
+}
+
+
+
+.tab-button:hover {
+    background-color: #e5b71e; /* Fondo de la pestaña al pasar el ratón */
+    color: #ffffff;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #2a2a37; /* Borde del contenido de las pestañas */
+    border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
+    background-color: #ffffff; /* Fondo del contenido de las pestañas */
+}
+
+
+
