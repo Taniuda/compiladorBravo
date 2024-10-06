@@ -136,10 +136,11 @@
         <div class="tabs">
             <button class="tab-button" onclick="showTab('lexico')">Análisis Léxico</button>
             <button class="tab-button" onclick="showTab('sintactico')">Análisis Sintáctico</button>
+            <button class="tab-button" onclick="showTab('semantico')">Análisis Semantico</button>
         </div>
 
         <!-- Contenido de las pestañas -->
-        <div id="tab-lexico" class="tab-content">
+        <div id="tab-lexico" class="tab-content" >
             <!-- Aquí se mostrarán los resultados del análisis léxico -->
             <table class="custom-table" id="tablaTokens">
                 <thead>
@@ -170,16 +171,23 @@
             </table>
         </div>
 
+        <div id="tab-semantico" class="tab-content" style="display: none;">
+            <!-- Aquí se mostrarán los resultados del análisis semantico -->
+            <table class="custom-table" id="tablaSemantica">
+                <thead>
+                    <tr>
+                        <th>Linea</th>
+                        <th>No Terminal</th>
+                    </tr>
+                </thead>
+                <tbody id="gramaticaSemantica">
+                    <!-- Aquí se agregarán los resultados del análisis semantico -->
+                </tbody>
+            </table>
+        </div>
+
     </div>
 </div>
 <script src="codigo.js"></script>
-<script>
-    function showTab(tabId) {
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.style.display = 'none';
-        });
-        document.getElementById(`tab-${tabId}`).style.display = 'block';
-    }
-</script>
 </body>
 </html>
