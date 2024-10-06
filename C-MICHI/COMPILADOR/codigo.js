@@ -225,7 +225,7 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[tokens.length - 1] === "Delimitador" // Delimitador final ";"
         ) {
             // Si se encuentra una declaración aritmética, generamos el árbol binario
-            //generarArbolBinario(tokensPorLinea);<---- no borrar esta linea, el metodo esta en otro lugar...
+            //generarArbolBinario(tokensPorLinea);//<---- no borrar esta linea, el metodo esta en otro lugar...
             generarSemantica(tokensPorLinea);
             return;
         }
@@ -265,7 +265,6 @@ function validarSintaxis(tokensPorLinea) {
 
 function generarSemantica(tokensPorLinea){
     
-
 }
 
 
@@ -280,17 +279,6 @@ function analizar() {
 }
 
 //-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-
-
 
 //FUNCION PARA LIMPIAR TODO
 function limpiar() {
