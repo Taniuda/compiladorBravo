@@ -124,6 +124,7 @@ function analizarTexto(texto) {
     const tokensPorLinea = [];
     const regex = /==|!=|<=|>=|&&|\|\||\+\+|--|["][^"]*["]|['][^']*[']|["]|[']|\/\/.*|\/\*[\s\S]*?\*\/|\d+\.\d+|\d+|[\w]+|[-+*/%=&|!<>]=?|[{}()[\],;:.@]/g;
     const lineas = texto.split('\n');
+    
 
     lineas.forEach((linea, numeroLinea) => {
         const palabras = linea.match(regex);
@@ -221,12 +222,12 @@ function validarSintaxis(tokensPorLinea) {
         if (
             tiposPresentes[0] === "Identificador" && // Nombre de la variable
             tiposPresentes[1] === "Operador de Asignacion" && // Operador de asignación "="
-            elementoOpcionalParentesis(tiposPresentes.slice(2, tokens.length - 1), operadoresAritmeticos, elementosVariable) && // Expresión válida
+            //elementoOpcionalParentesis(tiposPresentes.slice(2, tokens.length - 1), operadoresAritmeticos, elementosVariable) && // Expresión válida
             tiposPresentes[tokens.length - 1] === "Delimitador" // Delimitador final ";"
         ) {
             // Si se encuentra una declaración aritmética, generamos el árbol binario
             //generarArbolBinario(tokensPorLinea);//<---- no borrar esta linea, el metodo esta en otro lugar...
-            generarSemantica(tokensPorLinea);
+            
             return;
         }
         
@@ -263,9 +264,213 @@ function validarSintaxis(tokensPorLinea) {
 }
 
 
-function generarSemantica(tokensPorLinea){
-    
+// ----------------------------------------------------------------------
+
+
+
+
+
+
+
+function analizarSemantico(codigo) {
+    let resultado = "";
+
+    // Paso 1: Dividir la proposición en el lado izquierdo (id) y el lado derecho (exp)
+    const [ladoIzquierdo, ladoDerecho] = codigo.split('=').map(x => x.trim());
+
+    // Definir que la proposición es de asignación
+    resultado += "prop -> id = exp\n";
+
+    // Paso 2: Desglosar la expresión (lado derecho) sin duplicar elementos
+    const expTokens = desglosarExpresion(ladoDerecho);
+    resultado += "exp -> " + Array.from(new Set(expTokens)).join(' | ') + "\n";
+
+    // Paso 3: Desglosar identificadores en ambos lados (antes y después del igual)
+    const idTokens = [
+        ...desglosarIdentificador(ladoIzquierdo),  // Identificadores antes del "="
+        ...desglosarIdentificadoresEnExpresion(ladoDerecho)  // Identificadores después del "="
+    ];
+    resultado += "id -> " + Array.from(new Set(idTokens)).join(' | ') + "\n";
+
+    // Paso 4: Obtener los números (si los hay) en la expresión y desglosarlos por cantidad de dígitos (solo números puros)
+    const numTokens = desglosarNumerosAgrupadosPorDigitos(ladoDerecho);
+    if (numTokens.length > 0) {
+        resultado += "num -> " + numTokens.join(' | ') + "\n";
+    }
+
+    // Paso 5: Obtener las letras y dígitos únicos usados en los identificadores y números
+    const { letras, digitos } = obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho);
+
+    // Generar las líneas para las letras y solo para los dígitos si existen
+    resultado += "let -> " + letras.join(' | ') + "\n";
+    if (digitos.length > 0) {
+        resultado += "dig -> " + digitos.join(' | ') + "\n";
+    }
+
+    return resultado;
 }
+
+// Función para desglosar una expresión en identificadores, operaciones y números
+function desglosarExpresion(exp) {
+    const tokens = [];
+    let tokenActual = "";
+
+    for (let i = 0; i < exp.length; i++) {
+        const char = exp[i];
+
+        if (char.match(/[a-zA-Z]/)) {
+            // Acumular letras (posible identificador)
+            tokenActual += char;
+        } else if (char.match(/\d/)) {
+            // Acumular dígitos dentro de un identificador o número
+            tokenActual += char;
+        } else if (char.match(/[\+\-\*\/\(\)]/)) {
+            // Detectar operadores aritméticos y paréntesis
+            if (tokenActual.length > 0) {
+                if (tokenActual.match(/[a-zA-Z]/)) {
+                    tokens.push('id');  // Si contiene letras es un identificador
+                } else {
+                    tokens.push('num');  // Si solo contiene dígitos, es un número
+                }
+                tokenActual = "";
+            }
+            tokens.push(char === '(' || char === ')' ? `( exp )` : `exp ${char} exp`);
+        }
+    }
+
+    // Agregar el último token si existe
+    if (tokenActual.length > 0) {
+        if (tokenActual.match(/[a-zA-Z]/)) {
+            tokens.push('id');  // Si contiene letras es un identificador
+        } else {
+            tokens.push('num');  // Si solo contiene dígitos, es un número
+        }
+    }
+
+    return tokens;
+}
+
+// Función para desglosar un identificador y mostrar solo 'let' para letras y 'dig' para dígitos
+function desglosarIdentificador(id) {
+    const tokens = [];
+    let desglosado = "";
+
+    for (const char of id) {
+        if (char.match(/[a-zA-Z]/)) {
+            desglosado += "let ";
+        } else if (char.match(/\d/)) {
+            desglosado += "dig ";
+        }
+    }
+
+    tokens.push(desglosado.trim());
+    return tokens;
+}
+
+// Función para desglosar identificadores dentro de una expresión (después del igual)
+function desglosarIdentificadoresEnExpresion(exp) {
+    const tokens = [];
+    let tokenActual = "";
+
+    for (const char of exp) {
+        if (char.match(/[a-zA-Z]/)) {
+            tokenActual += char;
+        } else if (char.match(/\d/)) {
+            tokenActual += char;
+        } else {
+            if (tokenActual.length > 0 && tokenActual.match(/[a-zA-Z]/)) {
+                tokens.push(desglosarIdentificador(tokenActual).join(' '));  // Solo procesar identificadores
+            }
+            tokenActual = "";
+        }
+    }
+
+    // Agregar el último identificador si existe
+    if (tokenActual.length > 0 && tokenActual.match(/[a-zA-Z]/)) {
+        tokens.push(desglosarIdentificador(tokenActual).join(' '));
+    }
+
+    return tokens;
+}
+
+// Función para desglosar los números por cantidad de dígitos y eliminar duplicados
+function desglosarNumerosAgrupadosPorDigitos(exp) {
+    const numerosAgrupados = new Set();
+    let numeroActual = "";
+    let esIdentificador = false;
+
+    for (const char of exp) {
+        if (char.match(/[a-zA-Z]/)) {
+            esIdentificador = true;  // Si hay letras, es un identificador
+        } else if (char.match(/\d/)) {
+            numeroActual += "dig ";
+        } else {
+            if (numeroActual.length > 0 && !esIdentificador) {
+                numerosAgrupados.add(numeroActual.trim()); // Agregar el número si no es identificador
+            }
+            numeroActual = "";
+            esIdentificador = false;  // Reiniciar el estado de identificador
+        }
+    }
+
+    // Añadir el último número si quedó alguno sin procesar y no es identificador
+    if (numeroActual.length > 0 && !esIdentificador) {
+        numerosAgrupados.add(numeroActual.trim());
+    }
+
+    return Array.from(numerosAgrupados);
+}
+
+// Función para obtener las letras y dígitos únicos del código
+function obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho) {
+    const letras = new Set();
+    const digitos = new Set();
+    let hayDigitos = false;
+
+    // Procesar lado izquierdo (variables)
+    for (const char of ladoIzquierdo) {
+        if (char.match(/[a-zA-Z]/)) {
+            letras.add(char);
+        }
+    }
+
+    // Procesar lado derecho (expresiones y números)
+    for (const char of ladoDerecho) {
+        if (char.match(/[a-zA-Z]/)) {
+            letras.add(char);
+        } else if (char.match(/\d/)) {
+            digitos.add(char);
+            hayDigitos = true;
+        }
+    }
+
+    return {
+        letras: Array.from(letras),
+        digitos: hayDigitos ? Array.from(digitos) : []  // Solo devolver dígitos si existen
+    };
+}
+
+
+
+
+
+
+// Ejemplo de uso
+
+/*
+
+const codigoEjemplo1 = "ALPHA = BRVO - CHARLIE";
+console.log(codigoEjemplo1);
+console.log(analizarSemantico(codigoEjemplo1));
+
+const codigoEjemplo2 = "Prom = (p1 + p2 + p3)/3;";
+console.log(codigoEjemplo2);
+console.log(analizarSemantico(codigoEjemplo2));
+
+const codigoEjemplo3 = "x = a / (hola232 + var)";
+console.log(codigoEjemplo3);
+console.log(analizarSemantico(codigoEjemplo3));
+*/
 
 
 //----------------------FUNCIONES DE LOS BOTONES---------------------------------
@@ -276,6 +481,8 @@ function analizar() {
     const tokensPorLinea = analizarTexto(texto);
     mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
     validarSintaxis(tokensPorLinea);
+    console.log(analizarSemantico(texto));
+
 }
 
 //-------------------------------------------------------------------
