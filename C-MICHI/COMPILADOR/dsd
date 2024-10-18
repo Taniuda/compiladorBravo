@@ -1,0 +1,58 @@
+estoy trabajando en el analisis semantico segun mi maestro lo pidio, y es asi como se realiza:
+
+codigo fuente: var = id1 + 5;
+
+analisis semantico:
+prop -> id = exp
+exp -> id | exp + exp | num 
+id -> let let let | let let dig
+let -> v | a | r | i | d
+dig -> 1 | 5
+
+te explico que fue lo que se hizo:
+la primera linea indica que es lo que es la instruccion, en este caso como lleva un signo de igual se le conoce como proposicion de asignacion,
+de alli el porque lleva "prop", el simbolo "->" indica 'puede ser' o 'contiene' la propoiscion, en este caso es la "id = exp" es decir, 
+la variable que asigna una expresion aritmetica, de alli porque 'id' y 'exp'
+
+ahora la siguiente linea indica lo que contiene 'exp', y contiene 3 elementos, el cual es el identificador "id1", el operador aritmetico "+" y el numero "5".
+- dentro de 'exp' solo vamos a tomar en cuenta los elementos que esten despues del igual, si existe otro elemento antes del igual se descarta.
+- para agregar otro elemento a exp tenemos que usar pipeline para separarlosm. 
+- exp es recursivo, es por eso que usamos exp + exp para indicar la suma
+
+la siguiente linea es para desglosar que lleva 'id' ->, esta contiene letras, por eso usamos "let", por cada letra que tenga el identificador se coloca un let,
+si tiene 5 letras entonces sera: let let let let let, y asi sucesivamente, si existen dos o mas identificadores con la misma cantidad de letras o digitos, entonces solo se expresan una vez, ejemplo:
+caso 1: 'hola' y 'amor' tiene 4 letras, mientras que 'mar' tiene 3, entonces en este caso seria asi: id -> let let let let | let let let
+caso 2: ches1, javi2, tani3, asi quedaria: id -> let let let dig | let let let let dig
+
+las proximas lineas "let" y "dig" unicamente se expresan que letras fueron usadas en las letras o digitos, aqui solo se coloca una vez cada letra aunque esten repetidas
+por ejemplo: murcielago, aeiou, abejo, aqui se repiten las letras entonces solo se expresa asi:
+let -> m | u | r | c | i | e | l | a | g | o | b | j
+las letras a, e, i, o  se repiten al menos dos veces, pero en la linea gramatical solo se expresa una vez.
+
+entonces lo que necesito que el codigo haga es que cuando yo le ingrese un codigo fuente de operacion aritmetica, osea lleva simbolo de igual
+me realice ese proceso, aqui te paso varios ejemplos para que entiendas su uso...
+
+ejemplo #1: var1 = ide2;
+    prop -> id = exp
+    exp -> id 
+    id -> let let let dig //solo se coloca una vez esto porque ambos identificadores tienen la misma cantidad de letras y digitos
+    let -> v | a | r | i | d | e
+    dig -> 1 | 2
+
+ejemplo #2: a = B + B * C / A - 55;
+    prop -> id = exp
+    exp -> id | exp + exp | exp * exp | exp / exp | exp - exp | num //aqui se tienen que colocar exp "simbolo de operacion" para indicar que es una operacion aritmetica
+    id -> let
+    num -> dig dig
+    let -> a | B | C | D | A  //aqui se coloca a y A miniscula y mayuscula porque son dos letras distintas... 
+    dig -> 5
+
+ejemplo #3: Prom = (p1 ww+ p2 + p3)/3;
+    prop -> id = exp
+    exp -> id | exp + exp | ( exp ) | exp / exp | num // aqui se ponen las expresiones que estan encerradas entre parentesis
+    id -> let let let let | let dig
+    num -> dig
+    let -> P | r | o | m | P
+    dig -> 1 | 2 | 3 
+
+

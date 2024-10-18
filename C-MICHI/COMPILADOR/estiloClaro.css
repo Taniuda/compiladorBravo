@@ -389,3 +389,18 @@ p {
 
 
 
+.node circle {
+    fill: rgb(0, 0, 0);
+}
+
+.node text {
+    font: 20px sans-serif;
+    stroke: rgb(0, 0, 0);
+    stroke-width: 1.5px;
+}
+
+.link {
+    fill: none;
+    stroke:rgb(0, 0, 0);;
+    stroke-width: 1px;
+}
