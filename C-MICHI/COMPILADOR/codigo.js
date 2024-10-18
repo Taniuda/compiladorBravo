@@ -1,3 +1,12 @@
+//FUNCION PRINCIPAL
+function analizar() {
+    const texto = document.getElementById("input").value;
+    const tokensPorLinea = analizarTexto(texto);
+    mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
+    validarSintaxis(tokensPorLinea);
+    MostrarSemantica(texto);
+}
+
 // Diccionario de palabras reservadas y operadores
 const palabrasReservadas = {
     "equipo": "Palabra Reservada - Equipo",
@@ -139,26 +148,20 @@ function analizarTexto(texto) {
                 else if (literales[palabra]) tokenTipo = literales[palabra];
                 else if (delimitadores[palabra]) tokenTipo = delimitadores[palabra];
                 else if (!isNaN(palabra)) tokenTipo = "Literal Numerico";
-                // Detectar literales de cadena correctamente
                 else if (/^".*"$/.test(palabra) || /^'.*'$/.test(palabra)) tokenTipo = "Literal de Cadena";
-                // Detectar comillas sueltas como símbolos desconocidos
                 else if (/^["]$/.test(palabra) || /^['']$/.test(palabra)) tokenTipo = "Simbolo Desconocido";
                 else if (/^\/\/.*$/.test(palabra)) tokenTipo = "Comentario de una linea";
                 else if (/^\/\*.*\*\/$/.test(palabra)) tokenTipo = "Comentario de múltiples lineas";
                 else if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(palabra)) tokenTipo = "Identificador";
-                
                 lineaTokens.push({ tipo: tokenTipo, valor: palabra });
             });
         }
-
         if (lineaTokens.length > 0) {
             tokensPorLinea.push({ linea: numeroLinea + 1, tokens: lineaTokens });
         }
-
         // Mostrar en consola los tokens de la línea actual
         console.log(`Línea ${numeroLinea + 1}:`, lineaTokens);
     });
-
     return tokensPorLinea;
 }
 
@@ -202,14 +205,17 @@ function mostrarTokens(tokensPorLinea) {
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // --------------------ANALISIS SINTACTICO (GRAMATICO )-----------------------
-
+let esFor = false;
+let aceptarSemanticaPorLinea = [];
 
 function validarSintaxis(tokensPorLinea) {
     const divErrores = document.getElementById("erroresSintaxis");
     divErrores.innerHTML = ""; // Limpiar el contenido previo
     let hayError = false;
 
-    tokensPorLinea.forEach(lineaObj => {
+    aceptarSemanticaPorLinea = []; // Reiniciar la lista de validaciones semánticas
+
+    tokensPorLinea.forEach((lineaObj, index) => {
         const { linea, tokens } = lineaObj;
         let tiposPresentes = tokens.map(token => token.tipo);
 
@@ -222,20 +228,19 @@ function validarSintaxis(tokensPorLinea) {
         if (
             tiposPresentes[0] === "Identificador" && // Nombre de la variable
             tiposPresentes[1] === "Operador de Asignacion" && // Operador de asignación "="
-            //elementoOpcionalParentesis(tiposPresentes.slice(2, tokens.length - 1), operadoresAritmeticos, elementosVariable) && // Expresión válida
+            elementoOpcionalParentesis(tiposPresentes.slice(2, tokens.length - 1), operadoresAritmeticos, elementosVariable) && // Expresión válida
             tiposPresentes[tokens.length - 1] === "Delimitador" // Delimitador final ";"
         ) {
             // Si se encuentra una declaración aritmética, generamos el árbol binario
-            //generarArbolBinario(tokensPorLinea);//<---- no borrar esta linea, el metodo esta en otro lugar...
-            
-            return;
+            const arbolSintactico = analizarSintaxis(tokens);
+            mostrarArbolSintactico(arbolSintactico, linea);
+            aceptarSemanticaPorLinea[index] = true; // Activar semántica para esta línea
+        } else {
+            aceptarSemanticaPorLinea[index] = false; // Desactivar semántica para esta línea
         }
-        
-        // Verificar si es un comentario (una línea o múltiples líneas)
-        if (
-            //tiposPresentes.length === 1 && 
-            tiposPresentes[0] === "Comentario de una linea" || tiposPresentes[0] === "Comentario de múltiples lineas"
-        ) {return; }
+
+
+        // -----------------
 
         // Verificar si es la instrucción equipo();
         if (
@@ -245,66 +250,732 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[2] === "Parentesis de Cierre" &&
             tiposPresentes[3] === "Delimitador"
         ) { return; }
-    
-        //----------------------------------------------------------
+
+
+        
+        
+        // Verificar si es un comentario (una línea o múltiples líneas)
+        if (
+            //tiposPresentes.length === 1 && 
+            tiposPresentes[0] === "Comentario de una linea" || tiposPresentes[0] === "Comentario de múltiples lineas"
+        ) {return; }
+
+        
+        
+        // INSTRUCCIÓN #1 - escribir.consola
+        const separadoresEscribir = ["Separador"];
+        const elementosEscribir = ["Identificador", "Literal de Cadena"];
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Escribir" &&
+            tiposPresentes[1] === "Conector" &&
+            tiposPresentes[2] === "Palabra Reservada - Consola" &&
+            tiposPresentes[3] === "Parentesis de Apertura" &&
+           (tiposPresentes[4] === "Literal de Cadena" || tiposPresentes[4] === "Identificador") &&
+            elementoOpcional(tiposPresentes.slice(5, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
+            tiposPresentes[tokens.length - 2] === "Parentesis de Cierre" &&//penultimo
+            tiposPresentes[tokens.length - 1] === "Delimitador"//ultimo elemento
+        ) { return; }
+
+        //INSTRUCCION #2 - leer.consola
+        if(
+            //tiposPresentes.length===5&&
+            tiposPresentes[0]==="Palabra Reservada - Leer"&&
+            tiposPresentes[1]==="Conector"&&
+            tiposPresentes[2]==="Palabra Reservada - Consola"&&
+            tiposPresentes[3]==="Parentesis de Apertura"&&
+            tiposPresentes[4]==="Parentesis de Cierre"&&
+            tiposPresentes[5]==="Delimitador"
+        ) { return;}
+
+        //INSTRUCCION #3 - leerTecla.consola
+        if(
+            //tiposPresentes.length===5&&
+            tiposPresentes[0]==="Palabra Reservada - LeerTecla"&&
+            tiposPresentes[1]==="Conector"&&
+            tiposPresentes[2]==="Palabra Reservada - Consola"&&
+            tiposPresentes[3]==="Parentesis de Apertura"&&
+            tiposPresentes[4]==="Parentesis de Cierre"&&
+            tiposPresentes[5]==="Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #4 -  para
+        if (
+            tiposPresentes.length === 16 &&
+            tiposPresentes[0] === "Palabra Reservada - Para" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+
+            tiposPresentes[2] === "Tipo de Dato" && 
+            tiposPresentes[3] === "Identificador" && 
+            tiposPresentes[4] === "Operador de Asignacion" && 
+            (tiposPresentes[5] === "Literal Numerico" || tiposPresentes[5] === "Identificador") &&
+            tiposPresentes[6] === "Delimitador" &&
+
+            tiposPresentes[7] === "Identificador" && 
+            tiposPresentes[8] === "Operador de Comparacion" && 
+            (tiposPresentes[9] === "Literal Numerico" || tiposPresentes[9] === "Identificador") &&
+            tiposPresentes[10] === "Delimitador" && 
+
+            tiposPresentes[11] === "Identificador" &&
+            tiposPresentes[12] === "Operador de Incremento/Decremento" && 
+
+            tiposPresentes[13] === "Parentesis de Cierre" && 
+            tiposPresentes[14] === "Llaves de Apertura" && 
+            tiposPresentes[15] === "Llaves de Cierre"
+        ) { 
+            esFor = true;
+            return;
+        }
+
+        // INSTRUCCION #5 - mientras
+        const elementosNumID = ["Identificador", "Literal Numerico"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Mientras" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Operador de Comparacion" && 
+            (tiposPresentes[4] === "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
+            tiposPresentes[5] === "Parentesis de Cierre" && 
+            tiposPresentes[6] === "Llaves de Apertura" && 
+            tiposPresentes[7] === "Llaves de Cierre"
+        ) {return;}
+
+        // INSTRUCCION #6 - SINO
+        const elementoElseIf = ["Palabra Reservada - Sino"];
+        const ParInicial = ["Parentesis de Apertura"];
+        const Comparador = ["Operador de Comparacion"];
+        const Id = ["Identificador"];
+        const Comparaciones = ["Identificador", "Literal Numerico", "Literal de Cadena"];
+        const ParFinal = ["Parentesis de Cierre"];
+
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Si" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            // Verificamos el elemento opcional (comparador y valor)
+            elementoOpcional2(tiposPresentes.slice(3, tokens.length - 3), Comparador, Comparaciones, 1) &&
+            // Verificamos los tres últimos tokens
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" && 
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) {
+            return true; // Sintaxis correcta
+        }
+
+        // INSTRUCCION #7 - INTERRUPTOR 
+        const elementosCasos = ["Palabra Reservada - Caso"];
+        const elementosAsignacion = ["Asignacion de Bloque de Codigo"];
+        const elementosValor = ["Identificador", "Literal Numerico", "Literal de Cadena"];
+        const xdefectocaso=["Palabra Reservada - XDefecto"];
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Interruptor" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Llaves de Apertura" && 
+        
+            // Verificamos el primer caso (caso:1, caso:2, etc.)
+            tiposPresentes[5] === "Palabra Reservada - Caso" && 
+            tiposPresentes[6] === "Asignacion de Bloque de Codigo" && 
+            (tiposPresentes[7] === "Literal Numerico" || tiposPresentes[7] === "Literal de Cadena" || tiposPresentes[7] === "Identificador") && 
+        
+            // Validamos los casos opcionales y el posible xDefecto
+            elementoOpcionalDefault(tiposPresentes.slice(8, tokens.length - 1), elementosCasos, elementosAsignacion, elementosValor, 0) && 
+            
+            // Verificamos que la estructura cierre correctamente con llaves de cierre
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) {
+            return true; // Sintaxis correcta
+        }
+
+        // INSTRUCCION #8 - INTENTA ATRAPAR
+        const elementosExcepciones = ["Palabra Reservada - Excepcion", "Palabra Reservada - DivideEntreZeroExcepcion"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Intenta" && 
+            tiposPresentes[1] === "Llaves de Apertura" && 
+            tiposPresentes[2] === "Llaves de Cierre" && 
+            tiposPresentes[3] === "Palabra Reservada - Atrapar" && 
+            tiposPresentes[4] === "Parentesis de Apertura" && 
+            (tiposPresentes[5] === "Palabra Reservada - Excepcion" || tiposPresentes[5] === "Palabra Reservada - DivideEntreZeroExcepcion") &&
+            tiposPresentes[6] === "Identificador" &&
+            tiposPresentes[7] === "Parentesis de Cierre" && 
+            tiposPresentes[8] === "Llaves de Apertura" && 
+            tiposPresentes[9] === "Llaves de Cierre"
+        ) { return;}
+        
+        // INSTRUCCION #9 - arreglo.tamanio
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Identificador" && 
+            tiposPresentes[1] === "Conector" && 
+            tiposPresentes[2] === "Palabra Reservada - Tamanio" && 
+            tiposPresentes[3] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #10 - arreglo.copia
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Identificador" && 
+            tiposPresentes[1] === "Conector" && 
+            tiposPresentes[2] === "Palabra Reservada - Copia" && 
+            tiposPresentes[3] === "Parentesis de Apertura" && 
+            tiposPresentes[4] === "Identificador" && 
+            tiposPresentes[5] === "Separador" && 
+            tiposPresentes[6] === "Identificador" && 
+            tiposPresentes[7] === "Parentesis de Cierre" && 
+            tiposPresentes[8] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #11 - tamanioDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - TamanioDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+        
+        // INSTRUCCION #12 - nombreDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - NombreDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #13 - formatoDe
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - FormatoDe" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+           (tiposPresentes[2] === "Palabra Reservada - MAYUS" || tiposPresentes[2] === "Palabra Reservada - MINUS") &&
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+
+        // INSTRUCCION #14 - bloquear
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Bloquear" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            tiposPresentes[2] === "Identificador" && 
+            tiposPresentes[3] === "Parentesis de Cierre" && 
+            tiposPresentes[4] === "Llaves de Apertura" &&
+            tiposPresentes[5] === "Llaves de Cierre" 
+        ) { return;}
+
+        // INSTRUCCION #15 - usando
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Palabra Reservada - Usando" && 
+            tiposPresentes[1] === "Palabra Reservada - Sistema" && 
+            tiposPresentes[2] === "Conector" &&
+            tiposPresentes[3] === "Palabra Reservada - ES" && 
+            tiposPresentes[4] === "Delimitador"
+        ) { return;}
+        
+
+        //INSTRUCCION #16 - MATH.MAX Y MATH.MIN
+        if(
+            //tiposPresentes.length === 9 &&
+            tiposPresentes[0]=== "Palabra Reservada - Mate"&&
+            tiposPresentes[1]=== "Conector"&&
+           (tiposPresentes[2]=== "Palabra Reservada - Mayor" || tiposPresentes[2] === "Palabra Reservada - Menor") &&
+            tiposPresentes[3]=== "Parentesis de Apertura"&&
+           (tiposPresentes[4]=== "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
+            tiposPresentes[5]=== "Separador"&&
+           (tiposPresentes[6]=== "Literal Numerico" || tiposPresentes[6] === "Identificador") &&
+            tiposPresentes[7]=== "Parentesis de Cierre"&&
+            tiposPresentes[8]=== "Delimitador"
+        ) {return;}
+
+        //INSTRUCCION #17 - COMPROBADO Y NO COMPROBADO
+        if(
+            //tiposPresentes.length===3 &&
+           (tiposPresentes[0]=== "Palabra Reservada - Comprobado" || tiposPresentes[0] === "Palabra Reservada - NoComprobar") &&
+            tiposPresentes[1]==="Llaves de Apertura"&&
+            tiposPresentes[2]==="Llaves de Cierre"
+        ){return;}
+
+
+        // INSTRUCCION #18 -metodo
+        const tipoDatoM = ["Tipo de Dato"];
+        const varNombre = ["Identificador"];
+        const separadores = ["Separador"];
+        if (
+            //tiposPresentes.length === 8 &&
+            tiposPresentes[0] === "Modificadores de Acceso" && 
+            tiposPresentes[1] === "Palabra Reservada - Estatico" && 
+           (tiposPresentes[2]=== "Palabra Reservada - Vacio" || tiposPresentes[2] === "Tipo de Dato") &&
+            tiposPresentes[3] === "Identificador" && 
+            tiposPresentes[4] === "Parentesis de Apertura" && 
+            elementoOpcional3(tiposPresentes.slice(5, tokens.length - 3), tipoDatoM, varNombre, separadores, 0) &&
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" &&
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&//penultimo
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) { return;}
+
+        // INSTRUCCION #19 - DECLARACION DE VARIABLE
+        const operadorAsignacion=["Operador de Asignacion"];
+        const tiposdevalor=["Literal Numerico","Literal de Cadena"];
+        if (
+            //tiposPresentes.length === 5 &&
+            tiposPresentes[0] === "Tipo de Dato" &&
+            tiposPresentes[1] === "Identificador" &&
+            elementoOpcional(tiposPresentes.slice(2, tokens.length - 1), operadorAsignacion, tiposdevalor, 1) &&
+            tiposPresentes[tokens.length - 1] === "Delimitador"//esto es para que siempre este en la ultima posicion
+        ) {return;}
+
+        //INSTRUCCION #20 - ES
+        if(
+            //tiposPresentes.length===3&&
+            tiposPresentes[0]==="Identificador"&&
+            tiposPresentes[1]==="Palabra Reservada - ES"&&
+            tiposPresentes[2]==="Tipos de Dato"
+        ){return;}
 
         //---------------------------------------------------------------------------------------------------------------------
         // Si la línea no coincide con ninguna de las gramáticas, marcar error
-        const mensajeError = `<span style="color: red;">Error de Sintaxis en la Línea: # ${linea}</span>`;
-        divErrores.innerHTML += mensajeError + "<br>";
-        hayError = true;
+        if (!aceptarSemanticaPorLinea[index]) {
+            const mensajeError = `<span style="color: red;">Error de Sintaxis en la Línea: # ${linea}</span>`;
+            divErrores.innerHTML += mensajeError + "<br>";
+            hayError = true;
+        }
     });
 
     // Si no hay errores, mostrar que la sintaxis es correcta
     if (!hayError) {
         const mensajeExito = `<span style="color: #32CD32; font-weight: bold;">Sintaxis correcta</span>`;
-
         divErrores.innerHTML = mensajeExito + "<br>";
     }
 }
 
 
+
+
+
+
+
+
+function elementoOpcionalParentesis(tokens, permitidosOperadores, permitidosElementos) {
+    let stackParentesis = [];
+    let esperandoElemento = true;
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (esperandoElemento) {
+            if (token === 'Parentesis de Apertura') {
+                stackParentesis.push(token);
+            } else if (permitidosElementos.includes(token)) {
+                esperandoElemento = false;
+            } else {
+                return false; // Error: se esperaba un elemento
+            }
+        } else {
+            if (permitidosOperadores.includes(token)) {
+                esperandoElemento = true;
+            } else if (token === 'Parentesis de Cierre') {
+                if (stackParentesis.length === 0) {
+                    return false; // Error: paréntesis de cierre sin apertura
+                }
+                stackParentesis.pop();
+            } else {
+                return false; // Error: se esperaba un operador o paréntesis de cierre
+            }
+        }
+    }
+
+    // Al final, no debe haber paréntesis sin cerrar y no debemos estar esperando un elemento
+    return stackParentesis.length === 0 && !esperandoElemento;
+}
+
+
+
+
+function elementoOpcional(tokens, permitidosSeparador, permitidosElementos, vecesPermitidas) {
+    if (tokens.length === 0) return true; // No hay elementos opcionales, lo cual es válido.
+    let limite = vecesPermitidas === 0 ? Infinity : vecesPermitidas; // Si vecesPermitidas es 0, no hay límite en cuántas veces podemos usar los tokens
+    let vecesUsadas = 0; // Cada vez que se recorre un par (separador + elemento), cuenta como 1 vez permitida
+
+    // Recorremos los tokens en pares de separador y elemento
+    for (let i = 0; i < tokens.length; i += 2) {
+        // Verificamos que no se excedan las veces permitidas
+        if (vecesUsadas >= limite) {
+            return false; // Se ha superado el número de veces permitidas
+        }
+
+        // Verificamos que haya un separador (ej. coma, operador aritmético)
+        if (!permitidosSeparador.includes(tokens[i])) {
+            return false; // El separador no es válido
+        }
+
+        // Verificamos que el siguiente token sea un identificador o un literal (depende del contexto)
+        if (!permitidosElementos.includes(tokens[i + 1])) {
+            return false; // El elemento no es válido
+        }
+
+        vecesUsadas++;// Incrementamos las veces usadas por cada par de tokens (separador + elemento)
+    }
+
+    return true; // Todos los elementos opcionales son válidos dentro del límite
+}
+
+function elementoOpcional3(tokens, valor1, valor2, valor3, vecesPermitidas) {
+    if (tokens.length === 0) return true; // No hay elementos opcionales, lo cual es válido.
+    let limite = vecesPermitidas === 0 ? Infinity : vecesPermitidas; // Si vecesPermitidas es 0, no hay límite en cuántas veces podemos usar los tokens
+    let vecesUsadas = 0; // Cada vez que se recorre un par (separador + elemento), cuenta como 1 vez permitida
+
+    // Recorremos los tokens en pares de separador y elemento
+    for (let i = 0; i < tokens.length; i += 3) {
+        // Verificamos que no se excedan las veces permitidas
+        if (vecesUsadas >= limite) {
+            return false; // Se ha superado el número de veces permitidas
+        }
+
+        // Verificamos que haya un separador (ej. coma, operador aritmético)
+        if (!valor1.includes(tokens[i])) {
+            return false; // El separador no es válido
+        }
+
+        // Verificamos que el siguiente token sea un identificador o un literal (depende del contexto)
+        if (!valor2.includes(tokens[i + 1])) {
+            return false; // El elemento no es válido
+        }
+
+        if (!valor3.includes(tokens[i + 2])) {
+            return false; // El elemento no es válido
+        }
+
+        vecesUsadas++;// Incrementamos las veces usadas por cada par de tokens (separador + elemento)
+    }
+
+    return true; // Todos los elementos opcionales son válidos dentro del límite
+}
+
+function elementoOpcionalDefault(tokens, permitidosCasos, permitidosAsignacion, permitidosValores, vecesPermitidas) {
+    let vecesUsadas = 0;
+    let tieneXDefecto = false; // Para verificar si ya se ha encontrado xDefecto
+
+    for (let i = 0; i < tokens.length; ) {
+        // Verificamos si encontramos un xDefecto
+        if (tokens[i] === "Palabra Reservada - XDefecto") {
+            if (tieneXDefecto) return false; // Si ya existe un xDefecto, no puede haber otro
+            tieneXDefecto = true; // Marca que se ha encontrado xDefecto
+
+            // xDefecto debe tener asignación (por ejemplo, xDefecto: )
+            if (tokens[i + 1] !== "Asignacion de Bloque de Codigo") return false;
+
+            // Si hay xDefecto, solo avanzamos 2 posiciones
+            i += 2;
+        } else {
+            // Verificamos el caso
+            if (!permitidosCasos.includes(tokens[i]) || 
+                !permitidosAsignacion.includes(tokens[i + 1]) || 
+                !permitidosValores.includes(tokens[i + 2])) {
+                return false; // Si no es un caso válido, la sintaxis es incorrecta.
+            }
+            vecesUsadas++;
+            // Avanzamos 3 posiciones para el siguiente caso
+            i += 3;
+        }
+    }
+
+    return true; // Si todos los casos y xDefecto son válidos
+}
+
+function elementoOpcionalElse(tokens, permitidosCasos, parI, id, permitidosAsignacion, permitidosValores, parF, vecesPermitidas) {
+    let vecesUsadas = 0;
+    let tieneElse = false; // Para verificar si ya se ha encontrado "Contrario"
+
+    for (let i = 0; i < tokens.length; ) {
+        // Verificamos si encontramos un "Contrario"
+        if (tokens[i] === "Palabra Reservada - Contrario") {
+            if (tieneElse) return false; // Si ya existe "Contrario", no puede haber otro
+            tieneElse = true; // Marca que se ha encontrado "Contrario"
+
+            // Verificamos que "Contrario" tenga llaves de apertura y cierre
+            if (tokens[i + 1] !== "Llaves de Apertura") return false;
+            if (tokens[i + 2] !== "Llaves de Cierre") return false;
+
+            // Si hay "Contrario", avanzamos 3 posiciones
+            i += 3;
+        } else {
+            // Verificamos los casos
+            if (!permitidosCasos.includes(tokens[i]) || 
+                !parI.includes(tokens[i + 1]) ||  // Verificamos el paréntesis de apertura
+                !id.includes(tokens[i + 2]) ||   // Verificamos el identificador
+                !permitidosAsignacion.includes(tokens[i + 3]) ||  // Verificamos la asignación
+                !permitidosValores.includes(tokens[i + 4]) ||  // Verificamos el valor
+                !parF.includes(tokens[i + 5])) {  // Verificamos el paréntesis de cierre
+                return false; // Si no es un caso válido, la sintaxis es incorrecta.
+            }
+            vecesUsadas++;
+            // Avanzamos 6 posiciones para el siguiente caso
+            i += 6;
+        }
+    }
+
+    return true; // Si todos los casos y "Contrario" son válidos
+}
+
+
+
+
+/*---------------Analisis sintactico para expresiones aritmeticas-------------*/
+
+// Nodo para el árbol sintáctico
+class Nodo {
+  constructor(tipo, valor, hijos = []) {
+      this.tipo = tipo;
+      this.valor = valor;
+      this.hijos = hijos;
+  }
+}
+
+// Función principal para analizar la sintaxis
+// Función principal para analizar la sintaxis
+function analizarSintaxis(tokens) {
+    
+    let posicion = 0;
+
+    function tokenActual() {
+        return tokens[posicion] || null;
+    }
+
+    function avanzar() {
+        posicion++;
+    }
+
+    // Función para manejar errores sintácticos
+    function error(mensaje) {
+        throw new Error(`Error sintáctico en el token '${tokenActual()?.valor}' (${mensaje})`);
+    }
+
+    // Producción para manejar asignaciones
+    function parseAsignacion() {
+        const identificador = tokenActual();
+
+        if (identificador && identificador.tipo === "Identificador") {
+            avanzar(); // Avanzamos para consumir el identificador
+
+            if (tokenActual() && tokenActual().valor === "=") {
+                const operadorAsignacion = tokenActual();
+                avanzar(); // Consumimos el '='
+
+                const expresionDerecha = parseExpr(); // Analizamos la expresión a la derecha del '='
+
+                if (tokenActual() && tokenActual().valor === ";") {
+                    avanzar(); // Consumimos el ';'
+
+                    return new Nodo("Asignación", "=", [
+                        new Nodo("Identificador", identificador.valor),
+                        expresionDerecha
+                    ]);
+                } else {
+                    error("Se esperaba ';' al final de la asignación");
+                }
+            } else {
+                error("Se esperaba '=' después del identificador");
+            }
+        } else {
+            error("Se esperaba un identificador al inicio de la asignación");
+        }
+    }
+
+    // Producción para `expr`
+    function parseExpr() {
+        let nodo = parseTerm();
+
+        while (tokenActual() && (tokenActual().valor === "+" || tokenActual().valor === "-")) {
+            let operador = tokenActual();
+            avanzar();
+            let nodoDerecha = parseTerm();
+            nodo = new Nodo("Operación", operador.valor, [nodo, nodoDerecha]);
+        }
+
+        return nodo;
+    }
+
+    // Producción para `term`
+    function parseTerm() {
+        let nodo = parseFactor();
+
+        while (tokenActual() && (tokenActual().valor === "*" || tokenActual().valor === "/")) {
+            let operador = tokenActual();
+            avanzar();
+            let nodoDerecha = parseFactor();
+            nodo = new Nodo("Operación", operador.valor, [nodo, nodoDerecha]);
+        }
+
+        return nodo;
+    }
+
+    // Producción para `factor`
+    function parseFactor() {
+        let token = tokenActual();
+
+        if (token.valor === "(") {
+            avanzar();
+            let nodo = parseExpr();
+            if (tokenActual().valor === ")") {
+                avanzar();
+            } else {
+                error("Se esperaba ')'");
+            }
+            return nodo;
+        } else if (!isNaN(token.valor)) {
+            avanzar();
+            return new Nodo("Número", token.valor);
+        } else if (token.tipo === "Identificador") {
+            avanzar();
+            return new Nodo("Identificador", token.valor);
+        } else {
+            error("Se esperaba un número, identificador o '('");
+        }
+    }
+
+    // Comenzar el análisis verificando si se trata de una asignación
+    const arbol = parseAsignacion();
+
+    // Verificar si hay tokens restantes
+    if (posicion < tokens.length) {
+        error("Tokens sobrantes después del análisis sintáctico");
+    }
+
+    return arbol;
+}
+
+
+
+
+
+
+/*------------Mostramos arbol sintactico--------- */
+
+function mostrarArbolSintactico(arbol, linea) {
+  const width = 400;  // Ajusta el ancho según lo que necesites
+  const height = 300; // Ajusta la altura según lo que necesites
+  
+  // Agregar fila con número de línea y el espacio para el árbol
+  const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
+  const nuevaFila = tablaSintactico.insertRow();
+  
+  const celdaLinea = nuevaFila.insertCell(0);
+  const celdaArbol = nuevaFila.insertCell(1);
+  
+  // Insertar el número de línea en la celda
+  celdaLinea.textContent = linea;
+  
+  // Crear un div dentro de la celda para el árbol
+  const divArbol = document.createElement('div');
+  divArbol.style.width = `${width}px`;   // Ajustar ancho del contenedor
+  divArbol.style.height = `${height}px`; // Ajustar altura del contenedor
+  celdaArbol.appendChild(divArbol);
+  
+  // D3.js para mostrar el árbol sintáctico dentro del div creado
+  const svg = d3.select(divArbol)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(40,30)"); // Margen de 40 en el eje X
+
+  const root = d3.hierarchy(arbol, d => d.hijos);
+
+  const treeLayout = d3.tree().size([width - 100, height - 100]);
+  const treeData = treeLayout(root);
+
+  const nodes = svg.selectAll(".node")
+      .data(treeData.descendants())
+      .enter()
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.x},${d.y})`);
+
+  nodes.append("circle")
+      .attr("r", 10);
+
+  nodes.append("text")
+      .attr("dy", ".35em")
+      .attr("y", -20)
+      .style("text-anchor", "middle")
+      .text(d => d.data.valor);
+
+  const links = svg.selectAll(".link")
+      .data(treeData.links())
+      .enter()
+      .append("line")
+      .attr("class", "link")
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y)
+      .attr("stroke", "black");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ------ ANALISIS SEMANTICO ---------
 // ----------------------------------------------------------------------
 
+function MostrarSemantica(texto) {
+    const lineas = texto.split("\n");
+    const tablaSemantica = document.getElementById("tablaSemantica");
+    tablaSemantica.innerHTML = "";
 
+    lineas.forEach((linea, index) => {
+        const resultado = analizarSemantico(linea); // Solo realizar el análisis si se aceptó la semántica
+        const fila = document.createElement("tr");
 
+        // Crear celda para el número de línea
+        const celdaLinea = document.createElement("td");
+        celdaLinea.textContent = index + 1;
 
+        // Crear celda para el resultado y reemplazar "\n" con "<br>"
+        const celdaResultado = document.createElement("td");
+        celdaResultado.innerHTML = resultado.replace(/\n/g, "<br>");
+
+        fila.appendChild(celdaLinea);
+        fila.appendChild(celdaResultado);
+
+        tablaSemantica.appendChild(fila);
+    });
+}
 
 
 
 function analizarSemantico(codigo) {
     let resultado = "";
 
-    // Paso 1: Dividir la proposición en el lado izquierdo (id) y el lado derecho (exp)
-    const [ladoIzquierdo, ladoDerecho] = codigo.split('=').map(x => x.trim());
-
-    // Definir que la proposición es de asignación
-    resultado += "prop -> id = exp\n";
-
-    // Paso 2: Desglosar la expresión (lado derecho) sin duplicar elementos
-    const expTokens = desglosarExpresion(ladoDerecho);
-    resultado += "exp -> " + Array.from(new Set(expTokens)).join(' | ') + "\n";
-
-    // Paso 3: Desglosar identificadores en ambos lados (antes y después del igual)
-    const idTokens = [
-        ...desglosarIdentificador(ladoIzquierdo),  // Identificadores antes del "="
-        ...desglosarIdentificadoresEnExpresion(ladoDerecho)  // Identificadores después del "="
-    ];
-    resultado += "id -> " + Array.from(new Set(idTokens)).join(' | ') + "\n";
-
-    // Paso 4: Obtener los números (si los hay) en la expresión y desglosarlos por cantidad de dígitos (solo números puros)
-    const numTokens = desglosarNumerosAgrupadosPorDigitos(ladoDerecho);
-    if (numTokens.length > 0) {
-        resultado += "num -> " + numTokens.join(' | ') + "\n";
-    }
-
-    // Paso 5: Obtener las letras y dígitos únicos usados en los identificadores y números
-    const { letras, digitos } = obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho);
-
-    // Generar las líneas para las letras y solo para los dígitos si existen
-    resultado += "let -> " + letras.join(' | ') + "\n";
-    if (digitos.length > 0) {
-        resultado += "dig -> " + digitos.join(' | ') + "\n";
+    // Detectar estructuras condicionales o bucles
+    if (esFor == true) {
+        console.log("holasi");
+        resultado += analizarFor(codigo);
+    } else {
+        // Tratarlo como una operación de asignación o expresión aritmética
+        resultado += analizarAsignacion(codigo);
     }
 
     return resultado;
@@ -455,37 +1126,133 @@ function obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho) {
 
 
 
-// Ejemplo de uso
 
-/*
 
-const codigoEjemplo1 = "ALPHA = BRVO - CHARLIE";
-console.log(codigoEjemplo1);
-console.log(analizarSemantico(codigoEjemplo1));
 
-const codigoEjemplo2 = "Prom = (p1 + p2 + p3)/3;";
-console.log(codigoEjemplo2);
-console.log(analizarSemantico(codigoEjemplo2));
 
-const codigoEjemplo3 = "x = a / (hola232 + var)";
-console.log(codigoEjemplo3);
-console.log(analizarSemantico(codigoEjemplo3));
-*/
+
+
+
+
+
+
+
+
+// Función para desglosar una instrucción "if"
+function analizarIf(codigo) {
+    let resultado = "if -> if (cond) { bloque }\n";
+
+    // Extraer la condición (lo que está entre paréntesis)
+    const condicion = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).trim();
+    resultado += desglosarCondicion(condicion);
+
+    // Extraer el bloque (lo que está entre llaves)
+    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
+    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
+
+    return resultado;
+}
+
+// Función para desglosar una instrucción "for"
+function analizarFor(codigo) {
+    let resultado = "for -> for (init; cond; inc) { bloque }\n";
+
+    // Extraer las partes de la instrucción "for" (lo que está entre paréntesis)
+    const partes = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).split(';').map(p => p.trim());
+    const [init, cond, inc] = partes;
+
+    resultado += "init -> " + init + "\n";
+    resultado += "cond -> " + desglosarCondicion(cond) + "\n";
+    resultado += "inc -> " + inc + "\n";
+
+    // Extraer el bloque (lo que está entre llaves)
+    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
+    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
+
+    return resultado;
+}
+
+// Función para desglosar una condición (parte entre paréntesis en "if" o "for")
+function desglosarCondicion(cond) {
+    let resultado = "";
+
+    // Ejemplo básico de desglosar una condición con operadores relacionales
+    const operadoresRelacionales = ['<', '>', '==', '!=', '<=', '>='];
+    let tokens = [];
+    let tokenActual = "";
+
+    for (let i = 0; i < cond.length; i++) {
+        const char = cond[i];
+
+        if (char.match(/[a-zA-Z0-9]/)) {
+            tokenActual += char;
+        } else if (operadoresRelacionales.includes(char)) {
+            if (tokenActual.length > 0) {
+                tokens.push(tokenActual);
+                tokenActual = "";
+            }
+            tokens.push(`${char}`);
+        }
+    }
+
+    if (tokenActual.length > 0) {
+        tokens.push(tokenActual);
+    }
+
+    resultado += tokens.join(' ');
+    return resultado;
+}
+
+// Función para desglosar una asignación simple
+function analizarAsignacion(codigo) {
+    let resultado = "";
+
+    // Paso 1: Dividir la proposición en el lado izquierdo (id) y el lado derecho (exp)
+    const [ladoIzquierdo, ladoDerecho] = codigo.split('=').map(x => x.trim());
+
+    // Definir que la proposición es de asignación
+    resultado += "prop -> id = exp\n";
+
+    // Desglosar la expresión (lado derecho)
+    const expTokens = desglosarExpresion(ladoDerecho);
+    resultado += "exp -> " + Array.from(new Set(expTokens)).join(' | ') + "\n";
+
+    // Desglosar identificadores en ambos lados
+    const idTokens = [
+        ...desglosarIdentificador(ladoIzquierdo),
+        ...desglosarIdentificadoresEnExpresion(ladoDerecho)
+    ];
+    resultado += "id -> " + Array.from(new Set(idTokens)).join(' | ') + "\n";
+
+    // Desglosar números
+    const numTokens = desglosarNumerosAgrupadosPorDigitos(ladoDerecho);
+    if (numTokens.length > 0) {
+        resultado += "num -> " + numTokens.join(' | ') + "\n";
+    }
+ 
+     // Paso 5: Obtener las letras y dígitos únicos usados en los identificadores y números
+     const { letras, digitos } = obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho);
+ 
+     // Generar las líneas para las letras y solo para los dígitos si existen
+     resultado += "let -> " + letras.join(' | ') + "\n";
+     if (digitos.length > 0) {
+         resultado += "dig -> " + digitos.join(' | ') + "\n";
+     }
+
+    return resultado;
+}
+
+
+
+
+
+
 
 
 //----------------------FUNCIONES DE LOS BOTONES---------------------------------
 
-//FUNCION PRINCIPAL
-function analizar() {
-    const texto = document.getElementById("input").value;
-    const tokensPorLinea = analizarTexto(texto);
-    mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
-    validarSintaxis(tokensPorLinea);
-    console.log(analizarSemantico(texto));
 
-}
 
-//-------------------------------------------------------------------
 
 //FUNCION PARA LIMPIAR TODO
 function limpiar() {
