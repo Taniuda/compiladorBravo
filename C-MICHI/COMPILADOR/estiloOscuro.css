@@ -386,3 +386,25 @@ p {
     border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
     background-color: #2a2a37; /* Fondo del contenido de las pestañas */
 }
+
+
+
+
+
+
+
+.node circle {
+    fill: rgb(255, 255, 255);
+}
+
+.node text {
+    font: 20px sans-serif;
+    stroke: rgb(255, 255, 255);
+    stroke-width: 1.5px;
+}
+
+.link {
+    fill: none;
+    stroke:rgb(255, 255, 255);;
+    stroke-width: 1px;
+}

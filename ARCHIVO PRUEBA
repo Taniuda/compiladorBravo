@@ -1,1 +1,25 @@
-PRUEBA #1
+function MostrarSemantica(texto) {
+    const lineas = texto.split("\n");
+    const tablaSemantica = document.getElementById("tablaSemantica");
+    tablaSemantica.innerHTML = "";
+
+    lineas.forEach((linea, index) => {
+        if (aceptarSemanticaPorLinea[index] === true) {
+            const resultado = analizarSemantico(linea); // Solo realizar el análisis si se aceptó la semántica
+            const fila = document.createElement("tr");
+
+            // Crear celda para el número de línea
+            const celdaLinea = document.createElement("td");
+            celdaLinea.textContent = index + 1;
+
+            // Crear celda para el resultado y reemplazar "\n" con "<br>"
+            const celdaResultado = document.createElement("td");
+            celdaResultado.innerHTML = resultado.replace(/\n/g, "<br>");
+
+            fila.appendChild(celdaLinea);
+            fila.appendChild(celdaResultado);
+
+            tablaSemantica.appendChild(fila);
+        }
+    });
+}

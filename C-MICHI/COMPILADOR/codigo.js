@@ -1,3 +1,12 @@
+//FUNCION PRINCIPAL
+function analizar() {
+    const texto = document.getElementById("input").value;
+    const tokensPorLinea = analizarTexto(texto);
+    mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
+    validarSintaxis(tokensPorLinea);
+    MostrarSemantica(texto);
+}
+
 // Diccionario de palabras reservadas y operadores
 const palabrasReservadas = {
     "equipo": "Palabra Reservada - Equipo",
@@ -124,6 +133,7 @@ function analizarTexto(texto) {
     const tokensPorLinea = [];
     const regex = /==|!=|<=|>=|&&|\|\||\+\+|--|["][^"]*["]|['][^']*[']|["]|[']|\/\/.*|\/\*[\s\S]*?\*\/|\d+\.\d+|\d+|[\w]+|[-+*/%=&|!<>]=?|[{}()[\],;:.@]/g;
     const lineas = texto.split('\n');
+    
 
     lineas.forEach((linea, numeroLinea) => {
         const palabras = linea.match(regex);
@@ -138,26 +148,20 @@ function analizarTexto(texto) {
                 else if (literales[palabra]) tokenTipo = literales[palabra];
                 else if (delimitadores[palabra]) tokenTipo = delimitadores[palabra];
                 else if (!isNaN(palabra)) tokenTipo = "Literal Numerico";
-                // Detectar literales de cadena correctamente
                 else if (/^".*"$/.test(palabra) || /^'.*'$/.test(palabra)) tokenTipo = "Literal de Cadena";
-                // Detectar comillas sueltas como símbolos desconocidos
                 else if (/^["]$/.test(palabra) || /^['']$/.test(palabra)) tokenTipo = "Simbolo Desconocido";
                 else if (/^\/\/.*$/.test(palabra)) tokenTipo = "Comentario de una linea";
                 else if (/^\/\*.*\*\/$/.test(palabra)) tokenTipo = "Comentario de múltiples lineas";
                 else if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(palabra)) tokenTipo = "Identificador";
-                
                 lineaTokens.push({ tipo: tokenTipo, valor: palabra });
             });
         }
-
         if (lineaTokens.length > 0) {
             tokensPorLinea.push({ linea: numeroLinea + 1, tokens: lineaTokens });
         }
-
         // Mostrar en consola los tokens de la línea actual
         console.log(`Línea ${numeroLinea + 1}:`, lineaTokens);
     });
-
     return tokensPorLinea;
 }
 
@@ -201,14 +205,17 @@ function mostrarTokens(tokensPorLinea) {
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // --------------------ANALISIS SINTACTICO (GRAMATICO )-----------------------
-
+let esFor = false;
+let aceptarSemanticaPorLinea = [];
 
 function validarSintaxis(tokensPorLinea) {
     const divErrores = document.getElementById("erroresSintaxis");
     divErrores.innerHTML = ""; // Limpiar el contenido previo
     let hayError = false;
 
-    tokensPorLinea.forEach(lineaObj => {
+    aceptarSemanticaPorLinea = []; // Reiniciar la lista de validaciones semánticas
+
+    tokensPorLinea.forEach((lineaObj, index) => {
         const { linea, tokens } = lineaObj;
         let tiposPresentes = tokens.map(token => token.tipo);
 
@@ -225,15 +232,15 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[tokens.length - 1] === "Delimitador" // Delimitador final ";"
         ) {
             // Si se encuentra una declaración aritmética, generamos el árbol binario
-            generarArbolBinario(tokensPorLinea);
-            return;
+            const arbolSintactico = analizarSintaxis(tokens);
+            mostrarArbolSintactico(arbolSintactico, linea);
+            aceptarSemanticaPorLinea[index] = true; // Activar semántica para esta línea
+        } else {
+            aceptarSemanticaPorLinea[index] = false; // Desactivar semántica para esta línea
         }
-        
-        // Verificar si es un comentario (una línea o múltiples líneas)
-        if (
-            //tiposPresentes.length === 1 && 
-            tiposPresentes[0] === "Comentario de una linea" || tiposPresentes[0] === "Comentario de múltiples lineas"
-        ) {return; }
+
+
+        // -----------------
 
         // Verificar si es la instrucción equipo();
         if (
@@ -243,9 +250,18 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[2] === "Parentesis de Cierre" &&
             tiposPresentes[3] === "Delimitador"
         ) { return; }
-    
-        //----------------------------------------------------------
 
+
+        
+        
+        // Verificar si es un comentario (una línea o múltiples líneas)
+        if (
+            //tiposPresentes.length === 1 && 
+            tiposPresentes[0] === "Comentario de una linea" || tiposPresentes[0] === "Comentario de múltiples lineas"
+        ) {return; }
+
+        
+        
         // INSTRUCCIÓN #1 - escribir.consola
         const separadoresEscribir = ["Separador"];
         const elementosEscribir = ["Identificador", "Literal de Cadena"];
@@ -305,7 +321,10 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[13] === "Parentesis de Cierre" && 
             tiposPresentes[14] === "Llaves de Apertura" && 
             tiposPresentes[15] === "Llaves de Cierre"
-        ) { return;}
+        ) { 
+            esFor = true;
+            return;
+        }
 
         // INSTRUCCION #5 - mientras
         const elementosNumID = ["Identificador", "Literal Numerico"];
@@ -519,30 +538,63 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[2]==="Tipos de Dato"
         ){return;}
 
-        
-
-
-
-
-
-
-
-
-
         //---------------------------------------------------------------------------------------------------------------------
         // Si la línea no coincide con ninguna de las gramáticas, marcar error
-        const mensajeError = `<span style="color: red;">Error de Sintaxis en la Línea: # ${linea}</span>`;
-        divErrores.innerHTML += mensajeError + "<br>";
-        hayError = true;
+        if (!aceptarSemanticaPorLinea[index]) {
+            const mensajeError = `<span style="color: red;">Error de Sintaxis en la Línea: # ${linea}</span>`;
+            divErrores.innerHTML += mensajeError + "<br>";
+            hayError = true;
+        }
     });
 
     // Si no hay errores, mostrar que la sintaxis es correcta
     if (!hayError) {
         const mensajeExito = `<span style="color: #32CD32; font-weight: bold;">Sintaxis correcta</span>`;
-
         divErrores.innerHTML = mensajeExito + "<br>";
     }
 }
+
+
+
+
+
+
+
+
+function elementoOpcionalParentesis(tokens, permitidosOperadores, permitidosElementos) {
+    let stackParentesis = [];
+    let esperandoElemento = true;
+
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+
+        if (esperandoElemento) {
+            if (token === 'Parentesis de Apertura') {
+                stackParentesis.push(token);
+            } else if (permitidosElementos.includes(token)) {
+                esperandoElemento = false;
+            } else {
+                return false; // Error: se esperaba un elemento
+            }
+        } else {
+            if (permitidosOperadores.includes(token)) {
+                esperandoElemento = true;
+            } else if (token === 'Parentesis de Cierre') {
+                if (stackParentesis.length === 0) {
+                    return false; // Error: paréntesis de cierre sin apertura
+                }
+                stackParentesis.pop();
+            } else {
+                return false; // Error: se esperaba un operador o paréntesis de cierre
+            }
+        }
+    }
+
+    // Al final, no debe haber paréntesis sin cerrar y no debemos estar esperando un elemento
+    return stackParentesis.length === 0 && !esperandoElemento;
+}
+
+
 
 
 function elementoOpcional(tokens, permitidosSeparador, permitidosElementos, vecesPermitidas) {
@@ -604,40 +656,6 @@ function elementoOpcional3(tokens, valor1, valor2, valor3, vecesPermitidas) {
 
     return true; // Todos los elementos opcionales son válidos dentro del límite
 }
-
-function elementoOpcionalParentesis(tokens, permitidosOperadores, permitidosElementos) {
-    let stackParentesis = [];
-    let esperandoElemento = true;
-
-    for (let i = 0; i < tokens.length; i++) {
-        const token = tokens[i];
-
-        if (esperandoElemento) {
-            if (token === 'Parentesis de Apertura') {
-                stackParentesis.push(token);
-            } else if (permitidosElementos.includes(token)) {
-                esperandoElemento = false;
-            } else {
-                return false; // Error: se esperaba un elemento
-            }
-        } else {
-            if (permitidosOperadores.includes(token)) {
-                esperandoElemento = true;
-            } else if (token === 'Parentesis de Cierre') {
-                if (stackParentesis.length === 0) {
-                    return false; // Error: paréntesis de cierre sin apertura
-                }
-                stackParentesis.pop();
-            } else {
-                return false; // Error: se esperaba un operador o paréntesis de cierre
-            }
-        }
-    }
-
-    // Al final, no debe haber paréntesis sin cerrar y no debemos estar esperando un elemento
-    return stackParentesis.length === 0 && !esperandoElemento;
-}
-
 
 function elementoOpcionalDefault(tokens, permitidosCasos, permitidosAsignacion, permitidosValores, vecesPermitidas) {
     let vecesUsadas = 0;
@@ -708,221 +726,521 @@ function elementoOpcionalElse(tokens, permitidosCasos, parI, id, permitidosAsign
 
 
 
+/*---------------Analisis sintactico para expresiones aritmeticas-------------*/
 
+// Nodo para el árbol sintáctico
+class Nodo {
+  constructor(tipo, valor, hijos = []) {
+      this.tipo = tipo;
+      this.valor = valor;
+      this.hijos = hijos;
+  }
+}
 
+// Función principal para analizar la sintaxis
+// Función principal para analizar la sintaxis
+function analizarSintaxis(tokens) {
+    
+    let posicion = 0;
 
+    function tokenActual() {
+        return tokens[posicion] || null;
+    }
 
+    function avanzar() {
+        posicion++;
+    }
 
+    // Función para manejar errores sintácticos
+    function error(mensaje) {
+        throw new Error(`Error sintáctico en el token '${tokenActual()?.valor}' (${mensaje})`);
+    }
 
+    // Producción para manejar asignaciones
+    function parseAsignacion() {
+        const identificador = tokenActual();
 
+        if (identificador && identificador.tipo === "Identificador") {
+            avanzar(); // Avanzamos para consumir el identificador
 
+            if (tokenActual() && tokenActual().valor === "=") {
+                const operadorAsignacion = tokenActual();
+                avanzar(); // Consumimos el '='
 
+                const expresionDerecha = parseExpr(); // Analizamos la expresión a la derecha del '='
 
+                if (tokenActual() && tokenActual().valor === ";") {
+                    avanzar(); // Consumimos el ';'
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Definir las jerarquías de los operadores
-const jerarquiaOperadores = {
-    'OR': 1,
-    'AND': 2,
-    '<': 3,
-    '>': 3,
-    '<=': 3,
-    '>=': 3,
-    '==': 3,
-    '!=': 3,
-    'NOT':4,
-    '=': 5,
-    '+': 6,
-    '-': 6,
-    '*': 7,
-    '/': 7,
-};
-
-// Función para encontrar el operador principal, ajustada para operadores de múltiples caracteres
-function encontrarOperadorPrincipal(expr) {
-    let nivelParentesis = 0;
-    let operadorPrincipal = null;
-    let posicionOperador = -1;
-    let menorJerarquia = Infinity;
-
-    // Iterar sobre la expresión de derecha a izquierda, pero ahora se buscan operadores de varias letras
-    for (let i = expr.length - 1; i >= 0; i--) {
-        const char = expr[i];
-
-        if (char === ')') {
-            nivelParentesis++;
-        } else if (char === '(') {
-            nivelParentesis--;
-        }
-
-        if (nivelParentesis === 0) {
-            // Comprobar operadores de más de un carácter (como AND y OR)
-            for (const operador in jerarquiaOperadores) {
-                if (expr.slice(i - operador.length + 1, i + 1) === operador) {
-                    const jerarquia = jerarquiaOperadores[operador];
-                    if (jerarquia < menorJerarquia) {
-                        menorJerarquia = jerarquia;
-                        operadorPrincipal = operador;
-                        posicionOperador = i - operador.length + 1; // Asegurarse de que la posición es el inicio del operador
-                    }
+                    return new Nodo("Asignación", "=", [
+                        new Nodo("Identificador", identificador.valor),
+                        expresionDerecha
+                    ]);
+                } else {
+                    error("Se esperaba ';' al final de la asignación");
                 }
+            } else {
+                error("Se esperaba '=' después del identificador");
             }
+        } else {
+            error("Se esperaba un identificador al inicio de la asignación");
         }
     }
 
-    return { operador: operadorPrincipal, posicion: posicionOperador };
-}
+    // Producción para `expr`
+    function parseExpr() {
+        let nodo = parseTerm();
 
-// Función recursiva para construir el árbol binario
-function construirArbol(expr) {
-    expr = expr.replace(/\s+/g, ''); // Remover espacios en blanco
-
-    // Si es un número o identificador, devolver un nodo hoja
-    if (!isNaN(expr) || /^[a-zA-Z_]\w*$/.test(expr)) {
-        return { name: expr, children: [] };
-    }
-
-    // Caso especial: si la expresión tiene paréntesis, asegurarnos de desglosar lo que hay dentro
-    if (expr[0] === '(' && expr[expr.length - 1] === ')') {
-        return construirArbol(expr.slice(1, -1)); // Procesar el contenido entre los paréntesis
-    }
-
-    // Encontrar el operador principal
-    const { operador, posicion } = encontrarOperadorPrincipal(expr);
-
-    if (operador) {
-        const izquierda = expr.slice(0, posicion);
-        const derecha = expr.slice(posicion + operador.length);
-
-        return {
-            name: operador,
-            children: [
-                construirArbol(izquierda),
-                construirArbol(derecha)
-            ]
-        };
-    }
-
-    // Si no hay operadores, devolver un nodo con la expresión
-    return { name: expr, children: [] };
-}
-
-// Crear un conjunto para almacenar las expresiones procesadas
-const expresionesProcesadas = new Set();
-
-// Función para generar el árbol binario de una línea de código
-function generarArbolBinario(tokensPorLinea) {
-    // Eliminar la línea que borra los árboles previos:
-    // document.getElementById('arbolesSintacticos').innerHTML = "";
-
-    tokensPorLinea.forEach((lineaObj, index) => {
-        const { tokens } = lineaObj;
-
-        const identificador = tokens[0].valor; // Nombre de la variable
-        const operador = tokens[1].valor; // Operador de asignación
-        const expresion = tokens.slice(2).map(token => token.valor).join(""); // Expresión completa
-
-        if (expresionesProcesadas.has(expresion)) {
-            console.log(`La expresión "${expresion}" ya ha sido procesada.`);
-            return; 
+        while (tokenActual() && (tokenActual().valor === "+" || tokenActual().valor === "-")) {
+            let operador = tokenActual();
+            avanzar();
+            let nodoDerecha = parseTerm();
+            nodo = new Nodo("Operación", operador.valor, [nodo, nodoDerecha]);
         }
 
-        expresionesProcesadas.add(expresion);
-        
-        // Crear el árbol binario de la expresión
-        const treeData = {
-            name: operador,
-            children: [
-                { name: identificador, children: [] },
-                construirArbol(expresion)
-            ]
-        };
+        return nodo;
+    }
 
-        const row = document.createElement('tr');
-        row.innerHTML = `<td>${index + 1}</td><td id="arbolCell_${expresionesProcesadas.size}"></td>`; // Usar el tamaño del set para un id único
-        document.getElementById('arbolesSintacticos').appendChild(row);
+    // Producción para `term`
+    function parseTerm() {
+        let nodo = parseFactor();
 
-        dibujarArbol(treeData, expresionesProcesadas.size);
+        while (tokenActual() && (tokenActual().valor === "*" || tokenActual().valor === "/")) {
+            let operador = tokenActual();
+            avanzar();
+            let nodoDerecha = parseFactor();
+            nodo = new Nodo("Operación", operador.valor, [nodo, nodoDerecha]);
+        }
+
+        return nodo;
+    }
+
+    // Producción para `factor`
+    function parseFactor() {
+        let token = tokenActual();
+
+        if (token.valor === "(") {
+            avanzar();
+            let nodo = parseExpr();
+            if (tokenActual().valor === ")") {
+                avanzar();
+            } else {
+                error("Se esperaba ')'");
+            }
+            return nodo;
+        } else if (!isNaN(token.valor)) {
+            avanzar();
+            return new Nodo("Número", token.valor);
+        } else if (token.tipo === "Identificador") {
+            avanzar();
+            return new Nodo("Identificador", token.valor);
+        } else {
+            error("Se esperaba un número, identificador o '('");
+        }
+    }
+
+    // Comenzar el análisis verificando si se trata de una asignación
+    const arbol = parseAsignacion();
+
+    // Verificar si hay tokens restantes
+    if (posicion < tokens.length) {
+        error("Tokens sobrantes después del análisis sintáctico");
+    }
+
+    return arbol;
+}
+
+
+
+
+
+
+/*------------Mostramos arbol sintactico--------- */
+
+function mostrarArbolSintactico(arbol, linea) {
+  const width = 400;  // Ajusta el ancho según lo que necesites
+  const height = 300; // Ajusta la altura según lo que necesites
+  
+  // Agregar fila con número de línea y el espacio para el árbol
+  const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
+  const nuevaFila = tablaSintactico.insertRow();
+  
+  const celdaLinea = nuevaFila.insertCell(0);
+  const celdaArbol = nuevaFila.insertCell(1);
+  
+  // Insertar el número de línea en la celda
+  celdaLinea.textContent = linea;
+  
+  // Crear un div dentro de la celda para el árbol
+  const divArbol = document.createElement('div');
+  divArbol.style.width = `${width}px`;   // Ajustar ancho del contenedor
+  divArbol.style.height = `${height}px`; // Ajustar altura del contenedor
+  celdaArbol.appendChild(divArbol);
+  
+  // D3.js para mostrar el árbol sintáctico dentro del div creado
+  const svg = d3.select(divArbol)
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform", "translate(40,30)"); // Margen de 40 en el eje X
+
+  const root = d3.hierarchy(arbol, d => d.hijos);
+
+  const treeLayout = d3.tree().size([width - 100, height - 100]);
+  const treeData = treeLayout(root);
+
+  const nodes = svg.selectAll(".node")
+      .data(treeData.descendants())
+      .enter()
+      .append("g")
+      .attr("class", "node")
+      .attr("transform", d => `translate(${d.x},${d.y})`);
+
+  nodes.append("circle")
+      .attr("r", 10);
+
+  nodes.append("text")
+      .attr("dy", ".35em")
+      .attr("y", -20)
+      .style("text-anchor", "middle")
+      .text(d => d.data.valor);
+
+  const links = svg.selectAll(".link")
+      .data(treeData.links())
+      .enter()
+      .append("line")
+      .attr("class", "link")
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y)
+      .attr("stroke", "black");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ------ ANALISIS SEMANTICO ---------
+// ----------------------------------------------------------------------
+
+function MostrarSemantica(texto) {
+    const lineas = texto.split("\n");
+    const tablaSemantica = document.getElementById("tablaSemantica");
+    tablaSemantica.innerHTML = "";
+
+    lineas.forEach((linea, index) => {
+        const resultado = analizarSemantico(linea); // Solo realizar el análisis si se aceptó la semántica
+        const fila = document.createElement("tr");
+
+        // Crear celda para el número de línea
+        const celdaLinea = document.createElement("td");
+        celdaLinea.textContent = index + 1;
+
+        // Crear celda para el resultado y reemplazar "\n" con "<br>"
+        const celdaResultado = document.createElement("td");
+        celdaResultado.innerHTML = resultado.replace(/\n/g, "<br>");
+
+        fila.appendChild(celdaLinea);
+        fila.appendChild(celdaResultado);
+
+        tablaSemantica.appendChild(fila);
     });
 }
 
-// Función para dibujar el árbol sintáctico en SVG
-function dibujarArbol(treeData, index) {
-    const svgWidth = 400, svgHeight = 300;
 
-    const svg = d3.select(`#arbolCell_${index}`)
-        .append('svg')
-        .attr('width', svgWidth)
-        .attr('height', svgHeight)
-        .attr('id', 'arbol_' + index);
 
-    const root = d3.hierarchy(treeData);
-    const treeLayout = d3.tree().size([svgWidth - 50, svgHeight - 60]);
+function analizarSemantico(codigo) {
+    let resultado = "";
 
-    const nodes = treeLayout(root).descendants();
-    const links = treeLayout(root).links();
+    // Detectar estructuras condicionales o bucles
+    if (esFor == true) {
+        console.log("holasi");
+        resultado += analizarFor(codigo);
+    } else {
+        // Tratarlo como una operación de asignación o expresión aritmética
+        resultado += analizarAsignacion(codigo);
+    }
 
-    const g = svg.append('g').attr('transform', 'translate(20, 30)');
+    return resultado;
+}
 
-    g.selectAll('.link')
-        .data(links)
-        .enter()
-        .append('line')
-        .attr('class', 'link')
-        .attr('x1', d => d.source.x)
-        .attr('y1', d => d.source.y)
-        .attr('x2', d => d.target.x)
-        .attr('y2', d => d.target.y)
-        .style('stroke', '#aaa');
+// Función para desglosar una expresión en identificadores, operaciones y números
+function desglosarExpresion(exp) {
+    const tokens = [];
+    let tokenActual = "";
 
-    g.selectAll('.node')
-        .data(nodes)
-        .enter()
-        .append('circle')
-        .attr('class', 'node')
-        .attr('cx', d => d.x)
-        .attr('cy', d => d.y)
-        .attr('r', 10)
-        .style('fill', 'cyan');
+    for (let i = 0; i < exp.length; i++) {
+        const char = exp[i];
 
-    g.selectAll('.label')
-        .data(nodes)
-        .enter()
-        .append('text')
-        .attr('class', 'label')
-        .attr('x', d => d.x)
-        .attr('y', d => d.y - 10)
-        .attr('text-anchor', 'middle')
-        .text(d => d.data.name)
-        .style('fill', 'blue');
+        if (char.match(/[a-zA-Z]/)) {
+            // Acumular letras (posible identificador)
+            tokenActual += char;
+        } else if (char.match(/\d/)) {
+            // Acumular dígitos dentro de un identificador o número
+            tokenActual += char;
+        } else if (char.match(/[\+\-\*\/\(\)]/)) {
+            // Detectar operadores aritméticos y paréntesis
+            if (tokenActual.length > 0) {
+                if (tokenActual.match(/[a-zA-Z]/)) {
+                    tokens.push('id');  // Si contiene letras es un identificador
+                } else {
+                    tokens.push('num');  // Si solo contiene dígitos, es un número
+                }
+                tokenActual = "";
+            }
+            tokens.push(char === '(' || char === ')' ? `( exp )` : `exp ${char} exp`);
+        }
+    }
+
+    // Agregar el último token si existe
+    if (tokenActual.length > 0) {
+        if (tokenActual.match(/[a-zA-Z]/)) {
+            tokens.push('id');  // Si contiene letras es un identificador
+        } else {
+            tokens.push('num');  // Si solo contiene dígitos, es un número
+        }
+    }
+
+    return tokens;
+}
+
+// Función para desglosar un identificador y mostrar solo 'let' para letras y 'dig' para dígitos
+function desglosarIdentificador(id) {
+    const tokens = [];
+    let desglosado = "";
+
+    for (const char of id) {
+        if (char.match(/[a-zA-Z]/)) {
+            desglosado += "let ";
+        } else if (char.match(/\d/)) {
+            desglosado += "dig ";
+        }
+    }
+
+    tokens.push(desglosado.trim());
+    return tokens;
+}
+
+// Función para desglosar identificadores dentro de una expresión (después del igual)
+function desglosarIdentificadoresEnExpresion(exp) {
+    const tokens = [];
+    let tokenActual = "";
+
+    for (const char of exp) {
+        if (char.match(/[a-zA-Z]/)) {
+            tokenActual += char;
+        } else if (char.match(/\d/)) {
+            tokenActual += char;
+        } else {
+            if (tokenActual.length > 0 && tokenActual.match(/[a-zA-Z]/)) {
+                tokens.push(desglosarIdentificador(tokenActual).join(' '));  // Solo procesar identificadores
+            }
+            tokenActual = "";
+        }
+    }
+
+    // Agregar el último identificador si existe
+    if (tokenActual.length > 0 && tokenActual.match(/[a-zA-Z]/)) {
+        tokens.push(desglosarIdentificador(tokenActual).join(' '));
+    }
+
+    return tokens;
+}
+
+// Función para desglosar los números por cantidad de dígitos y eliminar duplicados
+function desglosarNumerosAgrupadosPorDigitos(exp) {
+    const numerosAgrupados = new Set();
+    let numeroActual = "";
+    let esIdentificador = false;
+
+    for (const char of exp) {
+        if (char.match(/[a-zA-Z]/)) {
+            esIdentificador = true;  // Si hay letras, es un identificador
+        } else if (char.match(/\d/)) {
+            numeroActual += "dig ";
+        } else {
+            if (numeroActual.length > 0 && !esIdentificador) {
+                numerosAgrupados.add(numeroActual.trim()); // Agregar el número si no es identificador
+            }
+            numeroActual = "";
+            esIdentificador = false;  // Reiniciar el estado de identificador
+        }
+    }
+
+    // Añadir el último número si quedó alguno sin procesar y no es identificador
+    if (numeroActual.length > 0 && !esIdentificador) {
+        numerosAgrupados.add(numeroActual.trim());
+    }
+
+    return Array.from(numerosAgrupados);
+}
+
+// Función para obtener las letras y dígitos únicos del código
+function obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho) {
+    const letras = new Set();
+    const digitos = new Set();
+    let hayDigitos = false;
+
+    // Procesar lado izquierdo (variables)
+    for (const char of ladoIzquierdo) {
+        if (char.match(/[a-zA-Z]/)) {
+            letras.add(char);
+        }
+    }
+
+    // Procesar lado derecho (expresiones y números)
+    for (const char of ladoDerecho) {
+        if (char.match(/[a-zA-Z]/)) {
+            letras.add(char);
+        } else if (char.match(/\d/)) {
+            digitos.add(char);
+            hayDigitos = true;
+        }
+    }
+
+    return {
+        letras: Array.from(letras),
+        digitos: hayDigitos ? Array.from(digitos) : []  // Solo devolver dígitos si existen
+    };
 }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Función para desglosar una instrucción "if"
+function analizarIf(codigo) {
+    let resultado = "if -> if (cond) { bloque }\n";
+
+    // Extraer la condición (lo que está entre paréntesis)
+    const condicion = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).trim();
+    resultado += desglosarCondicion(condicion);
+
+    // Extraer el bloque (lo que está entre llaves)
+    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
+    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
+
+    return resultado;
+}
+
+// Función para desglosar una instrucción "for"
+function analizarFor(codigo) {
+    let resultado = "for -> for (init; cond; inc) { bloque }\n";
+
+    // Extraer las partes de la instrucción "for" (lo que está entre paréntesis)
+    const partes = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).split(';').map(p => p.trim());
+    const [init, cond, inc] = partes;
+
+    resultado += "init -> " + init + "\n";
+    resultado += "cond -> " + desglosarCondicion(cond) + "\n";
+    resultado += "inc -> " + inc + "\n";
+
+    // Extraer el bloque (lo que está entre llaves)
+    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
+    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
+
+    return resultado;
+}
+
+// Función para desglosar una condición (parte entre paréntesis en "if" o "for")
+function desglosarCondicion(cond) {
+    let resultado = "";
+
+    // Ejemplo básico de desglosar una condición con operadores relacionales
+    const operadoresRelacionales = ['<', '>', '==', '!=', '<=', '>='];
+    let tokens = [];
+    let tokenActual = "";
+
+    for (let i = 0; i < cond.length; i++) {
+        const char = cond[i];
+
+        if (char.match(/[a-zA-Z0-9]/)) {
+            tokenActual += char;
+        } else if (operadoresRelacionales.includes(char)) {
+            if (tokenActual.length > 0) {
+                tokens.push(tokenActual);
+                tokenActual = "";
+            }
+            tokens.push(`${char}`);
+        }
+    }
+
+    if (tokenActual.length > 0) {
+        tokens.push(tokenActual);
+    }
+
+    resultado += tokens.join(' ');
+    return resultado;
+}
+
+// Función para desglosar una asignación simple
+function analizarAsignacion(codigo) {
+    let resultado = "";
+
+    // Paso 1: Dividir la proposición en el lado izquierdo (id) y el lado derecho (exp)
+    const [ladoIzquierdo, ladoDerecho] = codigo.split('=').map(x => x.trim());
+
+    // Definir que la proposición es de asignación
+    resultado += "prop -> id = exp\n";
+
+    // Desglosar la expresión (lado derecho)
+    const expTokens = desglosarExpresion(ladoDerecho);
+    resultado += "exp -> " + Array.from(new Set(expTokens)).join(' | ') + "\n";
+
+    // Desglosar identificadores en ambos lados
+    const idTokens = [
+        ...desglosarIdentificador(ladoIzquierdo),
+        ...desglosarIdentificadoresEnExpresion(ladoDerecho)
+    ];
+    resultado += "id -> " + Array.from(new Set(idTokens)).join(' | ') + "\n";
+
+    // Desglosar números
+    const numTokens = desglosarNumerosAgrupadosPorDigitos(ladoDerecho);
+    if (numTokens.length > 0) {
+        resultado += "num -> " + numTokens.join(' | ') + "\n";
+    }
+ 
+     // Paso 5: Obtener las letras y dígitos únicos usados en los identificadores y números
+     const { letras, digitos } = obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho);
+ 
+     // Generar las líneas para las letras y solo para los dígitos si existen
+     resultado += "let -> " + letras.join(' | ') + "\n";
+     if (digitos.length > 0) {
+         resultado += "dig -> " + digitos.join(' | ') + "\n";
+     }
+
+    return resultado;
+}
 
 
 
@@ -932,24 +1250,6 @@ function dibujarArbol(treeData, index) {
 
 
 //----------------------FUNCIONES DE LOS BOTONES---------------------------------
-
-//FUNCION PRINCIPAL
-function analizar() {
-    const texto = document.getElementById("input").value;
-    const tokensPorLinea = analizarTexto(texto);
-    mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
-    validarSintaxis(tokensPorLinea);
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
 
 
 
@@ -1039,3 +1339,11 @@ document.getElementById('tema').addEventListener('change', function() {
         themeStylesheet.setAttribute('href', 'estiloClaro.css');
     }
 });
+
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
+    document.getElementById(`tab-${tabId}`).style.display = 'block';
+}
