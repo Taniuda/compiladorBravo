@@ -324,6 +324,8 @@ function validarSintaxis(tokensPorLinea) {
         ) { 
             esFor = true;
             return;
+        } else {
+            esFor = false;
         }
 
         // INSTRUCCION #5 - mientras
@@ -971,7 +973,6 @@ function analizarSemantico(codigo) {
 
     // Detectar estructuras condicionales o bucles
     if (esFor == true) {
-        console.log("holasi");
         resultado += analizarFor(codigo);
     } else {
         // Tratarlo como una operación de asignación o expresión aritmética
