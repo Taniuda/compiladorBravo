@@ -28,8 +28,8 @@ const palabrasReservadas = {
     "clase": "Palabra Reservada - Clase",
     "nombrentorno": "Palabra Reservada - Nombrentorno",
     "argumentos": "Palabra Reservada - Argumentos",
-    "escribir": "Palabra Reservada - Escribir",
-    "consola": "Palabra Reservada - Consola",
+    "escribirConsola": "Palabra Reservada - Escribir consola",
+
     "si": "Palabra Reservada - Si",
     "sino": "Palabra Reservada - Sino",
     "contrario": "Palabra Reservada - Contrario",
@@ -266,12 +266,10 @@ function validarSintaxis(tokensPorLinea) {
         const separadoresEscribir = ["Separador"];
         const elementosEscribir = ["Identificador", "Literal de Cadena"];
         if (
-            tiposPresentes[0] === "Palabra Reservada - Escribir" &&
-            tiposPresentes[1] === "Conector" &&
-            tiposPresentes[2] === "Palabra Reservada - Consola" &&
-            tiposPresentes[3] === "Parentesis de Apertura" &&
-           (tiposPresentes[4] === "Literal de Cadena" || tiposPresentes[4] === "Identificador") &&
-            elementoOpcional(tiposPresentes.slice(5, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
+            tiposPresentes[0] === "Palabra Reservada - Escribir consola" &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+           (tiposPresentes[2] === "Literal de Cadena" || tiposPresentes[4] === "Identificador") &&
+            elementoOpcional(tiposPresentes.slice(4, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
             tiposPresentes[tokens.length - 2] === "Parentesis de Cierre" &&//penultimo
             tiposPresentes[tokens.length - 1] === "Delimitador"//ultimo elemento
         ) { return; }
