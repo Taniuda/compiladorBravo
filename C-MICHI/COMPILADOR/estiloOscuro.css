@@ -392,7 +392,6 @@ p {
 
 
 
-
 .node circle {
     fill: rgb(255, 255, 255);
 }
@@ -400,11 +399,10 @@ p {
 .node text {
     font: 20px sans-serif;
     stroke: rgb(255, 255, 255);
-    stroke-width: 1.5px;
 }
 
 .link {
     fill: none;
-    stroke:rgb(255, 255, 255);;
+    stroke:rgb(255, 255, 255);
     stroke-width: 1px;
 }
