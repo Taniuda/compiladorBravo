@@ -858,7 +858,7 @@ function analizarSintaxis(tokens) {
 /*------------Mostramos arbol sintactico--------- */
 
 function mostrarArbolSintactico(arbol, linea) {
-  const width = 400;  // Ajusta el ancho según lo que necesites
+  const width = 600;  // Ajusta el ancho según lo que necesites
   const height = 300; // Ajusta la altura según lo que necesites
   
   // Agregar fila con número de línea y el espacio para el árbol
