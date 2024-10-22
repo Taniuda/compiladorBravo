@@ -1149,6 +1149,11 @@ function esPalabraReservada(palabra) {
 }
 
 function analizarInst(codigo) {
+    // Primero, verificamos si hay comentarios en la línea
+    if (contieneComentario(codigo)) {
+        return "Sin semántica reconocida en esta línea";
+    }
+
     let resultado = "inst -> ";  // Agregar prefijo inst -> al inicio
     let ids = [];                // Almacenamos los ids con sus componentes
     let letras = new Set();       // Para las letras de los identificadores y cadenas
@@ -1314,6 +1319,29 @@ function esPalabraReservada(palabra) {
 function esNumeroPlano(char) {
     return /^[0-9]$/.test(char);
 }
+
+// Función para detectar si una línea contiene un comentario
+function contieneComentario(codigo) {
+    // Detectar comentarios de una línea con "//"
+    if (codigo.includes("//")) {
+        return true;
+    }
+
+    // Detectar comentarios de bloque con "/* ... */"
+    if (codigo.includes("/*") && codigo.includes("*/")) {
+        return true;
+    }
+
+    return false;
+}
+
+
+
+
+
+
+
+
 
 
 
