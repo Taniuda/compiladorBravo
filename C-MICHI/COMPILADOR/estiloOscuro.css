@@ -260,7 +260,7 @@ p {
 
 
 .custom-table td {
-    text-align: center;
+    text-align: left;
     min-height: 400px; /* Establecer una altura mínima */
     vertical-align: center; /* Alinear el contenido en la parte superior */
     padding: 16px;

@@ -2,6 +2,11 @@
 function analizar() {
     const texto = document.getElementById("input").value;
     const tokensPorLinea = analizarTexto(texto);
+    
+    // Obtener la tabla y limpiar las filas existentes
+    const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
+    tablaSintactico.innerHTML = "";  // Esto limpiará las filas de la tabla
+
     mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
     validarSintaxis(tokensPorLinea);
     MostrarSemantica(texto);
@@ -28,7 +33,7 @@ const palabrasReservadas = {
     "clase": "Palabra Reservada - Clase",
     "nombrentorno": "Palabra Reservada - Nombrentorno",
     "argumentos": "Palabra Reservada - Argumentos",
-    "escribir": "Palabra Reservada - Escribir",
+    "escribirConsola": "Palabra Reservada - Escribir",
     "consola": "Palabra Reservada - Consola",
     "si": "Palabra Reservada - Si",
     "sino": "Palabra Reservada - Sino",
@@ -262,16 +267,14 @@ function validarSintaxis(tokensPorLinea) {
 
         
         
-        // INSTRUCCIÓN #1 - escribir.consola
+        // INSTRUCCIÓN #1 - escribirConsola
         const separadoresEscribir = ["Separador"];
         const elementosEscribir = ["Identificador", "Literal de Cadena"];
         if (
             tiposPresentes[0] === "Palabra Reservada - Escribir" &&
-            tiposPresentes[1] === "Conector" &&
-            tiposPresentes[2] === "Palabra Reservada - Consola" &&
-            tiposPresentes[3] === "Parentesis de Apertura" &&
-           (tiposPresentes[4] === "Literal de Cadena" || tiposPresentes[4] === "Identificador") &&
-            elementoOpcional(tiposPresentes.slice(5, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+           (tiposPresentes[2] === "Literal de Cadena" || tiposPresentes[2] === "Identificador") &&
+            elementoOpcional(tiposPresentes.slice(3, tokens.length - 2), separadoresEscribir, elementosEscribir,0) &&
             tiposPresentes[tokens.length - 2] === "Parentesis de Cierre" &&//penultimo
             tiposPresentes[tokens.length - 1] === "Delimitador"//ultimo elemento
         ) { return; }
@@ -322,7 +325,6 @@ function validarSintaxis(tokensPorLinea) {
             tiposPresentes[14] === "Llaves de Apertura" && 
             tiposPresentes[15] === "Llaves de Cierre"
         ) { 
-            esFor = true;
             return;
         }
 
@@ -860,7 +862,7 @@ function analizarSintaxis(tokens) {
 function mostrarArbolSintactico(arbol, linea) {
   const width = 600;  // Ajusta el ancho según lo que necesites
   const height = 300; // Ajusta la altura según lo que necesites
-  
+
   // Agregar fila con número de línea y el espacio para el árbol
   const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
   const nuevaFila = tablaSintactico.insertRow();
@@ -939,17 +941,22 @@ function mostrarArbolSintactico(arbol, linea) {
 
 // ------ ANALISIS SEMANTICO ---------
 // ----------------------------------------------------------------------
-
 function MostrarSemantica(texto) {
     const lineas = texto.split("\n");
     const tablaSemantica = document.getElementById("tablaSemantica");
-    tablaSemantica.innerHTML = "";
+    tablaSemantica.innerHTML = "";  // Limpiar la tabla antes de agregar nuevas filas
 
     lineas.forEach((linea, index) => {
-        const resultado = analizarSemantico(linea); // Solo realizar el análisis si se aceptó la semántica
-        const fila = document.createElement("tr");
+        // Saltar líneas vacías
+        if (linea.trim() === "") {
+            const filaVacia = document.createElement("tr");
+            const celdaLineaVacia = document.createElement("td");
+            celdaLineaVacia.textContent = index + 1;
+            return;  // Saltar esta iteración para no analizar líneas vacías
+        }
 
-        // Crear celda para el número de línea
+        const resultado = analizarSemantico(linea, index);
+        const fila = document.createElement("tr");
         const celdaLinea = document.createElement("td");
         celdaLinea.textContent = index + 1;
 
@@ -959,30 +966,31 @@ function MostrarSemantica(texto) {
 
         fila.appendChild(celdaLinea);
         fila.appendChild(celdaResultado);
-
         tablaSemantica.appendChild(fila);
     });
 }
 
-
-
-function analizarSemantico(codigo) {
-    let resultado = "";
-
-    // Detectar estructuras condicionales o bucles
-    if (esFor == true) {
-        console.log("holasi");
-        resultado += analizarFor(codigo);
-    } else {
-        // Tratarlo como una operación de asignación o expresión aritmética
-        resultado += analizarAsignacion(codigo);
+function analizarSemantico(codigo, index) {
+    if (codigo.trim() === "") {
+        return "";  // Devolver cadena vacía para líneas vacías
     }
-
-    return resultado;
+    let resultado = "";
+    // Aquí analizas las asignaciones o declaraciones
+    if(aceptarSemanticaPorLinea[index] == true){
+        resultado = analizarAsignacion(codigo);
+    }else{
+        resultado = analizarInst(codigo);
+    }
+    // Si el resultado es vacío, al menos devolvemos un mensaje de que no se encontró semántica
+    return resultado !== "" ? resultado : "Sin semántica reconocida en esta línea";
 }
 
-// Función para desglosar una expresión en identificadores, operaciones y números
+
 function desglosarExpresion(exp) {
+    if (!exp || exp.trim() === "") {
+        return [];  // Si la expresión está vacía, devolver un array vacío
+    }
+
     const tokens = [];
     let tokenActual = "";
 
@@ -1136,41 +1144,205 @@ function obtenerLetrasDigitos(ladoIzquierdo, ladoDerecho) {
 
 
 
-
-
-// Función para desglosar una instrucción "if"
-function analizarIf(codigo) {
-    let resultado = "if -> if (cond) { bloque }\n";
-
-    // Extraer la condición (lo que está entre paréntesis)
-    const condicion = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).trim();
-    resultado += desglosarCondicion(condicion);
-
-    // Extraer el bloque (lo que está entre llaves)
-    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
-    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
-
-    return resultado;
+function esPalabraReservada(palabra) {
+    return palabrasReservadas.hasOwnProperty(palabra);
 }
 
-// Función para desglosar una instrucción "for"
-function analizarFor(codigo) {
-    let resultado = "for -> for (init; cond; inc) { bloque }\n";
+// Función que transforma el texto dentro de las comillas en let, dig, o simb
+function transformarTexto(texto) {
+    let resultadoTexto = "";
 
-    // Extraer las partes de la instrucción "for" (lo que está entre paréntesis)
-    const partes = codigo.substring(codigo.indexOf('(') + 1, codigo.indexOf(')')).split(';').map(p => p.trim());
-    const [init, cond, inc] = partes;
+    for (let char of texto) {
+        if (/[a-zA-Z]/.test(char)) {
+            // Si es una letra, lo marcamos como "let"
+            resultadoTexto += "let";
+        } else if (/\d/.test(char)) {
+            // Si es un dígito, lo marcamos como "dig"
+            resultadoTexto += "dig";
+        } else {
+            // Cualquier otro carácter lo marcamos como "simb"
+            resultadoTexto += "simb";
+        }
+        resultadoTexto += " ";  // Agregamos un espacio entre cada "let", "dig", o "simb"
+    }
 
-    resultado += "init -> " + init + "\n";
-    resultado += "cond -> " + desglosarCondicion(cond) + "\n";
-    resultado += "inc -> " + inc + "\n";
-
-    // Extraer el bloque (lo que está entre llaves)
-    const bloque = codigo.substring(codigo.indexOf('{') + 1, codigo.lastIndexOf('}')).trim();
-    resultado += "bloque -> " + (bloque.length > 0 ? "instrucciones" : "empty") + "\n";
-
-    return resultado;
+    return resultadoTexto.trim();  // Eliminamos el último espacio extra
 }
+
+
+function analizarInst(codigo) {
+    let resultado = "";  
+    let ids = [];             // Almacenamos los ids con sus componentes
+    let letras = new Set();    // Para las letras de los identificadores
+    let digitos = new Set();   // Para los dígitos numéricos
+    let numeros = new Set();   // Para los números completos
+    let simbolos = new Set();  // Para los símbolos como '_'
+    let enTexto = false;  
+    let textoActual = ""; 
+    let tipoComillas = '';  
+
+    for (let i = 0; i < codigo.length; i++) {
+        let char = codigo[i];
+
+        if ((char === '"' || char === "'") && !enTexto) {
+            // Iniciar captura de texto entre comillas
+            enTexto = true;
+            tipoComillas = char;
+            resultado += char;
+        } else if (char === tipoComillas && enTexto) {
+            // Al finalizar el texto entre comillas, transformarlo
+            resultado += transformarTexto(textoActual);
+            resultado += char;
+            textoActual = "";
+            enTexto = false;
+        } else if (enTexto) {
+            // Continuar capturando el texto entre comillas
+            textoActual += char;
+        } else {
+            if (esLetra(char)) {
+                // Detectar palabras (posibles identificadores o palabras reservadas)
+                let palabra = "";
+                while (i < codigo.length && esLetraODigito(codigo[i])) {
+                    palabra += codigo[i];
+                    i++;
+                }
+                i--;
+
+                if (esPalabraReservada(palabra)) {
+                    // Si es una palabra reservada, simplemente la agregamos
+                    resultado += palabra;
+                } else {
+                    // Si es un identificador, procesarlo
+                    resultado += "id";  // Representación general en la línea
+                    ids.push(palabra);   // Guardar el identificador único para desglosar más tarde
+                }
+            } else if (esNumeroPlano(char)) {
+                // Procesar números
+                let numero = "";
+                while (i < codigo.length && esDigito(codigo[i])) {
+                    numero += codigo[i];
+                    i++;
+                }
+                i--;
+                resultado += "num";  // Representación general en la línea
+                numeros.add(numero);  // Guardar el número único
+
+                // Desglosar el número en dígitos
+                for (const digito of numero) {
+                    digitos.add(digito); // Guardar los dígitos
+                }
+            } else {
+                // Para cualquier otro carácter, agregarlo tal cual
+                resultado += char;
+            }
+        }
+    }
+
+    // Generar el desglose semántico agrupado
+    let desgloseSemantico = "";
+
+    // Desglosar los identificadores
+    ids.forEach(id => {
+        let tipoId = "let";
+        let desglosadoId = "";
+        
+        for (const char of id) {
+            if (esLetra(char)) {
+                letras.add(char);
+                desglosadoId += "let ";
+            } else if (esDigito(char)) {
+                digitos.add(char);
+                desglosadoId += "dig ";
+            } else {
+                simbolos.add(char);
+                desglosadoId += "simb ";
+            }
+        }
+        
+        // Agregar la representación desglosada del identificador
+        desgloseSemantico += `id -> ${desglosadoId.trim()}\n`;
+    });
+
+    // Letras de los identificadores
+    if (letras.size > 0) {
+        desgloseSemantico += `let -> ${Array.from(letras).join(' | ')}\n`;
+    }
+
+    // Números
+    if (numeros.size > 0) {
+        desgloseSemantico += `num -> dig\n`;
+    }
+
+    // Dígitos
+    if (digitos.size > 0) {
+        desgloseSemantico += `dig -> ${Array.from(digitos).join(' | ')}\n`;
+    }
+
+    // Símbolos
+    if (simbolos.size > 0) {
+        desgloseSemantico += `simb -> ${Array.from(simbolos).join(' | ')}\n`;
+    }
+
+    // Retornar el resultado con el desglose semántico agrupado
+    return resultado + "\n" + desgloseSemantico;
+}
+
+
+
+function obtenerComponentesIdentificador(identificador) {
+    const letras = [];
+    const digitos = [];
+    const simbolos = [];
+    
+    for (const char of identificador) {
+        if (char.match(/[a-zA-Z]/)) {
+            letras.push(char);
+        } else if (char.match(/\d/)) {
+            digitos.push(char);
+        } else {
+            simbolos.push(char);
+        }
+    }
+
+    return {
+        letras: Array.from(new Set(letras)),  // Evitar duplicados
+        digitos: Array.from(new Set(digitos)),  // Evitar duplicados
+        simbolos: Array.from(new Set(simbolos))  // Evitar duplicados
+    };
+}
+
+
+
+
+// Función que verifica si un carácter es parte de un identificador (letra o dígito)
+function esLetraODigito(char) {
+    return /[a-zA-Z0-9_]/.test(char);  // Incluimos letras, números y guiones bajos
+}
+
+// Función que verifica si un carácter es una letra
+function esLetra(char) {
+    return /[a-zA-Z]/.test(char);
+}
+
+// Función que verifica si un carácter es un número plano
+function esNumeroPlano(char) {
+    return /\d/.test(char) && !/[a-zA-Z]/.test(char);  // Solo números que no forman parte de identificadores
+}
+
+// Función que verifica si un carácter es un dígito
+function esDigito(char) {
+    return /\d/.test(char);
+}
+
+
+
+
+
+
+
+
+
+
 
 // Función para desglosar una condición (parte entre paréntesis en "if" o "for")
 function desglosarCondicion(cond) {
@@ -1202,6 +1374,8 @@ function desglosarCondicion(cond) {
     resultado += tokens.join(' ');
     return resultado;
 }
+
+
 
 // Función para desglosar una asignación simple
 function analizarAsignacion(codigo) {
@@ -1256,13 +1430,23 @@ function analizarAsignacion(codigo) {
 
 //FUNCION PARA LIMPIAR TODO
 function limpiar() {
+    //VACIAR TEXT AREA
     document.getElementById("input").value = ""; //limpia la consola
+    
+    //LIMPIAR LEXICO
     const tablaTokens = document.getElementById("tablaTokens").getElementsByTagName('tbody')[0];
     tablaTokens.innerHTML = ""; // Limpiar tabla
+    
+    //LIMPIAR SINTACTICO
     const contenedorErrores = document.getElementById("erroresSintaxis");
     contenedorErrores.innerHTML = ""; // Limpiar la consola de salida
-    const tablaSintactico = document.getElementById("tablaSintactico").getElementsByTagName('tbody')[0];
-    tablaSintactico.innerHTML = ""; // Limpiar tabla de análisis sintáctico
+    const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
+    tablaSintactico.innerHTML = "";  // Esto limpiará las filas de la tabla
+
+    //LIMPIAR SEMANTICO
+    const tablaSemantica = document.getElementById("tablaSemantica");
+    tablaSemantica.innerHTML = "";  // Limpiar la tabla antes de agregar nuevas filas
+
 }
 
 //FUNCION PARA SALIR DEL PROGRANA
@@ -1281,7 +1465,7 @@ function ingresarInstruccion() {
     var instruccion0 = '//hola soy un comentario';
     var instruccion00 = '\nequipo();';
     var tipoDato1 = '\nboleano var = 1;';
-    var instruccion01 = '\nescribir.consola("hola mundo");';
+    var instruccion01 = '\nescribirConsola("hola mundo");';
     var instruccion02 = '\npara(entero i=0; i<5; i++){}';
     var instruccion03 = '\nmientras(variable<=10){}';
     var instruccion04 = '\ninterruptor(var){caso: 1}';
