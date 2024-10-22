@@ -1148,35 +1148,13 @@ function esPalabraReservada(palabra) {
     return palabrasReservadas.hasOwnProperty(palabra);
 }
 
-// Función que transforma el texto dentro de las comillas en let, dig, o simb
-function transformarTexto(texto) {
-    let resultadoTexto = "";
-
-    for (let char of texto) {
-        if (/[a-zA-Z]/.test(char)) {
-            // Si es una letra, lo marcamos como "let"
-            resultadoTexto += "let";
-        } else if (/\d/.test(char)) {
-            // Si es un dígito, lo marcamos como "dig"
-            resultadoTexto += "dig";
-        } else {
-            // Cualquier otro carácter lo marcamos como "simb"
-            resultadoTexto += "simb";
-        }
-        resultadoTexto += " ";  // Agregamos un espacio entre cada "let", "dig", o "simb"
-    }
-
-    return resultadoTexto.trim();  // Eliminamos el último espacio extra
-}
-
-
 function analizarInst(codigo) {
-    let resultado = "";  
-    let ids = [];             // Almacenamos los ids con sus componentes
-    let letras = new Set();    // Para las letras de los identificadores
-    let digitos = new Set();   // Para los dígitos numéricos
-    let numeros = new Set();   // Para los números completos
-    let simbolos = new Set();  // Para los símbolos como '_'
+    let resultado = "inst -> ";  // Agregar prefijo inst -> al inicio
+    let ids = [];                // Almacenamos los ids con sus componentes
+    let letras = new Set();       // Para las letras de los identificadores y cadenas
+    let digitos = new Set();      // Para los dígitos numéricos de los identificadores y cadenas
+    let simbolos = new Set();     // Para los símbolos como '_', espacios, etc.
+    let numeros = new Set();      // Para los números completos en la cadena
     let enTexto = false;  
     let textoActual = ""; 
     let tipoComillas = '';  
@@ -1191,7 +1169,8 @@ function analizarInst(codigo) {
             resultado += char;
         } else if (char === tipoComillas && enTexto) {
             // Al finalizar el texto entre comillas, transformarlo
-            resultado += transformarTexto(textoActual);
+            resultado += transformarTexto(textoActual);  // Transformar letras, dígitos y símbolos
+            desglosarElementos(textoActual, letras, digitos, simbolos);  // Añadir elementos a los sets
             resultado += char;
             textoActual = "";
             enTexto = false;
@@ -1243,7 +1222,6 @@ function analizarInst(codigo) {
 
     // Desglosar los identificadores
     ids.forEach(id => {
-        let tipoId = "let";
         let desglosadoId = "";
         
         for (const char of id) {
@@ -1263,7 +1241,7 @@ function analizarInst(codigo) {
         desgloseSemantico += `id -> ${desglosadoId.trim()}\n`;
     });
 
-    // Letras de los identificadores
+    // Letras de los identificadores y literales
     if (letras.size > 0) {
         desgloseSemantico += `let -> ${Array.from(letras).join(' | ')}\n`;
     }
@@ -1285,6 +1263,56 @@ function analizarInst(codigo) {
 
     // Retornar el resultado con el desglose semántico agrupado
     return resultado + "\n" + desgloseSemantico;
+}
+
+// Función que transforma texto entre comillas en letras, dígitos y símbolos
+function transformarTexto(texto) {
+    let resultado = "";
+    for (const char of texto) {
+        if (esLetra(char)) {
+            resultado += "let";
+        } else if (esDigito(char)) {
+            resultado += "dig";
+        } else {
+            resultado += "simb";
+        }
+    }
+    return resultado;
+}
+
+// Función que desglosa los elementos de un texto
+function desglosarElementos(texto, letras, digitos, simbolos) {
+    for (const char of texto) {
+        if (esLetra(char)) {
+            letras.add(char);
+        } else if (esDigito(char)) {
+            digitos.add(char);
+        } else {
+            simbolos.add(char);
+        }
+    }
+}
+
+// Funciones auxiliares para determinar el tipo de carácter
+function esLetra(char) {
+    return /^[a-zA-Z]$/.test(char);
+}
+
+function esDigito(char) {
+    return /^[0-9]$/.test(char);
+}
+
+function esLetraODigito(char) {
+    return /^[a-zA-Z0-9]$/.test(char);
+}
+
+function esPalabraReservada(palabra) {
+    const palabrasReservadas = ["para", "mientras", "entero", "escribirConsola"];
+    return palabrasReservadas.includes(palabra);
+}
+
+function esNumeroPlano(char) {
+    return /^[0-9]$/.test(char);
 }
 
 
@@ -1312,27 +1340,6 @@ function obtenerComponentesIdentificador(identificador) {
 }
 
 
-
-
-// Función que verifica si un carácter es parte de un identificador (letra o dígito)
-function esLetraODigito(char) {
-    return /[a-zA-Z0-9_]/.test(char);  // Incluimos letras, números y guiones bajos
-}
-
-// Función que verifica si un carácter es una letra
-function esLetra(char) {
-    return /[a-zA-Z]/.test(char);
-}
-
-// Función que verifica si un carácter es un número plano
-function esNumeroPlano(char) {
-    return /\d/.test(char) && !/[a-zA-Z]/.test(char);  // Solo números que no forman parte de identificadores
-}
-
-// Función que verifica si un carácter es un dígito
-function esDigito(char) {
-    return /\d/.test(char);
-}
 
 
 
