@@ -384,11 +384,10 @@ function validarSintaxis(tokensPorLinea) {
          
              // Verificamos el primer caso (caso:1, caso:2, etc.)
              tiposPresentes[5] === "Palabra Reservada - Caso" && 
-             tiposPresentes[6] === "Asignacion de Bloque de Codigo" && 
-             (tiposPresentes[7] === "Literal Numerico" || tiposPresentes[7] === "Literal de Cadena" || tiposPresentes[7] === "Identificador") && 
-         
+             (tiposPresentes[6] === "Literal Numerico" || tiposPresentes[6] === "Literal de Cadena" || tiposPresentes[6] === "Identificador") && 
+             tiposPresentes[7] === "Asignacion de Bloque de Codigo" && 
              // Validamos los casos opcionales y el posible xDefecto
-             elementoOpcionalDefault(tiposPresentes.slice(8, tokens.length - 1), elementosCasos, elementosAsignacion, elementosValor, 0) && 
+             elementoOpcionalDefault(tiposPresentes.slice(8, tokens.length - 1), elementosCasos, elementosValor, elementosAsignacion, 0) && 
              
              // Verificamos que la estructura cierre correctamente con llaves de cierre
              tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
@@ -542,9 +541,10 @@ function validarSintaxis(tokensPorLinea) {
          //INSTRUCCION #20 - ES
          if(
              //tiposPresentes.length===3&&
-             tiposPresentes[0]==="Identificador"&&
-             tiposPresentes[1]==="Palabra Reservada - ES"&&
-             tiposPresentes[2]==="Tipos de Dato"
+             tiposPresentes[0] === "Identificador" &&
+             tiposPresentes[1] === "Palabra Reservada - ES"&&
+             tiposPresentes[2] === "Tipo de Dato" &&
+             tiposPresentes[3] === "Delimitador"
          ){return;}
  
  
@@ -674,7 +674,7 @@ function elementoMetodo(tokens, permitidosSeparador, permitidosElementos1, permi
 
 
 
-function elementoOpcionalDefault(tokens, permitidosCasos, permitidosAsignacion, permitidosValores, vecesPermitidas) {
+function elementoOpcionalDefault(tokens, permitidosCasos, permitidosValores, permitidosAsignacion, vecesPermitidas) {
     let vecesUsadas = 0;
     let tieneXDefecto = false; // Para verificar si ya se ha encontrado xDefecto
 
@@ -692,8 +692,8 @@ function elementoOpcionalDefault(tokens, permitidosCasos, permitidosAsignacion, 
         } else {
             // Verificamos el caso
             if (!permitidosCasos.includes(tokens[i]) || 
-                !permitidosAsignacion.includes(tokens[i + 1]) || 
-                !permitidosValores.includes(tokens[i + 2])) {
+                !permitidosValores.includes(tokens[i + 1]) || 
+                !permitidosAsignacion.includes(tokens[i + 2])) {
                 return false; // Si no es un caso válido, la sintaxis es incorrecta.
             }
             vecesUsadas++;
@@ -1518,7 +1518,7 @@ function ingresarInstruccion() {
     var instruccion01 = '\nescribirConsola("hola mundo");';
     var instruccion02 = '\npara(entero i=0; i<5; i++){}';
     var instruccion03 = '\nmientras(variable<=10){}';
-    var instruccion04 = '\ninterruptor(var){caso: 1}';
+    var instruccion04 = '\ninterruptor(var){caso 1: caso 2: xDefecto:}';
     var instruccion05 = '\nintenta{}atrapar(Excepcion ex){}';
     var instruccion06 = '\nleer.consola();';
     var instruccion07 = '\narreglitoVar.tamanio;';
@@ -1530,11 +1530,11 @@ function ingresarInstruccion() {
     var instruccion13 = '\nusando Sistema.ES;';
     var instruccion14 = '\nleerTecla.consola();';
     var instruccion15 = '\nmate.mayor(numero1, numero2);';
-    var instruccion16 = '\nformatoDe(mayus);';
+    var instruccion16 = '\nid ES entero;';
     var instruccion17 = '\ncomprobado{}';
     var instruccion18 = '\nsi(5>id){}contrario{}';
     var instruccion19 = '\npublico estatico vacio ola(){}';
-    var instruccion20 = '\npublico estatico entero metodo(,entero id1, entero id2, flotante id3){}';
+    var instruccion20 = '\n';
     
     var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
     document.getElementById("input").value = cadInst;
