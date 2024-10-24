@@ -85,7 +85,9 @@ const palabrasReservadas = {
     "este": "Palabra Reservada - Este",
     "tarea": "Palabra Reservada - Tarea",
     "Sistema": "Palabra Reservada - Sistema",
-    "ES": "Palabra Reservada - ES"
+    "ES": "Palabra Reservada - ES",
+    "Lista": "Palabra Reservada - Lista",
+    "Agregar": "Palabta reservada - Agregar"
 };
 
 const operadores = {
@@ -331,7 +333,7 @@ function validarSintaxis(tokensPorLinea) {
              //tiposPresentes.length === 8 &&
              tiposPresentes[0] === "Palabra Reservada - Mientras" && 
              tiposPresentes[1] === "Parentesis de Apertura" && 
-             tiposPresentes[2] === "Identificador" && 
+             (tiposPresentes[2] === "Literal Numerico" || tiposPresentes[2] === "Identificador") &&
              tiposPresentes[3] === "Operador de Comparacion" && 
              (tiposPresentes[4] === "Literal Numerico" || tiposPresentes[4] === "Identificador") &&
              tiposPresentes[5] === "Parentesis de Cierre" && 
@@ -457,11 +459,13 @@ function validarSintaxis(tokensPorLinea) {
          // INSTRUCCION #13 - formatoDe
          if (
              //tiposPresentes.length === 8 &&
-             tiposPresentes[0] === "Palabra Reservada - FormatoDe" && 
-             tiposPresentes[1] === "Parentesis de Apertura" && 
-            (tiposPresentes[2] === "Palabra Reservada - MAYUS" || tiposPresentes[2] === "Palabra Reservada - MINUS") &&
-             tiposPresentes[3] === "Parentesis de Cierre" && 
-             tiposPresentes[4] === "Delimitador"
+             tiposPresentes[0] === "Identificador" && 
+             tiposPresentes[1] === "Conector" &&
+             tiposPresentes[2] === "Palabra Reservada - FormatoDe" && 
+             tiposPresentes[3] === "Parentesis de Apertura" && 
+            (tiposPresentes[4] === "Palabra Reservada - MAYUS" || tiposPresentes[4] === "Palabra Reservada - MINUS") &&
+             tiposPresentes[5] === "Parentesis de Cierre" && 
+             tiposPresentes[6] === "Delimitador"
          ) { return;}
  
          // INSTRUCCION #14 - bloquear
@@ -546,7 +550,8 @@ function validarSintaxis(tokensPorLinea) {
              tiposPresentes[2] === "Tipo de Dato" &&
              tiposPresentes[3] === "Delimitador"
          ){return;}
- 
+         
+
  
 
 
@@ -1514,9 +1519,9 @@ function equipo() {
 function ingresarInstruccion() {
     var instruccion0 = '//hola soy un comentario';
     var instruccion00 = '\nequipo();';
-    var tipoDato1 = '\nboleano var = 1;';
+    
     var instruccion01 = '\nescribirConsola("hola mundo");';
-    var instruccion02 = '\npara(entero i=0; i<5; i++){}';
+    var instruccion02 = '\npara(entero i=0; i>5; i++){}';
     var instruccion03 = '\nmientras(variable<=10){}';
     var instruccion04 = '\ninterruptor(var){caso 1: caso 2: xDefecto:}';
     var instruccion05 = '\nintenta{}atrapar(Excepcion ex){}';
@@ -1525,7 +1530,7 @@ function ingresarInstruccion() {
     var instruccion08 = '\narreglitoVar.copia(destino,longitud);';
     var instruccion09 = '\ntamanioDe(variable);';
     var instruccion10 = '\nnombreDe(variable);';
-    var instruccion11 = '\nformatoDe(minus);';
+    var instruccion11 = '\nvariable.formatoDe(minus);';
     var instruccion12 = '\nbloquear(variable){}';
     var instruccion13 = '\nusando Sistema.ES;';
     var instruccion14 = '\nleerTecla.consola();';
@@ -1534,9 +1539,9 @@ function ingresarInstruccion() {
     var instruccion17 = '\ncomprobado{}';
     var instruccion18 = '\nsi(5>id){}contrario{}';
     var instruccion19 = '\npublico estatico vacio ola(){}';
-    var instruccion20 = '\n';
+    var instruccion20 = '\nboleano var = 1;';
     
-    var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
+    var cadInst = instruccion0 + instruccion00  + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
     document.getElementById("input").value = cadInst;
 }
 
