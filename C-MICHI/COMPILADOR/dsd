@@ -100,3 +100,170 @@ ejemplo #3: Prom = (p1 ww+ p2 + p3)/3;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        ESTO NOS PUEDE SERVIR despues
+        let esFor = false;
+let aceptarSemanticaPorLinea = [];
+let contadorLlaves = 0;
+let dentroDeBloque = false; // Para saber si estamos dentro de un bloque de código
+
+function validarSintaxis(tokensPorLinea) {
+    const divErrores = document.getElementById("erroresSintaxis");
+    divErrores.innerHTML = ""; // Limpiar el contenido previo
+    let hayError = false;
+
+    aceptarSemanticaPorLinea = []; // Reiniciar la lista de validaciones semánticas
+
+    tokensPorLinea.forEach((lineaObj, index) => {
+        const { linea, tokens } = lineaObj;
+        let tiposPresentes = tokens.map(token => token.tipo);
+
+        // Verificar si la línea tiene solo una llave de apertura o cierre
+        if (tiposPresentes.includes("Llaves de Apertura")) {
+            contadorLlaves++;
+            dentroDeBloque = true; // Comienza un nuevo bloque
+        }
+
+        if (tiposPresentes.includes("Llaves de Cierre")) {
+            contadorLlaves--;
+            if (contadorLlaves === 0) {
+                dentroDeBloque = false; // El bloque ha sido cerrado
+                return; // No generes error si estamos cerrando un bloque válido
+            }
+        }
+
+        // Si estamos dentro de un bloque (entre llaves), no validar individualmente
+        if (dentroDeBloque) {
+            return; // Estamos dentro de un bloque, no generes error
+        }
+
+        // -------------------------------------------------------------------------------------
+        // Verificar si es la instrucción equipo();
+        if (
+            (tiposPresentes[0] === "Palabra Reservada - Equipo" || tiposPresentes[0] === null) &&
+            tiposPresentes[1] === "Parentesis de Apertura" &&
+            tiposPresentes[2] === "Parentesis de Cierre" &&
+            tiposPresentes[3] === "Delimitador"
+        ) { return; }
+
+        // INSTRUCCION #18 -metodo
+        const tipoDatoM = ["Tipo de Dato"];
+        const varNombre = ["Identificador"];
+        const separadores = ["Separador"];
+        if (
+            tiposPresentes[0] === "Modificadores de Acceso" && 
+            (tiposPresentes[1] === "Palabra Reservada - Estatico") &&
+            (tiposPresentes[2] === "Palabra Reservada - Vacio" || tiposPresentes[2] === "Tipo de Dato") &&
+            tiposPresentes[3] === "Identificador" && 
+            tiposPresentes[4] === "Parentesis de Apertura" && 
+            elementoMetodo(tiposPresentes.slice(5, tokens.length - 3), separadores, tipoDatoM, varNombre, 0) &&
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" &&
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) { return; }
+
+        // INSTRUCCION #6 - SINO
+        const elementoElseIf = ["Palabra Reservada - Sino"];
+        const Comparaciones = ["Identificador", "Literal Numerico", "Literal de Cadena"];
+        if (
+            tiposPresentes[0] === "Palabra Reservada - Si" && 
+            tiposPresentes[1] === "Parentesis de Apertura" && 
+            (tiposPresentes[2] === "Identificador" || tiposPresentes[2] === "Literal Numerico") &&
+            elementoOpcional(tiposPresentes.slice(3, tokens.length - 3), ["Operador de Comparacion"], Comparaciones, 1) &&
+            tiposPresentes[tokens.length - 3] === "Parentesis de Cierre" && 
+            tiposPresentes[tokens.length - 2] === "Llaves de Apertura" &&
+            tiposPresentes[tokens.length - 1] === "Llaves de Cierre"
+        ) {
+            return true; // Sintaxis correcta
+        }
+
+        // ---------------------------------------------------------------------------------------------------------------------
+        // Si la línea no coincide con ninguna de las gramáticas, marcar error
+        if (!aceptarSemanticaPorLinea[index]) {
+            const mensajeError = `<span style="color: red;">Error de Sintaxis en la Línea: # ${linea}</span>`;
+            divErrores.innerHTML += mensajeError + "<br>";
+            hayError = true;
+        }
+    });
+
+    // Si no hay errores, mostrar que la sintaxis es correcta
+    if (!hayError) {
+        const mensajeExito = `<span style="color: #32CD32; font-weight: bold;">Sintaxis correcta</span>`;
+        divErrores.innerHTML = mensajeExito + "<br>";
+    }
+}
