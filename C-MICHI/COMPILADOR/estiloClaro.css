@@ -43,7 +43,7 @@ p {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más fuerte */
     padding: 20px;
-    width: 1000px;
+    width: 60%;
     margin: 20px auto;
     position: relative;
 }
