@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ISC - Analizador Léxico</title>
+<title>Compilador</title>
 <link id="themeStylesheet" rel="stylesheet" href="estiloOscuro.css">
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -13,15 +13,12 @@
 <body>
 
     <div id="tree-container"></div>
-                                
-   
-
 
     <div class="container">
 
         <div class="header">
             <img src="logouat.jpg" alt="Logo Izquierdo" class="logoIzquierda">
-            <p class="titulo">Analizador Léxico, Sintactico & Semantico</p>
+            <p class="titulo">Compilador C#Michi</p>
             <p class="titulo">Grupo: 9°EJF - Equipo: Bravo</p>
             <img src="logogrifo.jpg" alt="Logo Derecho" class="logoDerecha">
         </div>
@@ -44,7 +41,10 @@
             
             <!-- Contenedor para los botones -->
             <div class="botonesConsola">
-                <button class="boton_archivo" onclick="archivo()">Archivo</button>
+            <!--     <button class="boton" onclick="archivo()">Archivo</button>  -->
+                <button onclick="procesarCodigo()">Procesar</button>
+                <pre id="resultado"></pre>
+
                 <button class="boton" onclick="analizar()">Analizar</button>
                 <button class="boton" onclick="limpiar()">Limpiar</button>
                 <button class="boton" onclick="equipo()">Equipo</button>
