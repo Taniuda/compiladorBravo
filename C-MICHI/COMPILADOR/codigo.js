@@ -1658,3 +1658,24 @@ document.getElementById('archivo').addEventListener('change', function (event) {
         alert('No se seleccionó ningún archivo.');
     }
 });
+
+
+
+// Boton nuevo
+
+// Función para manejar el clic en el botón "Nuevo"
+document.querySelector('a.dropdown-item[href="#"]').addEventListener('click', function() {
+    // Limpia el contenido del textarea
+    document.getElementById('input').value = '';
+
+    // Limpia el nombre del archivo actual
+    nombreArchivoActual = null;
+
+    // Limpia los errores de sintaxis
+    document.getElementById('erroresSintaxis').innerText = '';
+
+    // Opcional: Cambia el estado de los tabs (por si necesitas volver a mostrar los resultados de análisis)
+    document.getElementById('tab-lexico').style.display = 'none';
+    document.getElementById('tab-sintactico').style.display = 'none';
+    document.getElementById('tab-semantico').style.display = 'none';
+});
