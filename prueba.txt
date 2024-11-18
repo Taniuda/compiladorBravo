@@ -1,0 +1,11 @@
+
+if (x > 10) {
+    // Este es un comentario
+    console.writeline("Hola mundo");
+}
+
+
+if (10 <= var) {
+    // Este es un comentario
+    console.writeline(variable);
+}
