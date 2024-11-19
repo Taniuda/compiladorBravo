@@ -4,8 +4,25 @@ if (x > 10) {
     console.writeline("Hola mundo");
 }
 
-
 if (10 <= var) {
     // Este es un comentario
     console.writeline(variable);
+} else {
+    
 }
+
+
+
+
+
+for
+
+switch
+
+do
+while
+
+checked
+unchecked
+
+BUENA SUERTE BONITA! <3

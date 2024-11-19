@@ -7,16 +7,6 @@
 //-------------------------------------------------------------------------------------------------------------------------------
 //FUNCION PRINCIPAL
 function analizar() {
-
-
-
-
-
-
-
-
-
-
     const texto = document.getElementById("input").value;
     const tokensPorLinea = analizarTexto(texto);
     

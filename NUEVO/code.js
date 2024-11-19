@@ -1,12 +1,16 @@
 // Definiciones de tokens
 const tokenDefinitions = [
-    { type: "palabraReservada", regex: /^(if|else)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|defalt|break|return)$/ },
     { type: "consoleCommand", regex: /^console\.writeline$/ },
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
     { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?$/ },
     { type: "literalCadena", regex: /^"([^"]*)"$/ }, // Aceptar espacios y caracteres especiales dentro de comillas
     { type: "operador", regex: /^(<|>|<=|>=|==|!=)$/ },
-    { type: "delimitador", regex: /^[{}();]$/ },
+    { type: "parentesisApertura", regex: /^[(]$/ },
+    { type: "parentesisCierre", regex: /^[)]$/ },
+    { type: "llaveApertura", regex: /^[{]$/ },
+    { type: "llaveCierre", regex: /^[}]$/ },
+    { type: "delimitador", regex: /^[;]$/ },
     { type: "comentarioLinea", regex: /^\/\/.*$/ },
 ];
 
@@ -32,7 +36,7 @@ function tokenize(code) {
 
         // Separar palabras y delimitadores
         const words = trimmedLine
-            .replace(/([{}();])/g, " $1 ") // Separar delimitadores
+            .replace(/([{}();,])/g, " $1 ") // Separar delimitadores
             .trim()
             .match(/"[^"]*"|\S+/g); // Mantener cadenas completas y separar las demás palabras
 
@@ -64,6 +68,7 @@ function parse(tokens) {
         );
     }
 
+    // es la instrucion que permite hacer comentarios simples
     function INSTRUCCION_COMENTARIO() {
         if (tokens[currentIndex]?.type === "comentarioLinea") {
             currentIndex++;
@@ -74,9 +79,27 @@ function parse(tokens) {
         }
     }
 
+    // es la instruccion de imprimir en pantalla (Console.Writeline)
     function INSTRUCCION_CONSOLE() {
         expect("consoleCommand"); // console.writeline
-        expect("delimitador"); // (
+        expect("parentesisApertura"); // (
+    
+        // Procesar múltiples cadenas o variables separadas por comas
+        do {
+            EXPRESION(); // Procesar una cadena o identificador
+            if (tokens[currentIndex]?.type === "delimitador" && tokens[currentIndex].value === ",") {
+                currentIndex++; // Avanzar sobre la coma
+            } else {
+                break; // No hay más elementos separados por comas
+            }
+        } while (currentIndex < tokens.length);
+    
+        expect("parentesisCierre"); // )
+        expect("delimitador"); // ;
+    }
+    
+    // Método para manejar una expresión (cadena o variable)
+    function EXPRESION() {
         if (tokens[currentIndex]?.type === "literalCadena") {
             expect("literalCadena");
         } else if (tokens[currentIndex]?.type === "identificador") {
@@ -86,29 +109,130 @@ function parse(tokens) {
                 `Error sintáctico: Se esperaba una cadena o un identificador en la línea ${tokens[currentIndex]?.line || "desconocida"}`
             );
         }
-        expect("delimitador"); // )
-        expect("delimitador"); // ;
     }
+    
 
+    // es la instruccion de condicional
     function INSTRUCCION_IF() {
         expect("palabraReservada"); // if
-        expect("delimitador"); // (
-        COMPARACION();
-        expect("delimitador"); // )
-        BLOQUE_CODIGO();
+        expect("parentesisApertura"); // (
+        COMPARACION(); // Evaluamos la condición del if
+        expect("parentesisCierre"); // )
+        BLOQUE_CODIGO(); // Bloque principal del if
+    
+        // Procesar múltiples bloques "else if"
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.value === "else" &&
+            tokens[currentIndex + 1]?.value === "if"
+        ) {
+            expect("palabraReservada"); // else
+            expect("palabraReservada"); // if
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluamos la condición del else if
+            expect("parentesisCierre"); // )
+            BLOQUE_CODIGO(); // Bloque del else if
+        }
+    
+        // Procesar bloque "else" (opcional)
+        if (currentIndex < tokens.length && tokens[currentIndex]?.value === "else") {
+            expect("palabraReservada"); // else
+            BLOQUE_CODIGO(); // Bloque del else
+        }
     }
+    function INSTRUCCION_WHILE() {
+        if (tokens[currentIndex]?.value === "do") {
+            // Caso de "do while"
+            expect("palabraReservada"); // do
+            BLOQUE_CODIGO(); // Bloque de código que se ejecuta al menos una vez
+            expect("palabraReservada"); // while
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluar la condición del do while
+            expect("parentesisCierre"); // )
+            expect("delimitador"); // ;
+        } else {
+            // Caso de "while"
+            expect("palabraReservada"); // while
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluar la condición del while
+            expect("parentesisCierre"); // )
+            BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
+        }
+    }
+    
+    
+    
+    function INSTRUCCION_SWITCH() {
+        expect("palabraReservada"); // switch
+        expect("parentesisApertura"); // (
+        ELEMENTO(); // Expresión en el switch (puede ser un identificador, número, etc.)
+        expect("parentesisCierre"); // )
+        expect("delimitador"); // {
+    
+        // Procesamos los casos
+        while (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "case") {
+            INSTRUCCION_CASE();
+        }
+    
+        // Procesamos el default, si existe
+        if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "default") {
+            INSTRUCCION_DEFAULT();
+        }
+    
+        expect("delimitador"); // }
+    }
+    
 
+    function INSTRUCCION_CASE() {
+        expect("palabraReservada"); // case
+        ELEMENTO(); // La expresión del case (puede ser un número, cadena, identificador, etc.)
+        expect("delimitador"); // :
+        BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
+        
+        // Procesar las instrucciones dentro del case
+        while (tokens[currentIndex]?.type !== "palabraReservada" || tokens[currentIndex]?.value === "case" || tokens[currentIndex]?.value === "default") {
+            INSTRUCCION();
+    
+            // Si encontramos un break, lo procesamos y salimos del case
+            if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "break") {
+                expect("palabraReservada"); // break
+                expect("delimitador"); // ;
+                break;
+            }
+        }
+    }
+    
+    
+    function INSTRUCCION_DEFAULT() {
+        expect("palabraReservada"); // default
+        expect("delimitador"); // :
+        
+        // Procesar las instrucciones dentro del default
+        while (tokens[currentIndex]?.type !== "delimitador" && tokens[currentIndex]?.value !== "}") {
+            INSTRUCCION();
+        }
+    }
+    
+    
+    
+
+
+
+
+    
+
+    // metodo multiusos de comparacion
     function COMPARACION() {
         ELEMENTO();
         expect("operador"); // ==, <, etc.
         ELEMENTO();
     }
 
+    // metodo multiusos
     function ELEMENTO() {
         if (
             tokens[currentIndex]?.type === "identificador" ||
-            tokens[currentIndex]?.type === "literalNumerica" ||
-            tokens[currentIndex]?.type === "literalCadena"
+            tokens[currentIndex]?.type === "literalNumerica"
         ) {
             currentIndex++;
         } else {
@@ -118,6 +242,22 @@ function parse(tokens) {
         }
     }
 
+    // metodo multiusos
+    /*
+    function ELEMENTO_EXPANDIDO() {
+        if (tokens[currentIndex]?.type === "identificador" ||
+            tokens[currentIndex]?.type === "literalNumerica" || 
+            tokens[currentIndex]?.type === "literalCadena"
+        ) {
+            // Validar que el elemento sea una expresión válida (número, cadena, etc.)
+            currentIndex++;
+        } else {
+            throw new Error(`Error sintáctico: Se esperaba una expresión válida después de 'case' en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
+    }
+    */
+
+    // es el que permite bloques de codigo
     function BLOQUE_CODIGO() {
         expect("delimitador"); // {
         while (
@@ -133,7 +273,17 @@ function parse(tokens) {
         if (tokens[currentIndex]?.type === "comentarioLinea") {
             INSTRUCCION_COMENTARIO();
         } else if (tokens[currentIndex]?.type === "palabraReservada") {
-            INSTRUCCION_IF();
+            if (tokens[currentIndex]?.value === "if") {
+                INSTRUCCION_IF();
+            } else if (tokens[currentIndex]?.value === "while") {
+                INSTRUCCION_WHILE();
+            } else if (tokens[currentIndex]?.value === "switch") {
+                INSTRUCCION_SWITCH();
+            } else {
+                throw new Error(
+                    `Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+                );
+            }
         } else if (tokens[currentIndex]?.type === "consoleCommand") {
             INSTRUCCION_CONSOLE();
         } else {
@@ -142,6 +292,15 @@ function parse(tokens) {
             );
         }
     }
+    
+    
+
+
+
+
+
+
+
 
     while (currentIndex < tokens.length) {
         INSTRUCCION();
@@ -169,3 +328,8 @@ function analyzeCode() {
         output.innerHTML = e.message; // Mostrar error sintáctico
     }
 }
+
+
+
+
+
