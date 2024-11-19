@@ -5,13 +5,17 @@ const tokenDefinitions = [
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
     { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?$/ },
     { type: "literalCadena", regex: /^"([^"]*)"$/ }, // Aceptar espacios y caracteres especiales dentro de comillas
-    { type: "operador", regex: /^(<|>|<=|>=|==|!=)$/ },
+    { type: "operador", regex: /^(<|>|<=|>=|==|!=)$/ }, //---------CAMBIO DE JAVI
+    { type: "asignacion", regex: /^\=$/ },
     { type: "parentesisApertura", regex: /^\($/ },
     { type: "parentesisCierre", regex: /^\)$/ },
     { type: "llaveApertura", regex: /^\{$/ },
     { type: "llaveCierre", regex: /^\}$/ },
     { type: "delimitador", regex: /^;$/ },
-    { type: "delimitador", regex: /^,$/ },
+    { type: "bloqueCodigo", regex: /^:$/ },
+    { type: "incremento", regex: /^\+\+$/ },
+    { type: "decremento", regex: /^--$/ },
+    { type: "separador", regex: /^,$/ },
     { type: "comentarioLinea", regex: /^\/\/.*$/ },
 ];
 
@@ -88,7 +92,7 @@ function parse(tokens) {
         // Procesar múltiples cadenas o variables separadas por comas
         do {
             EXPRESION(); // Procesar una cadena o identificador
-            if (tokens[currentIndex]?.type === "delimitador" && tokens[currentIndex].value === ",") {
+            if (tokens[currentIndex]?.type === "separador" && tokens[currentIndex].value === ",") {
                 currentIndex++; // Avanzar sobre la coma
             } else {
                 break; // No hay más elementos separados por comas
@@ -141,6 +145,7 @@ function parse(tokens) {
             BLOQUE_CODIGO(); // Bloque del else
         }
     }
+
     function INSTRUCCION_WHILE() {
         if (tokens[currentIndex]?.value === "do") {
             // Caso de "do while"
@@ -160,6 +165,50 @@ function parse(tokens) {
             BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
         }
     }
+
+    function INSTRUCCION_FOR() {
+        expect("palabraReservada"); // for
+        expect("parentesisApertura"); // (
+        
+        // Inicialización (puede ser una declaración o asignación)
+        if (tokens[currentIndex]?.type === "identificador") {
+            ELEMENTO(); // Identificador o inicializador
+            expect("asignacion"); // =
+            ELEMENTO(); // Literal numérica o identificador
+        } else {
+            throw new Error(
+                `Error sintáctico: Inicialización no válida en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+        expect("delimitador"); // ;
+        
+        // Condición
+        COMPARACION(); // Validar condición (e.g., i < 10)
+        expect("delimitador"); // ;
+        
+        // Incremento/Decremento
+        if (
+            tokens[currentIndex]?.type === "identificador" &&
+            (tokens[currentIndex + 1]?.type === "incremento" || tokens[currentIndex + 1]?.type === "decremento")
+        ) {
+            ELEMENTO(); // Identificador
+            ELEMENTO_INC_DEC(); // ++ o --
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            ELEMENTO(); // Identificador
+            expect("operador"); // +=, -=
+            ELEMENTO(); // Literal o identificador
+        } else {
+            throw new Error(
+                `Error sintáctico: Incremento/Decremento no válido en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+        
+        expect("parentesisCierre"); // )
+        
+        // Bloque de código
+        BLOQUE_CODIGO();
+    }
+    
     
     
     
@@ -168,7 +217,7 @@ function parse(tokens) {
         expect("parentesisApertura"); // (
         ELEMENTO(); // Expresión en el switch (puede ser un identificador, número, etc.)
         expect("parentesisCierre"); // )
-        expect("delimitador"); // {
+        expect("llaveApertura"); // {
     
         // Procesamos los casos
         while (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "case") {
@@ -180,14 +229,13 @@ function parse(tokens) {
             INSTRUCCION_DEFAULT();
         }
     
-        expect("delimitador"); // }
+        expect("llaveCierre"); // }
     }
-    
 
     function INSTRUCCION_CASE() {
         expect("palabraReservada"); // case
         ELEMENTO(); // La expresión del case (puede ser un número, cadena, identificador, etc.)
-        expect("delimitador"); // :
+        expect("bloqueCodigo"); // :
         BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
         
         // Procesar las instrucciones dentro del case
@@ -203,7 +251,6 @@ function parse(tokens) {
         }
     }
     
-    
     function INSTRUCCION_DEFAULT() {
         expect("palabraReservada"); // default
         expect("delimitador"); // :
@@ -215,7 +262,29 @@ function parse(tokens) {
     }
     
     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
+
+
+
+
+
+
+
+
 
 
 
@@ -234,6 +303,19 @@ function parse(tokens) {
         if (
             tokens[currentIndex]?.type === "identificador" ||
             tokens[currentIndex]?.type === "literalNumerica"
+        ) {
+            currentIndex++;
+        } else {
+            throw new Error(
+                `Error sintáctico: Se esperaba un identificador o literal en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+    }
+
+    function ELEMENTO_INC_DEC() {
+        if (
+            tokens[currentIndex]?.type === "incremento" ||
+            tokens[currentIndex]?.type === "decremento"
         ) {
             currentIndex++;
         } else {
@@ -280,6 +362,8 @@ function parse(tokens) {
                 INSTRUCCION_WHILE();
             } else if (tokens[currentIndex]?.value === "switch") {
                 INSTRUCCION_SWITCH();
+            } else if (tokens[currentIndex]?.value === "for") {
+                INSTRUCCION_FOR();
             } else {
                 throw new Error(
                     `Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`
