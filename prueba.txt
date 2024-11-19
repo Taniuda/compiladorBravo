@@ -26,3 +26,14 @@ checked
 unchecked
 
 BUENA SUERTE BONITA! <3
+
+
+
+switch(op){
+    case 1:
+        //
+        break;
+    default:
+        // 
+        break;
+}

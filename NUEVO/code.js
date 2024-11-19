@@ -1,16 +1,17 @@
 // Definiciones de tokens
 const tokenDefinitions = [
-    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|defalt|break|return)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|return)$/ },
     { type: "consoleCommand", regex: /^console\.writeline$/ },
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
     { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?$/ },
     { type: "literalCadena", regex: /^"([^"]*)"$/ }, // Aceptar espacios y caracteres especiales dentro de comillas
     { type: "operador", regex: /^(<|>|<=|>=|==|!=)$/ },
-    { type: "parentesisApertura", regex: /^[(]$/ },
-    { type: "parentesisCierre", regex: /^[)]$/ },
-    { type: "llaveApertura", regex: /^[{]$/ },
-    { type: "llaveCierre", regex: /^[}]$/ },
-    { type: "delimitador", regex: /^[;]$/ },
+    { type: "parentesisApertura", regex: /^\($/ },
+    { type: "parentesisCierre", regex: /^\)$/ },
+    { type: "llaveApertura", regex: /^\{$/ },
+    { type: "llaveCierre", regex: /^\}$/ },
+    { type: "delimitador", regex: /^;$/ },
+    { type: "delimitador", regex: /^,$/ },
     { type: "comentarioLinea", regex: /^\/\/.*$/ },
 ];
 
@@ -259,14 +260,14 @@ function parse(tokens) {
 
     // es el que permite bloques de codigo
     function BLOQUE_CODIGO() {
-        expect("delimitador"); // {
+        expect("llaveApertura"); // {
         while (
             currentIndex < tokens.length &&
-            tokens[currentIndex]?.type !== "delimitador"
+            tokens[currentIndex]?.type !== "llaveCierre"
         ) {
             INSTRUCCION();
         }
-        expect("delimitador"); // }
+        expect("llaveCierre"); // }
     }
 
     function INSTRUCCION() {
