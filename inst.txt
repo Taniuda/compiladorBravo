@@ -1,0 +1,51 @@
+console.writeline
+if
+else
+while
+do
+for
+switch
+case
+default
+break
+return
+checked
+unchecked
+try
+catch
+int
+double
+string
+bool
+Exception
+IndexOutOfRangeException
+NullReferenceException
+FormatException
+
+
+Console.ReadLine()
+Console.ReadKey()
+array.Length
+Array.Copy()
+-->>> sizeof()
+nameof()
+ToLower()
+ToUpper()
+lock
+object 
+new
+return
+using System.IO
+Math.Max()
+is
+
+/*
+asi funciona el is:
+object obj = "Este es un string";
+if (obj is string)
+{
+    Console.WriteLine("El objeto es una cadena");
+}
+*/
+
+

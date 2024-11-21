@@ -43,6 +43,7 @@ while(variable > 5){
     // bloque de codigo
 }
 
+// ESTA YA ME SALE
 do {
     // bloque de codigo
 } while(variable > 5);
@@ -52,8 +53,6 @@ do {
 
 
 
-//------------------------falta ajustar el i++
-// YA SE ARREGLO LO DEL ESPACIO ENTRE I++
 
 
 
@@ -99,23 +98,42 @@ switch(opc){
 
 
 
-/*
-checked garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
-unchecked permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
-*/
+
+//checked garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
+//unchecked permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
+
 
 unchecked{
-
+    //comentario
 }
 
 checked{
-
+    //comentario
 }
 
 
 
 
 
+
+
+try{
+    //comentario
+} catch(Exception ex){
+    //comentario
+}
+
+try{
+    //comentario
+} catch(IndexOutOfRangeException c){
+    //comentario
+}
+
+
+
+
+
+//declaracion de variable
 
 int variable1;
 double variable2;
@@ -123,10 +141,39 @@ string variable3;
 bool variable4;
 
 int variable_entera = 5;
-//float variable_flotante = 2.5f; //mejor usamos double, nos evitamos la f
 double variable_decimal = 2.5;
 string variable_texto = "Hola mundo";
 bool variable_boleana = false;
+
+
+
+
+// LO DEJO PENDIENTE-----------------------------------------
+// declaracion de arreglo
+int[] arregloInt = { 1, 2, 3, 4, 5 };
+string[] arregloStr = { "Hola", "Mundo" };
+double[] arregloDou = { 1.2, 3.4, 5.6 };
+bool[] arregloBoo = { true, false, true, true };
+
+
+// LO DEJO PENDIENTE-----------------------------------------
+// asignacion de variable
+
+x = "Hola ";
+y = "Mundo"
+z = x + y;
+A = (5 + id3 + var)/3;
+B = console.readline(); 
+C = numeros.length;
+
+
+
+
+
+
+
+
+
 
 
 
