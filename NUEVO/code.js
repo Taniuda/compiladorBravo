@@ -8,9 +8,15 @@ const tokenDefinitions = [
     { type: "asignacion", regex: /^\=$/ },
 
     // palabras reservadas
-    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|return|checked|unchecked|try|catch|int|double|string|bool)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|return|checked|unchecked|try|catch|int|double|string|bool|using|system)$/ },
     { type: "excepciones", regex: /^(Exception|IndexOutOfRangeException|NullReferenceException|FormatException)$/ },
-    { type: "consoleCommand", regex: /^console\.writeline$/ },
+    { type: "consoleCommand", regex: /^console\.writeline$/i },
+    { type: "consoleReadKey", regex: /^console\.readkey$/i },
+    { type: "consoleReadLine", regex: /^console\.readline$/i },
+    { type: "mathMax", regex: /^Math\.Max$/i },
+    { type: "mathMin", regex: /^Math\.Min$/i },
+    { type: "toLower", regex: /^toLower$/i },
+    { type: "toUpper", regex: /^toUpper$/i },
     { type: "tipoArray", regex: /^(int|double|string|bool)\s*\[\]$/ },
     
     // elementos de valores
@@ -29,6 +35,7 @@ const tokenDefinitions = [
     { type: "delimitador", regex: /^;$/ },
     { type: "bloqueCodigo", regex: /^:$/ },
     { type: "separador", regex: /^,$/ },
+    { type: "conector", regex: /^.$/ },
 
     //comentarios
     { type: "comentarioLinea", regex: /^\/\/.*$/ },
@@ -55,19 +62,20 @@ function tokenize(code) {
         }
 
         // Separar palabras y delimitadores
-        // Separar palabras y delimitadores
         const words = trimmedLine
             .replace(/([{}();,])/g, " $1 ") // Separar delimitadores
             .replace(/(\+\+|--|[+\-*/%=><!]=?)/g, " $1 ") // Añadir espacio alrededor de los operadores (incremento, decremento, relacionales, etc.)
             .trim()
             .match(/"[^"]*"|\S+/g); // Mantener cadenas completas y separar las demás palabras
 
-
         // Validar tokens
         words.forEach((word) => {
             const tokenType = tokenDefinitions.find((def) => def.regex.test(word))?.type;
             if (tokenType) {
+                // Agregar el token a la lista
                 tokens.push({ type: tokenType, value: word, line: lineNumber + 1 });
+                // Mostrar el tipo y valor del token en la consola
+                console.log(`Tipo: ${tokenType}, Valor: "${word}", Línea: ${lineNumber + 1}`);
             } else {
                 errors.push(`Token no reconocido en la línea ${lineNumber + 1}: "${word}"`);
             }
@@ -106,365 +114,205 @@ function parse(tokens)
         }
     }
 
-    // --------------------------------------------------------------------------------------------
-    // es la instruccion de imprimir en pantalla (Console.Writeline)
-    function INSTRUCCION_CONSOLE() {
-        expect("consoleCommand"); // console.writeline
-        expect("parentesisApertura"); // (
+    //si existen las instrucciones, pero las removi para evitar mucho codigo
     
-        // Procesar múltiples cadenas o variables separadas por comas
-        do {
-            EXPRESION(); // Procesar una cadena o identificador
-            if (tokens[currentIndex]?.type === "separador" && tokens[currentIndex].value === ",") {
-                currentIndex++; // Avanzar sobre la coma
-            } else {
-                break; // No hay más elementos separados por comas
-            }
-        } while (currentIndex < tokens.length);
-    
-        expect("parentesisCierre"); // )
-        expect("delimitador"); // ;
-    }
-    
-    // Método para manejar una expresión (cadena o variable)
-    function EXPRESION() {
-        if (tokens[currentIndex]?.type === "literalCadena") {
-            expect("literalCadena");
-        } else if (tokens[currentIndex]?.type === "identificador") {
-            expect("identificador");
-        } else {
-            throw new Error(`Error sintáctico: Se esperaba una cadena o un identificador en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-            );
-        }
-    }
-    
-    // ----------------------------------------------------------------------------------------
-    // es la instruccion de condicional, si, sino, contrario
-    function INSTRUCCION_IF() {
-        expect("palabraReservada"); // if
-        expect("parentesisApertura"); // (
-        COMPARACION(); // Evaluamos la condición del if
-        expect("parentesisCierre"); // )
-        BLOQUE_CODIGO(); // Bloque principal del if
-    
-        // Procesar múltiples bloques "else if"
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.value === "else" &&
-            tokens[currentIndex + 1]?.value === "if"
-        ) {
-            expect("palabraReservada"); // else
-            expect("palabraReservada"); // if
-            expect("parentesisApertura"); // (
-            COMPARACION(); // Evaluamos la condición del else if
-            expect("parentesisCierre"); // )
-            BLOQUE_CODIGO(); // Bloque del else if
-        }
-    
-        // Procesar bloque "else" (opcional)
-        if (currentIndex < tokens.length && tokens[currentIndex]?.value === "else") {
-            expect("palabraReservada"); // else
-            BLOQUE_CODIGO(); // Bloque del else
-        }
-    }
-
-    // ---------------------------------------------------------------------------------------------------
-    // instruccion While
-    function INSTRUCCION_WHILE() {
-        if (tokens[currentIndex]?.value === "do") {
-            // Caso de "do while"
-            expect("palabraReservada"); // do
-            BLOQUE_CODIGO(); // Bloque de código que se ejecuta al menos una vez
-            expect("palabraReservada"); // while
-            expect("parentesisApertura"); // (
-            COMPARACION(); // Evaluar la condición del do while
-            expect("parentesisCierre"); // )
-            expect("delimitador"); // ;
-        } else {
-            // Caso de "while"
-            expect("palabraReservada"); // while
-            expect("parentesisApertura"); // (
-            COMPARACION(); // Evaluar la condición del while
-            expect("parentesisCierre"); // )
-            BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
-        }
-    }
-
-    // ----------------------------------------------------------------------------------------------------
-    // instruccion for
-    function INSTRUCCION_FOR() {
-        expect("palabraReservada"); // for
-        expect("parentesisApertura"); // (
-        
-        // Inicialización (puede ser una declaración o asignación)
-        if (tokens[currentIndex]?.type === "palabraReservada" && ["int", "double", "string", "bool"].includes(tokens[currentIndex]?.value)) {
-            // Caso con tipo de dato explícito
-            expect("palabraReservada"); // tipo de dato (int, double, etc.)
-            expect("identificador"); // identificador
-            expect("asignacion"); // =
-            ELEMENTO(); // Literal numérica o identificador
-        } else if (tokens[currentIndex]?.type === "identificador") {
-            // Caso sin tipo de dato (solo asignación)
-            ELEMENTO(); // Identificador
-            expect("asignacion"); // =
-            ELEMENTO(); // Literal numérica o identificador
-        } else {
-            throw new Error(
-                `Error sintáctico: Inicialización no válida en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-            );
-        }
-        expect("delimitador"); // ;
-        
-        // Condición
-        COMPARACION(); // Validar condición (e.g., i < 10)
-        expect("delimitador"); // ;
-        
-        // Incremento/Decremento
-        if (
-            tokens[currentIndex]?.type === "identificador" &&
-            (tokens[currentIndex + 1]?.type === "incremento" || tokens[currentIndex + 1]?.type === "decremento")
-        ) {
-            ELEMENTO(); // Identificador
-            ELEMENTO_INC_DEC(); // ++ o --
-        } else if (tokens[currentIndex]?.type === "identificador") {
-            ELEMENTO(); // Identificador
-            expect("operador"); // +=, -=
-            ELEMENTO(); // Literal o identificador
-        } else {
-            throw new Error(
-                `Error sintáctico: Incremento/Decremento no válido en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-            );
-        }
-        
-        expect("parentesisCierre"); // )
-        
-        // Bloque de código
-        BLOQUE_CODIGO();
-    }
-
-
-    
-    // -------------------------------------------------------------------------------------------------------------
-    // instruccion switch
-    function INSTRUCCION_SWITCH() {
-        expect("palabraReservada"); // switch
-        expect("parentesisApertura"); // (
-        ELEMENTO(); // Expresión del switch
-        expect("parentesisCierre"); // )
-        expect("llaveApertura"); // {
-        
-        // Procesar casos
-        while (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "case") {
-            INSTRUCCION_CASE();
-        }
-    
-        // Procesar default si existe
-        if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "default") {
-            INSTRUCCION_DEFAULT();
-        }
-    
-        expect("llaveCierre"); // }
-    }
-    
-    function INSTRUCCION_CASE() {
-        expect("palabraReservada"); // case
-        ELEMENTO_EXPANDIDO(); // Valor del case (puede ser un número, cadena, etc.)
-        expect("bloqueCodigo"); // :
-        
-        // Procesar instrucciones dentro del case
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type !== "palabraReservada" &&
-            tokens[currentIndex]?.type !== "llaveCierre"
-        ) {
-            INSTRUCCION();
-    
-            // Procesar break si existe
-            if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "break") {
-                expect("palabraReservada"); // break
-                expect("delimitador"); // ;
-                break;
-            }
-        }
-    }
-    
-    function INSTRUCCION_DEFAULT() {
-        expect("palabraReservada"); // default
-        expect("bloqueCodigo"); // :
-        
-        // Procesar instrucciones dentro del default
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type !== "llaveCierre"
-        ) {
-            INSTRUCCION();
-        }
-    }
-    
-    
-    // ------------------------------------------------------------------------------------------------------
-    // instruccion Checked y unchecked
-    function INSTRUCCION_CHECKED() {
-        expect("palabraReservada"); // checked
-        BLOQUE_CODIGO(); // Bloque de código protegido contra desbordamientos
-    }
-
-    function INSTRUCCION_UNCHECKED() {
-        expect("palabraReservada"); // unchecked
-        BLOQUE_CODIGO(); // Bloque de código que permite desbordamientos
-    }
-
-    // ------------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------
     // Declaración de variables
-    function DECLARACION_VARIABLE() {
-    // Detectar el tipo de dato (int, double, string, bool) o arreglo
-    if (
-        tokens[currentIndex]?.type === "palabraReservada" &&
-        ["int", "double", "string", "bool"].some((t) =>
-            tokens[currentIndex].value.startsWith(t)
-        )
-    ) {
-        const tipoDato = tokens[currentIndex].value; // Guardar el tipo de dato
-        currentIndex++; // Avanzar al identificador
+    function DECLARACION_VARIABLE() 
+    {
+        if (
+            tokens[currentIndex]?.type === "palabraReservada" &&
+            ["int", "double", "string", "bool"].some((t) =>
+                tokens[currentIndex].value.startsWith(t)
+            )
+        ) {
+            const tipoDato = tokens[currentIndex].value; // Guardar el tipo de dato
+            currentIndex++; // Avanzar al identificador
 
-        // Verificar que el siguiente token es un identificador válido
-        if (tokens[currentIndex]?.type === "identificador") {
-            const nombreVariable = tokens[currentIndex].value; // Guardar el nombre de la variable
-            currentIndex++; // Avanzar al siguiente token
+            // Verificar que el siguiente token es un identificador válido
+            if (tokens[currentIndex]?.type === "identificador") {
+                const nombreVariable = tokens[currentIndex].value; // Guardar el nombre de la variable
+                currentIndex++; // Avanzar al siguiente token
 
-            // Validar si es inicialización de arreglo
-            if (tipoDato.includes("[]")) {
-                // Verificar inicialización con '{'
-                if (tokens[currentIndex]?.type === "asignacion") {
-                    currentIndex++; // Avanzar sobre '='
-                    expect("llaveApertura"); // {
-                    
-                    // Validar cada elemento del arreglo
-                    do {
+                // Validar si es inicialización de arreglo
+                if (tipoDato.includes("[]")) {
+                    // Verificar inicialización con '{'
+                    if (tokens[currentIndex]?.type === "asignacion") {
+                        currentIndex++; // Avanzar sobre '='
+                        expect("llaveApertura"); // {
+                        
+                        // Validar cada elemento del arreglo
+                        do {
+                            if (
+                                (tipoDato.startsWith("int") && tokens[currentIndex]?.type === "literalNumerica" && !tokens[currentIndex].value.includes(".")) ||
+                                (tipoDato.startsWith("double") && tokens[currentIndex]?.type === "literalNumerica" && tokens[currentIndex].value.includes(".")) ||
+                                (tipoDato.startsWith("string") && tokens[currentIndex]?.type === "literalCadena") ||
+                                (tipoDato.startsWith("bool") && ["true", "false"].includes(tokens[currentIndex]?.value))
+                            ) {
+                                currentIndex++; // Avanzar al siguiente elemento
+                            } else {
+                                throw new Error(
+                                    `Error sintáctico: Elemento no válido en el arreglo '${nombreVariable}' de tipo '${tipoDato}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+                                );
+                            }
+
+                            // Validar separadores entre elementos
+                            if (tokens[currentIndex]?.type === "separador") {
+                                currentIndex++;
+                            } else {
+                                break; // No hay más elementos
+                            }
+                        } while (tokens[currentIndex]?.type !== "llaveCierre");
+
+                        expect("llaveCierre"); // }
+                    }
+                } else {
+                    // Validar inicialización normal (no arreglo)
+                    if (tokens[currentIndex]?.type === "asignacion") {
+                        currentIndex++; // Avanzar sobre '='
+
+                        // Validar el valor inicial
                         if (
-                            (tipoDato.startsWith("int") && tokens[currentIndex]?.type === "literalNumerica" && !tokens[currentIndex].value.includes(".")) ||
-                            (tipoDato.startsWith("double") && tokens[currentIndex]?.type === "literalNumerica" && tokens[currentIndex].value.includes(".")) ||
-                            (tipoDato.startsWith("string") && tokens[currentIndex]?.type === "literalCadena") ||
-                            (tipoDato.startsWith("bool") && ["true", "false"].includes(tokens[currentIndex]?.value))
+                            (tipoDato === "int" && tokens[currentIndex]?.type === "literalNumerica" && !tokens[currentIndex].value.includes(".")) ||
+                            (tipoDato === "double" && tokens[currentIndex]?.type === "literalNumerica" && tokens[currentIndex].value.includes(".")) ||
+                            (tipoDato === "string" && tokens[currentIndex]?.type === "literalCadena") ||
+                            (tipoDato === "bool" && ["true", "false"].includes(tokens[currentIndex]?.value))
                         ) {
-                            currentIndex++; // Avanzar al siguiente elemento
+                            currentIndex++; // Avanzar sobre el valor inicial
                         } else {
                             throw new Error(
-                                `Error sintáctico: Elemento no válido en el arreglo '${nombreVariable}' de tipo '${tipoDato}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+                                `Error sintáctico: Valor inicial no válido para la variable '${nombreVariable}' de tipo '${tipoDato}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
                             );
                         }
-
-                        // Validar separadores entre elementos
-                        if (tokens[currentIndex]?.type === "separador") {
-                            currentIndex++;
-                        } else {
-                            break; // No hay más elementos
-                        }
-                    } while (tokens[currentIndex]?.type !== "llaveCierre");
-
-                    expect("llaveCierre"); // }
-                }
-            } else {
-                // Validar inicialización normal (no arreglo)
-                if (tokens[currentIndex]?.type === "asignacion") {
-                    currentIndex++; // Avanzar sobre '='
-
-                    // Validar el valor inicial
-                    if (
-                        (tipoDato === "int" && tokens[currentIndex]?.type === "literalNumerica" && !tokens[currentIndex].value.includes(".")) ||
-                        (tipoDato === "double" && tokens[currentIndex]?.type === "literalNumerica" && tokens[currentIndex].value.includes(".")) ||
-                        (tipoDato === "string" && tokens[currentIndex]?.type === "literalCadena") ||
-                        (tipoDato === "bool" && ["true", "false"].includes(tokens[currentIndex]?.value))
-                    ) {
-                        currentIndex++; // Avanzar sobre el valor inicial
-                    } else {
-                        throw new Error(
-                            `Error sintáctico: Valor inicial no válido para la variable '${nombreVariable}' de tipo '${tipoDato}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-                        );
                     }
                 }
-            }
 
-            // Validar el delimitador ';'
-            expect("delimitador");
-        } else {
-            throw new Error(
-                `Error sintáctico: Se esperaba un identificador después del tipo de dato en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-            );
-        }
-    } else {
-        throw new Error(
-            `Error sintáctico: Se esperaba un tipo de dato válido en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-        );
-    }
-}
-
-
-
-    //-----------------------------------------------------------------------
-    
- 
-
-
-    // ------------------------------------------------------------------------------------------------------
-    // Instrucción Try-Catch
-    function INSTRUCCION_TRYCATCH() {
-        expect("palabraReservada"); // try
-        BLOQUE_CODIGO(); // Bloque asociado al try
-
-        // Procesar uno o más bloques "catch"
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type === "palabraReservada" &&
-            tokens[currentIndex]?.value === "catch"
-        ) {
-            expect("palabraReservada"); // catch
-            expect("parentesisApertura"); // (
-            if (
-                tokens[currentIndex]?.type === "excepciones" &&
-                ["Exception", "IndexOutOfRangeException", "NullReferenceException", "FormatException"].includes(tokens[currentIndex]?.value)
-            ) {
-                expect("excepciones"); // Tipo de excepción
-                expect("identificador"); // Nombre de la variable de excepción (opcional)
+                // Validar el delimitador ';'
+                expect("delimitador");
             } else {
                 throw new Error(
-                    `Error sintáctico: Se esperaba un tipo de excepción válido en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+                    `Error sintáctico: Se esperaba un identificador después del tipo de dato en la línea ${tokens[currentIndex]?.line || "desconocida"}`
                 );
             }
-            expect("parentesisCierre"); // )
-            BLOQUE_CODIGO(); // Bloque asociado al catch
+        } else {
+            throw new Error(
+                `Error sintáctico: Se esperaba un tipo de dato válido en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
         }
-
-        /*
-        // Bloque opcional "finally"
-        if (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type === "palabraReservada" &&
-            tokens[currentIndex]?.value === "finally"
-        ) {
-            expect("palabraReservada"); // finally
-            BLOQUE_CODIGO(); // Bloque asociado al finally
-        }
-        */
     }
 
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
+    function ASIGNACION_VARIABLE() {
+        // Verifica que el primer token sea un identificador
+        if (tokens[currentIndex]?.type === "identificador") {
+            const variable = tokens[currentIndex].value;
+            currentIndex++; // Avanza al siguiente token
+    
+            // Verifica el operador de asignación '='
+            expect("asignacion");
+    
+            // Valida la expresión
+            EXPRESION();
+    
+            // Verifica el delimitador ';'
+            expect("delimitador");
+        } else {
+            throw new Error(`Error sintáctico: Se esperaba un identificador al inicio de la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
+    }
+    
+    // Función para validar una expresión aritmética
+    function EXPRESION() {
+        TERM(); // Valida el primer término
+    
+        // Mientras haya operadores aritméticos (+, -, *, /, %), sigue validando términos
+        while (
+            tokens[currentIndex]?.type === "operadorAritmetico" ||
+            tokens[currentIndex]?.type === "parentesisApertura"
+        ) {
+            if (tokens[currentIndex]?.type === "operadorAritmetico") {
+                currentIndex++; // Avanza al operador
+                TERM(); // Valida el siguiente término
+            } else if (tokens[currentIndex]?.type === "parentesisApertura") {
+                // Valida un bloque de paréntesis recursivo
+                currentIndex++; // Avanza al paréntesis de apertura
+                EXPRESION();
+                expect("parentesisCierre"); // Valida que el paréntesis cierre
+            }
+        }
+    }
+    
+    // Valida un término en la expresión (literal, identificador o paréntesis)
+    function TERM() {
+        if (
+            tokens[currentIndex]?.type === "literalNumerica" ||
+            tokens[currentIndex]?.type === "identificador"
+        ) {
+            currentIndex++; // Avanza al siguiente token
+        } else if (tokens[currentIndex]?.type === "parentesisApertura") {
+            // Si es un paréntesis, valida la expresión interna
+            currentIndex++; // Avanza al paréntesis de apertura
+            EXPRESION();
+            expect("parentesisCierre"); // Valida que el paréntesis cierre
+        } else {
+            throw new Error(`Error sintáctico: Término no válido en la expresión en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
+    }
+
+    // ------------------------------------
+
+    function ASIGNACION_METODO() {
+        // Verifica que el primer token sea un identificador (nombre de la variable destino)
+        if (tokens[currentIndex]?.type === "identificador") {
+            const variableDestino = tokens[currentIndex].value; // Guarda el nombre de la variable destino
+            currentIndex++; // Avanza al siguiente token
+            expect("asignacion");// Verifica el operador de asignación '='
+    
+            // Identificar el tipo de método o expresión en la asignación
+            if (tokens[currentIndex]?.type === "consoleReadLine") {  // Caso: console.readline()
+                currentIndex++; // Avanza al token de "Console.ReadLine"
+                expect("parentesisApertura");
+                expect("parentesisCierre");
+
+            } else if (tokens[currentIndex]?.type === "mathMax" || tokens[currentIndex]?.type === "mathMin") { // Caso: Math.Max(a, b) o Math.Min(a, b)
+                currentIndex++; // Avanza al token del método (Math.Max o Math.Min)
+                expect("parentesisApertura");
+                EXPRESION(); // Primer argumento
+                expect("separador"); // Separador ','
+                EXPRESION(); // Segundo argumento
+                expect("parentesisCierre"); // Paréntesis de cierre
+
+            } else if (tokens[currentIndex]?.type === "identificador" && tokens[currentIndex + 1]?.type === "conector" && (tokens[currentIndex + 2]?.type === "toUpper" || tokens[currentIndex + 2]?.type === "toLower")) { 
+                // Caso: txt.ToUpper() o txt.ToLower()
+                currentIndex++; // Avanza al identificador (txt)
+                expect("conector"); // Verifica el conector '.'
+                currentIndex++; // Avanza al tipo de método (ToUpper o ToLower)
+                expect("parentesisApertura"); // Verifica el paréntesis de apertura
+                EXPRESION(); // Primer argumento
+                expect("parentesisCierre"); // Paréntesis de cierre
+    
+            } else {
+                throw new Error(`Error sintáctico: Método o expresión no válido para la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+            }
+    
+            // Verifica el delimitador ';'
+            expect("delimitador");
+        } else {
+            throw new Error(`Error sintáctico: Se esperaba un identificador al inicio de la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
+    }
+    
+    
+    
+    
+    
+
 // -------------------------------------------------------------------------------------------------------------
 // METODOS COMPARTIDOS
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------
-
-
-    // metodo multiusos de comparacion
     function COMPARACION() {
         ELEMENTO();
         expect("operadorRelacional"); // ==, <, etc.
         ELEMENTO();
     }
-
-    // metodo multiusos
     function ELEMENTO() {
         if (
             tokens[currentIndex]?.type === "identificador" ||
@@ -477,7 +325,6 @@ function parse(tokens)
             );
         }
     }
-
     function ELEMENTO_INC_DEC() {
         if (
             tokens[currentIndex]?.type === "incremento" ||
@@ -490,9 +337,6 @@ function parse(tokens)
             );
         }
     }
-
-    // metodo multiusos
-    
     function ELEMENTO_EXPANDIDO() {
         if (
             tokens[currentIndex]?.type === "literalNumerica" ||
@@ -505,12 +349,7 @@ function parse(tokens)
         }
     }
     
-    
     // ------------------------------------------------------------------------------------------------------------------------------
-    // ------------------------------------------------------------------------------------------------------------------------------
-    // ------------------------------------------------------------------------------------------------------------------------------
-    
-
     // es el que permite bloques de codigo
     function BLOQUE_CODIGO() {
         expect("llaveApertura"); // {
@@ -524,57 +363,51 @@ function parse(tokens)
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------
-    // aqui deben ir todas las instrucciones:
-
     function INSTRUCCION() {
         if (tokens[currentIndex]?.type === "comentarioLinea") {
             INSTRUCCION_COMENTARIO();
         } else if (tokens[currentIndex]?.type === "palabraReservada") {
-
-            if (tokens[currentIndex]?.type === "palabraReservada" &&
-                ["int", "double", "string", "bool"].includes(tokens[currentIndex]?.value)
-            ) {
+            if (["int", "double", "string", "bool"].includes(tokens[currentIndex]?.value)) {
                 DECLARACION_VARIABLE();
-            } else if (tokens[currentIndex]?.type === "identificador"){
-                ASIGNACION_VARIABLE();
-            } 
-            
-            
-            //cuando tienen palabras reservadas:
-            else if (tokens[currentIndex]?.value === "if") {
+            } else if (tokens[currentIndex]?.value === "if") {
                 INSTRUCCION_IF();
-            } else if (tokens[currentIndex]?.value === "while") {
-                INSTRUCCION_WHILE();
             } else if (tokens[currentIndex]?.value === "do") {
+                INSTRUCCION_WHILE();
+            } else if (tokens[currentIndex]?.value === "while") {
                 INSTRUCCION_WHILE();
             } else if (tokens[currentIndex]?.value === "switch") {
                 INSTRUCCION_SWITCH();
             } else if (tokens[currentIndex]?.value === "for") {
                 INSTRUCCION_FOR();
+            } else if (tokens[currentIndex]?.value === "try") {
+                INSTRUCCION_TRYCATCH();
             } else if (tokens[currentIndex]?.value === "checked") {
                 INSTRUCCION_CHECKED();
             } else if (tokens[currentIndex]?.value === "unchecked") {
                 INSTRUCCION_UNCHECKED();
-            } else if (tokens[currentIndex]?.value === "try") {
-                INSTRUCCION_TRYCATCH();
+            } else if (tokens[currentIndex]?.value === "using") {
+                INSTRUCCION_USING();
             } else {
                 throw new Error(`Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
             }
-        } 
-
-        else if (tokens[currentIndex]?.type === "consoleCommand") {
-            INSTRUCCION_CONSOLE();
-        } else if (tokens[currentIndex]?.type === "comentarioLinea") {
-            INSTRUCCION_COMENTARIO();
+        } else if (
+            tokens[currentIndex]?.type === "identificador" &&
+            tokens[currentIndex + 1]?.type === "asignacion" &&
+            tokens[currentIndex + 2]?.type !== "literalNumerica"
+        ) {
+            ASIGNACION_METODO();
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            ASIGNACION_VARIABLE();
+        } else if (tokens[currentIndex]?.type === "consoleCommand") {
+            INSTRUCCION_IMPRIMIR();
+        } else if (tokens[currentIndex]?.type === "consoleReadKey") {
+            INSTRUCCION_READKEY();
         } else {
-            throw new Error(
-                `Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-            );
+            throw new Error(`Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
         }
     }
     
     // ------------------------------
-    
     while (currentIndex < tokens.length) {
         INSTRUCCION();
     }

@@ -1,0 +1,262 @@
+    // --------------------------------------------------------------------------------------------
+    // es la instruccion de imprimir en pantalla (Console.Writeline)
+    function INSTRUCCION_IMPRIMIR() {
+        expect("consoleCommand"); // console.writeline
+        expect("parentesisApertura"); // (
+    
+        // Procesar múltiples cadenas o variables separadas por comas
+        do {
+            EXPRESION(); // Procesar una cadena o identificador
+                currentIndex++; // Avanzar sobre la coma
+            } else {
+                break; // No hay más elementos separados por comas
+            }
+        } while (currentIndex < tokens.length);
+    
+        expect("parentesisCierre"); // )
+        expect("delimitador"); // ;
+    }
+    
+    // Método para manejar una expresión (cadena o variable)
+    function EXPRESION() {
+        if (tokens[currentIndex]?.type === "literalCadena") {
+            expect("literalCadena");
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            expect("identificador");
+        } else {
+            throw new Error(`Error sintáctico: Se esperaba una cadena o un identificador en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+    }
+    
+    // ----------------------------------------------------------------------------------------
+    // es la instruccion de condicional, si, sino, contrario
+    function INSTRUCCION_IF() {
+        expect("palabraReservada"); // if
+        expect("parentesisApertura"); // (
+        COMPARACION(); // Evaluamos la condición del if
+        expect("parentesisCierre"); // )
+        BLOQUE_CODIGO(); // Bloque principal del if
+    
+        // Procesar múltiples bloques "else if"
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.value === "else" &&
+            tokens[currentIndex + 1]?.value === "if"
+        ) {
+            expect("palabraReservada"); // else
+            expect("palabraReservada"); // if
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluamos la condición del else if
+            expect("parentesisCierre"); // )
+            BLOQUE_CODIGO(); // Bloque del else if
+        }
+    
+        // Procesar bloque "else" (opcional)
+        if (currentIndex < tokens.length && tokens[currentIndex]?.value === "else") {
+            expect("palabraReservada"); // else
+            BLOQUE_CODIGO(); // Bloque del else
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------
+    // instruccion While
+    function INSTRUCCION_WHILE() {
+        if (tokens[currentIndex]?.value === "do") {
+            // Caso de "do while"
+            expect("palabraReservada"); // do
+            BLOQUE_CODIGO(); // Bloque de código que se ejecuta al menos una vez
+            expect("palabraReservada"); // while
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluar la condición del do while
+            expect("parentesisCierre"); // )
+            expect("delimitador"); // ;
+        } else {
+            // Caso de "while"
+            expect("palabraReservada"); // while
+            expect("parentesisApertura"); // (
+            COMPARACION(); // Evaluar la condición del while
+            expect("parentesisCierre"); // )
+            BLOQUE_CODIGO(); // Bloque de código a ejecutar mientras la condición sea verdadera
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+    // instruccion for
+    function INSTRUCCION_FOR() {
+        expect("palabraReservada"); // for
+        expect("parentesisApertura"); // (
+        
+        // Inicialización (puede ser una declaración o asignación)
+        if (tokens[currentIndex]?.type === "palabraReservada" && ["int", "double", "string", "bool"].includes(tokens[currentIndex]?.value)) {
+            // Caso con tipo de dato explícito
+            expect("palabraReservada"); // tipo de dato (int, double, etc.)
+            expect("identificador"); // identificador
+            expect("asignacion"); // =
+            ELEMENTO(); // Literal numérica o identificador
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            // Caso sin tipo de dato (solo asignación)
+            ELEMENTO(); // Identificador
+            expect("asignacion"); // =
+            ELEMENTO(); // Literal numérica o identificador
+        } else {
+            throw new Error(
+                `Error sintáctico: Inicialización no válida en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+        expect("delimitador"); // ;
+        
+        // Condición
+        COMPARACION(); // Validar condición (e.g., i < 10)
+        expect("delimitador"); // ;
+        
+        // Incremento/Decremento
+        if (
+            tokens[currentIndex]?.type === "identificador" &&
+            (tokens[currentIndex + 1]?.type === "incremento" || tokens[currentIndex + 1]?.type === "decremento")
+        ) {
+            ELEMENTO(); // Identificador
+            ELEMENTO_INC_DEC(); // ++ o --
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            ELEMENTO(); // Identificador
+            expect("operador"); // +=, -=
+            ELEMENTO(); // Literal o identificador
+        } else {
+            throw new Error(
+                `Error sintáctico: Incremento/Decremento no válido en el 'for' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+        
+        expect("parentesisCierre"); // )
+        
+        // Bloque de código
+        BLOQUE_CODIGO();
+    }
+
+
+    
+    // -------------------------------------------------------------------------------------------------------------
+    // instruccion switch
+    function INSTRUCCION_SWITCH() {
+        expect("palabraReservada"); // switch
+        expect("parentesisApertura"); // (
+        ELEMENTO(); // Expresión del switch
+        expect("parentesisCierre"); // )
+        expect("llaveApertura"); // {
+        
+        // Procesar casos
+        while (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "case") {
+            INSTRUCCION_CASE();
+        }
+    
+        // Procesar default si existe
+        if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "default") {
+            INSTRUCCION_DEFAULT();
+        }
+    
+        expect("llaveCierre"); // }
+    }
+    
+    function INSTRUCCION_CASE() {
+        expect("palabraReservada"); // case
+        ELEMENTO_EXPANDIDO(); // Valor del case (puede ser un número, cadena, etc.)
+        expect("bloqueCodigo"); // :
+        
+        // Procesar instrucciones dentro del case
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type !== "palabraReservada" &&
+            tokens[currentIndex]?.type !== "llaveCierre"
+        ) {
+            INSTRUCCION();
+    
+            // Procesar break si existe
+            if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "break") {
+                expect("palabraReservada"); // break
+                expect("delimitador"); // ;
+                break;
+            }
+        }
+    }
+    
+    function INSTRUCCION_DEFAULT() {
+        expect("palabraReservada"); // default
+        expect("bloqueCodigo"); // :
+        
+        // Procesar instrucciones dentro del default
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type !== "llaveCierre"
+        ) {
+            INSTRUCCION();
+        }
+    }
+    
+    
+    // ------------------------------------------------------------------------------------------------------
+    // instruccion Checked y unchecked
+    function INSTRUCCION_CHECKED() {
+        expect("palabraReservada"); // checked
+        BLOQUE_CODIGO(); // Bloque de código protegido contra desbordamientos
+    }
+
+    function INSTRUCCION_UNCHECKED() {
+        expect("palabraReservada"); // unchecked
+        BLOQUE_CODIGO(); // Bloque de código que permite desbordamientos
+    }
+    // ------------------------------------------------------------------------------------------------------
+    // Instrucción Try-Catch
+    function INSTRUCCION_TRYCATCH() {
+        expect("palabraReservada"); // try
+        BLOQUE_CODIGO(); // Bloque asociado al try
+
+        // Procesar uno o más bloques "catch"
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type === "palabraReservada" &&
+            tokens[currentIndex]?.value === "catch"
+        ) {
+            expect("palabraReservada"); // catch
+            expect("parentesisApertura"); // (
+            if (
+                tokens[currentIndex]?.type === "excepciones" &&
+                ["Exception", "IndexOutOfRangeException", "NullReferenceException", "FormatException"].includes(tokens[currentIndex]?.value)
+            ) {
+                expect("excepciones"); // Tipo de excepción
+                expect("identificador"); // Nombre de la variable de excepción (opcional)
+            } else {
+                throw new Error(
+                    `Error sintáctico: Se esperaba un tipo de excepción válido en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+                );
+            }
+            expect("parentesisCierre"); // )
+            BLOQUE_CODIGO(); // Bloque asociado al catch
+        }
+
+        /*
+        // Bloque opcional "finally"
+        if (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type === "palabraReservada" &&
+            tokens[currentIndex]?.value === "finally"
+        ) {
+            expect("palabraReservada"); // finally
+            BLOQUE_CODIGO(); // Bloque asociado al finally
+        }
+        */
+    }
+
+    // ---------------------------------------------
+
+    function INSTRUCCION_READKEY() {
+        expect("consoleReadKey"); // console.readkey;
+        expect("parentesisApertura"); // (
+        expect("parentesisCierre"); // )
+        expect("delimitador"); // ;
+    }
+
+    function INSTRUCCION_USING() {
+        expect("palabraReservada"); // using;
+        expect("palabraReservada"); // system;
+        expect("delimitador"); // ;
+    }

@@ -1,0 +1,3 @@
+else if (tokens[currentIndex]?.type === "identificador" || tokens[currentIndex]?.type === "literalNumerica") {
+                EXPRESION(); // Valida la expresión
+            } 

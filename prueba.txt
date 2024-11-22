@@ -148,29 +148,45 @@ bool variable_boleana = false;
 
 
 
+
+
+// LO DEJO PENDIENTE-----------------------------------------
+// asignacion de variable
+
+promedio = (5 + id3 + var)/3;
+
+leer = console.readline(); 
+
+tamanioArreglo = numeros.length;
+
+mayor = math.max(5, 1);
+mayor = math.max(id1, id2);
+
+textoMayus = texto.toUpper();
+textoMinus = texto.toLower();
+
+
+
+
+
+console.readkey();
+
+
+
+
+
+
+
+
+
+
+
 // LO DEJO PENDIENTE-----------------------------------------
 // declaracion de arreglo
 int[] arregloInt = { 1, 2, 3, 4, 5 };
 string[] arregloStr = { "Hola", "Mundo" };
 double[] arregloDou = { 1.2, 3.4, 5.6 };
 bool[] arregloBoo = { true, false, true, true };
-
-
-// LO DEJO PENDIENTE-----------------------------------------
-// asignacion de variable
-
-x = "Hola ";
-y = "Mundo"
-z = x + y;
-A = (5 + id3 + var)/3;
-B = console.readline(); 
-C = numeros.length;
-
-
-
-
-
-
 
 
 

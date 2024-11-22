@@ -1,51 +1,24 @@
 console.writeline
 if
 else
-while
-do
+while, do
 for
-switch
-case
-default
-break
-return
-checked
-unchecked
-try
-catch
-int
-double
-string
-bool
-Exception
-IndexOutOfRangeException
-NullReferenceException
-FormatException
-
-
-Console.ReadLine()
+switch, case, default, break
+checked, unchecked
+try, catch, Exception, IndexOutOfRangeException, NullReferenceException, FormatException
+int, double, string, bool
 Console.ReadKey()
-array.Length
-Array.Copy()
--->>> sizeof()
-nameof()
+using System.IO
+console.readline()
+Math.Max()
+Math.Min()
 ToLower()
 ToUpper()
-lock
-object 
-new
-return
-using System.IO
-Math.Max()
-is
 
-/*
-asi funciona el is:
-object obj = "Este es un string";
-if (obj is string)
-{
-    Console.WriteLine("El objeto es una cadena");
-}
-*/
+array.Length
+Array.Copy()
 
+sizeof()
+nameof()
+lock, object , new, return
 
