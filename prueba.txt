@@ -141,7 +141,7 @@ string variable3;
 bool variable4;
 
 int variable_entera = 5;
-double variable_decimal = 2.5;
+
 string variable_texto = "Hola mundo";
 bool variable_boleana = false;
 
@@ -149,21 +149,10 @@ bool variable_boleana = false;
 
 
 
-
-// LO DEJO PENDIENTE-----------------------------------------
-// asignacion de variable
-
+x = a + b;
+abc_123 = 1 + hola - (4 + 5);
 promedio = (5 + id3 + var)/3;
-
-leer = console.readline(); 
-
-tamanioArreglo = numeros.length;
-
-mayor = math.max(5, 1);
-mayor = math.max(id1, id2);
-
-textoMayus = texto.toUpper();
-textoMinus = texto.toLower();
+x = (5);
 
 
 
@@ -172,16 +161,19 @@ textoMinus = texto.toLower();
 console.readkey();
 
 
+leer = console.readline();
+
+mayus = txt.ToUpper();
+minus = txt.ToLower();
+
+mayor = math.max(5, 1);
+menor = math.min(id, id2);
 
 
 
 
 
 
-
-
-
-// LO DEJO PENDIENTE-----------------------------------------
 // declaracion de arreglo
 int[] arregloInt = { 1, 2, 3, 4, 5 };
 string[] arregloStr = { "Hola", "Mundo" };
@@ -203,3 +195,7 @@ bool[] arregloBoo = { true, false, true, true };
 
 
 
+
+
+
+double variable_decimal = 2.5; // ESTA LE FALTA CORREJIR EL PUNTO

@@ -17,8 +17,7 @@ ToUpper()
 
 array.Length
 Array.Copy()
+metodo
+main
 
-sizeof()
-nameof()
-lock, object , new, return
 

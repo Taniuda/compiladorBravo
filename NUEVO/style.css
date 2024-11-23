@@ -9,7 +9,7 @@
 body {
     font-family: Arial, sans-serif;
     background-color: rgb(21, 21, 21);
-    color: aqua;
+    color: rgb(255, 0, 0);
 }
 textarea {
     width: 100%;
@@ -17,12 +17,12 @@ textarea {
     font-family: monospace;
     font-size: 16px;
     background-color: rgb(21, 21, 21);
-    color: aqua;
-    border-color: aqua;;
+    color: rgb(255, 0, 0);
+    border-color: rgb(255, 0, 0);
 }
 button {
     margin-top: 10px;
     background-color: rgb(21, 21, 21);
-    color: aqua;
+    color: rgb(255, 0, 0);
 }
 
