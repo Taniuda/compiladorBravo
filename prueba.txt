@@ -173,12 +173,10 @@ menor = math.min(id, id2);
 
 
 
+int [] arregloInt = { 1, 2, 3, 4, 5 };
+string [] arregloStr = { "Hola", "Mundo" };
 
-// declaracion de arreglo
-int[] arregloInt = { 1, 2, 3, 4, 5 };
-string[] arregloStr = { "Hola", "Mundo" };
-double[] arregloDou = { 1.2, 3.4, 5.6 };
-bool[] arregloBoo = { true, false, true, true };
+bool [] arregloBoo = { true, false, true, true };
 
 
 
@@ -193,9 +191,7 @@ bool[] arregloBoo = { true, false, true, true };
 
 
 
+//double variable_decimal = 2.5;
+//double [] arregloDou = { 1.2, 3.4, 5.6 };
 
 
-
-
-
-double variable_decimal = 2.5; // ESTA LE FALTA CORREJIR EL PUNTO
