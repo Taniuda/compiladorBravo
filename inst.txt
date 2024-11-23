@@ -14,8 +14,8 @@ Math.Max()
 Math.Min()
 ToLower()
 ToUpper()
-
 array.Length
+
 Array.Copy()
 metodo
 main

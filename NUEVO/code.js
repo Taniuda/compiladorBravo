@@ -8,7 +8,7 @@ const tokenDefinitions = [
     { type: "asignacion", regex: /^\=$/ },
 
     // palabras reservadas
-    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|return|checked|unchecked|try|catch|int|double|string|bool|using|system)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|return|checked|unchecked|try|catch|int|double|string|bool|using|system|array)$/ },
     { type: "excepciones", regex: /^(Exception|IndexOutOfRangeException|NullReferenceException|FormatException)$/ },
     { type: "toUpper", regex: /^toUpper$/i },
     { type: "toLower", regex: /^toLower$/i },
@@ -19,6 +19,8 @@ const tokenDefinitions = [
     { type: "math", regex: /^math$/i },
     { type: "max", regex: /^max$/i },
     { type: "min", regex: /^min$/i },
+    { type: "length", regex: /^length$/i },
+    { type: "copy", regex: /^copy$/i },
     
     // elementos de valores
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
@@ -387,6 +389,22 @@ function parse(tokens)
         expect("palabraReservada"); // system;
         expect("delimitador"); // ;
     }
+
+    function INSTRUCCION_ARRAY_COPY() {
+        expect("palabraReservada"); // Verifica "Array"
+        expect("conector"); // Verifica "."
+        expect("copy"); // Verifica "Copy"
+    
+        expect("parentesisApertura"); // "("
+        expect("identificador"); // sourceArray
+        expect("separador"); // ","
+        expect("identificador"); // destinationArray
+        expect("separador"); // ","
+        expect("literalNumerica"); // length
+        expect("parentesisCierre"); // ")"
+        expect("delimitador"); // ";"
+    }
+    
     
 
     
@@ -578,7 +596,15 @@ function parse(tokens)
                 currentIndex++; // Avanza al tipo de método (ToUpper o ToLower)
                 expect("parentesisApertura"); // Verifica el paréntesis de apertura
                 expect("parentesisCierre"); // Verifica el paréntesis de cierre
-            }else {
+            } else if (tokens[currentIndex]?.type === "identificador" && 
+                    tokens[currentIndex + 1]?.type === "conector" && 
+                    tokens[currentIndex + 2]?.value === "length") 
+            {
+                currentIndex++; // Avanza al identificador (array)
+                expect("conector"); // Verifica el conector '.'
+                currentIndex++; // Avanza a "length"
+                // No hay paréntesis, así que no se requiere más validación
+            } else {
                 throw new Error(`Error sintáctico: Método o expresión no válido para la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
             }
     
@@ -758,26 +784,28 @@ function TERM() {
             } else if (tokens[currentIndex]?.value === "using") {
                 console.log("DECLARACION USING");
                 INSTRUCCION_USING();
+            } else if (tokens[currentIndex]?.value === "array" && tokens[currentIndex + 1]?.type === "conector" && tokens[currentIndex + 2]?.value.toLowerCase() === "copy") {
+                console.log("DECLARACION ARRAY COPY");
+                INSTRUCCION_ARRAY_COPY();
             } else {
                 throw new Error(`Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
             }
         } else if (tokens[currentIndex]?.type === "identificador") {
-            // Verificar si es una asignación de método
             if (
-                tokens[currentIndex + 1]?.type === "asignacion" &&
-                // Patrón específico para métodos como console.readline, txt.ToUpper, math.max, etc.
-                ((tokens[currentIndex + 2]?.value.toLowerCase() === "console" && 
-                  tokens[currentIndex + 3]?.type === "conector") ||
-                 (tokens[currentIndex + 2]?.value.toLowerCase() === "math" && 
-                  tokens[currentIndex + 3]?.type === "conector") ||
-                 (tokens[currentIndex + 2]?.type === "identificador" && 
-                  tokens[currentIndex + 3]?.type === "conector"))
+                tokens[currentIndex + 1]?.type === "asignacion" && // Verifica que haya un operador de asignación
+                (
+                    tokens[currentIndex + 2]?.type !== "parentesisApertura" && // No puede empezar con paréntesis de apertura
+                    tokens[currentIndex + 2]?.type !== "literalNumerica" && // No puede ser una literal numérica
+                    (
+                        tokens[currentIndex + 2]?.type !== "identificador" || // Si es un identificador...
+                        tokens[currentIndex + 3]?.type !== "operadorAritmetico" // ...entonces NO debe ser seguido por un operador aritmético
+                    )
+                )
             ) {
                 console.log("ASIGNACION METODO");
                 ASIGNACION_METODO();
             } else {
-                // Si no es un método, debe ser una asignación normal
-                console.log("ASIGNAION VARIABLE");
+                console.log("ASIGNACION VARIABLE");
                 ASIGNACION_VARIABLE();
             }
         } else if (

@@ -186,7 +186,13 @@ bool [] arregloBoo = { true, false, true, true };
 
 
 
+tamanio = arreglo.length;
 
+
+
+
+
+array.copy(origen, destino, 6);
 
 
 
