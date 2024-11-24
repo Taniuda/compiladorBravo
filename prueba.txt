@@ -1,29 +1,17 @@
 // esto es un comentario...
 
-
-
-
-
 console.writeline("Literal de Cadena");
 console.writeline(identificador);
 console.writeline("texto", var);
 
-
-
-
-
-
-
 if(variable == 5){
     // bloque de codigo
 }
-
 if(variable != 5){
     // condicion #1
 } else {
     // extra
 }
-
 if(variable <= 5){
     // condicion #1
 } else if (variable >= 5) {
@@ -32,43 +20,20 @@ if(variable <= 5){
     // extra
 }
 
-
-
-
-
-
-
-
 while(variable > 5){
     // bloque de codigo
 }
-
 // ESTA YA ME SALE
 do {
     // bloque de codigo
 } while(variable > 5);
 
-
-
-
-
-
-
-
-
 for(i = 0; i < 5; i++){
     // bloque de codigo
 }
-
 for(int i = 0; i < 5; i++){
     // bloque de codigo
 }
-
-
-
-
-
-
 
 switch(opc){
     case 1 :
@@ -77,7 +42,6 @@ switch(opc){
     case 2 : 
         // codigo #2
 }
-
 switch(opc){
     case 1 :
         // codigo #1
@@ -93,48 +57,27 @@ switch(opc){
 }
 
 
-
-
-
-
-
-
 //checked garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
 //unchecked permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
-
-
 unchecked{
     //comentario
 }
-
 checked{
     //comentario
 }
-
-
-
-
-
-
 
 try{
     //comentario
 } catch(Exception ex){
     //comentario
 }
-
 try{
     //comentario
 } catch(IndexOutOfRangeException c){
     //comentario
 }
 
-
-
-
-
 //declaracion de variable
-
 int variable1;
 double variable2;
 string variable3;
@@ -145,59 +88,47 @@ int variable_entera = 5;
 string variable_texto = "Hola mundo";
 bool variable_boleana = false;
 
-
-
-
-
 x = a + b;
 abc_123 = 1 + hola - (4 + 5);
 promedio = (5 + id3 + var)/3;
 x = (5);
 
-
-
-
-
 console.readkey();
-
-
 leer = console.readline();
-
 mayus = txt.ToUpper();
 minus = txt.ToLower();
-
 mayor = math.max(5, 1);
 menor = math.min(id, id2);
-
-
-
-
+tamanio = arreglo.length;
+array.copy(origen, destino, 6);
 
 int [] arregloInt = { 1, 2, 3, 4, 5 };
-string [] arregloStr = { "Hola", "Mundo" };
 
+string [] arregloStr = { "Hola", "Mundo" };
 bool [] arregloBoo = { true, false, true, true };
 
+public static void Metodo(){
+
+}
+private static int Metodo(int variable){
+    return variable;
+}
+public static void Hola() {
+    // código
+}
+public static int MetodoDevuelve() {
+    // código
+    return var;
+}
 
 
 
 
 
 
-
-
-tamanio = arreglo.length;
-
-
-
-
-
-array.copy(origen, destino, 6);
 
 
 
 
 //double variable_decimal = 2.5;
 //double [] arregloDou = { 1.2, 3.4, 5.6 };
-
-

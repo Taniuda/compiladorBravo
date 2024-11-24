@@ -1,12 +1,10 @@
 console.writeline
-if
-else
+if, else
 while, do
 for
 switch, case, default, break
 checked, unchecked
 try, catch, Exception, IndexOutOfRangeException, NullReferenceException, FormatException
-int, double, string, bool
 Console.ReadKey()
 using System.IO
 console.readline()
@@ -15,9 +13,6 @@ Math.Min()
 ToLower()
 ToUpper()
 array.Length
-
 Array.Copy()
 metodo
 main
-
-
