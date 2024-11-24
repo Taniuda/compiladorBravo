@@ -28,7 +28,9 @@ const tokenDefinitions = [
     
     // elementos de valores
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
-    { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?$/ },
+    { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?(f|F)?$/ }, // Detectar números decimales correctamente
+    { type: "conector", regex: /^\.$/ }, // Punto como separador general
+
     { type: "literalCadena", regex: /^"([^"]*)"$/ }, // Aceptar espacios y caracteres especiales dentro de comillas
     { type: "literalBooleana", regex: /^(true|false)$/ }, // Booleanos
 
@@ -70,7 +72,7 @@ function tokenize(code) {
             .replace(/([{}();,])/g, " $1 ") // Separar delimitadores comunes
             .replace(/(\[\])/g, " $1 ") // Separar [] como unidad
             .replace(/(\+\+|--|[+\-*/%=><!]=?)/g, " $1 ") // Separar operadores
-            .replace(/(\w+\.\w+)/g, (match) => match.split(".").join(" . ")) // Separar palabras unidas por puntos
+            .replace(/([a-zA-Z_]+\.[a-zA-Z_]+)/g, (match) => match.split(".").join(" . "))
             .trim()
             .match(/"[^"]*"|\S+/g); // Mantener cadenas y dividir palabras
 
