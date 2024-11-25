@@ -131,16 +131,7 @@ function parse(tokens)
             }
             
             expect("parentesisApertura"); // Verificar el paréntesis de apertura "("
-            
-            // Procesar múltiples expresiones separadas por comas
-            do {
-                EXPRESION(); // Procesar una cadena o identificador
-                if (tokens[currentIndex]?.type === "operadorAritmetico" && tokens[currentIndex].value === "+") {
-                    currentIndex++; // Avanzar sobre la coma
-                } else {
-                    break; // No hay más elementos separados por comas
-                }
-            } while (currentIndex < tokens.length);
+            concatenacion();
             
             expect("parentesisCierre"); // Verificar el paréntesis de cierre ")"
             expect("delimitador"); // Verificar el punto y coma ";"
@@ -814,7 +805,24 @@ function parse(tokens)
     }
     
 
-
+    function concatenacion() {
+        // Procesar el primer término de la expresión
+        TERM(); // Aquí asumes que TERM procesa términos como cadenas o identificadores
+    
+        // Verificar que solo haya operadores de concatenación "+"
+        while (tokens[currentIndex]?.type === "operadorAritmetico") {
+            const operador = tokens[currentIndex]?.value;
+    
+            // Solo permitir el operador "+"
+            if (operador !== "+") {
+                throw new Error(`Error sintáctico: El operador '${operador}' no es permitido en una concatenación (solo se permite '+') en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+            }
+    
+            currentIndex++; // Avanzar al siguiente operador
+            TERM(); // Procesar el siguiente término
+        }
+    }
+    
     
     
 
