@@ -8,7 +8,7 @@ const tokenDefinitions = [
     { type: "asignacion", regex: /^\=$/ },
 
     // palabras reservadas
-    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|checked|unchecked|try|catch|void|int|double|string|bool|using|system|array)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|checked|unchecked|try|catch|void|int|double|string|bool|using|system|array|length)$/ },
     { type: "excepciones", regex: /^(Exception|IndexOutOfRangeException|NullReferenceException|FormatException)$/ },
     { type: "modificadoresAcceso", regex: /^(public|private|protected|internal)$/ },
     { type: "static", regex: /^static$/i },
