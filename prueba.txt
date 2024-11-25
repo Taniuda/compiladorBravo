@@ -1,8 +1,8 @@
 // esto es un comentario...
 
-console.writeline("Literal de Cadena");
-console.writeline(identificador);
-console.writeline("texto", var);
+console.writeline("Hola Mundo!");
+console.writeline(variable);
+console.writeline("Texto " + var);
 
 if(variable == 5){
     // bloque de codigo
@@ -84,7 +84,7 @@ string variable3;
 bool variable4;
 
 int variable_entera = 5;
-
+double variable_decimal = 2.5;
 string variable_texto = "Hola mundo";
 bool variable_boleana = false;
 
@@ -103,7 +103,7 @@ tamanio = arreglo.length;
 array.copy(origen, destino, 6);
 
 int [] arregloInt = { 1, 2, 3, 4, 5 };
-
+double [] arregloDou = { 1.2, 3.4, 5.6 };
 string [] arregloStr = { "Hola", "Mundo" };
 bool [] arregloBoo = { true, false, true, true };
 
@@ -120,15 +120,3 @@ public static int MetodoDevuelve() {
     // código
     return var;
 }
-
-
-
-
-
-
-
-
-
-
-//double variable_decimal = 2.5;
-//double [] arregloDou = { 1.2, 3.4, 5.6 };

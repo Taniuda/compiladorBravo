@@ -135,7 +135,7 @@ function parse(tokens)
             // Procesar múltiples expresiones separadas por comas
             do {
                 EXPRESION(); // Procesar una cadena o identificador
-                if (tokens[currentIndex]?.type === "separador" && tokens[currentIndex].value === ",") {
+                if (tokens[currentIndex]?.type === "operadorAritmetico" && tokens[currentIndex].value === "+") {
                     currentIndex++; // Avanzar sobre la coma
                 } else {
                     break; // No hay más elementos separados por comas
