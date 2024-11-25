@@ -8,7 +8,7 @@ const tokenDefinitions = [
     { type: "asignacion", regex: /^\=$/ },
 
     // palabras reservadas
-    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|checked|unchecked|try|catch|void|int|double|string|bool|using|system|array|length)$/ },
+    { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|checked|unchecked|try|catch|void|int|double|string|bool|using|system|array|length|Main|args|class|in)$/ },
     { type: "excepciones", regex: /^(Exception|IndexOutOfRangeException|NullReferenceException|FormatException)$/ },
     { type: "modificadoresAcceso", regex: /^(public|private|protected|internal)$/ },
     { type: "static", regex: /^static$/i },
@@ -256,8 +256,48 @@ function parse(tokens)
         // Bloque de código
         BLOQUE_CODIGO();
     }
-
-
+    function INSTRUCCION_FOREACH() {
+        expect("palabraReservada"); // foreach
+        expect("parentesisApertura"); // (
+    
+        // Procesar el contenido dentro de los paréntesis
+        procesarParentesisForeach();
+    
+        expect("parentesisCierre"); // )
+    
+        // Bloque de código
+        BLOQUE_CODIGO();
+    }
+    
+    // Función auxiliar para manejar el contenido de los paréntesis en el foreach
+    function procesarParentesisForeach() {
+        // Declaración del identificador
+        if (tokens[currentIndex]?.type === "palabraReservada" && ["int", "double", "string", "bool"].includes(tokens[currentIndex]?.value)) {
+            // Caso con tipo de dato explícito (como en un for tradicional)
+            expect("palabraReservada"); // tipo de dato (int, double, etc.)
+            expect("identificador"); // identificador (por ejemplo, "elemento")
+        } else if (tokens[currentIndex]?.type === "identificador") {
+            // Si no hay tipo de dato explícito, asumimos que es una variable simple (por ejemplo, `elemento` en `foreach elemento in arreglo`)
+            expect("identificador"); // identificador (por ejemplo, "elemento")
+        } else {
+            throw new Error(
+                `Error sintáctico: Se esperaba un tipo de dato o un identificador en la declaración del foreach en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+            );
+        }
+    
+        expect("palabraReservada", "in"); // in
+        expect("identificador"); // Aquí debería estar la colección o iterable sobre la cual iterar (ejemplo: arreglo)
+    }
+    
+    // Función para esperar y verificar el tipo y valor de un token
+    function expect(tipo, valor) {
+        if (tokens[currentIndex]?.type !== tipo || (valor && tokens[currentIndex]?.value !== valor)) {
+            throw new Error(`Error sintáctico: Se esperaba un token de tipo ${tipo}${valor ? ` con valor "${valor}"` : ''}, pero se encontró ${tokens[currentIndex]?.type} en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
+        currentIndex++; // Avanzamos al siguiente token
+    }
+    
+    
     
     // -------------------------------------------------------------------------------------------------------------
     // instruccion switch
@@ -728,6 +768,15 @@ function parse(tokens)
     }
 
 
+
+
+    
+
+
+
+
+
+
     function DECLARACION_METODO() {
         // Verifica que el primer token sea un modificador de acceso
         expect("modificadoresAcceso"); // public, private, etc.
@@ -824,7 +873,83 @@ function parse(tokens)
     }
     
     
+    let isMainDeclared = false;  // Variable global para verificar si "Main" ya fue declarado
+
+// Función independiente para declarar el método Main
+function DECLARACION_MAIN() {
     
+    
+    // Verifica que el primer token sea un modificador de acceso (por ejemplo, public)
+    expect("modificadoresAcceso");
+
+    // Verifica si el siguiente token es 'static' (debe serlo para Main)
+    if (tokens[currentIndex]?.type !== "static") {
+        throw new Error(
+            `Error sintáctico: Se esperaba 'static' en la declaración de 'Main' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+        );
+    }
+    currentIndex++; // Avanza al siguiente token después de 'static'
+
+    // Verifica el tipo de retorno (debe ser 'void' para Main)
+    const returnType = tokens[currentIndex]?.value;
+    if (returnType !== "void") {
+        throw new Error(
+            `Error sintáctico: El método 'Main' debe ser de tipo 'void', encontrado '${returnType}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+        );
+    }
+    currentIndex++; // Avanza al siguiente token después de 'void'
+
+    // Verifica el identificador (el nombre del método debe ser "Main")
+    const methodName = tokens[currentIndex]?.value;
+    if (methodName !== "Main") {
+        throw new Error(
+            `Error sintáctico: Se esperaba 'Main' como nombre de método, encontrado '${methodName}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+        );
+    }
+    currentIndex++; // Avanza al siguiente token después de 'Main'
+    
+    // Asegura que solo haya una declaración del método 'Main'
+    if (isMainDeclared) {
+        throw new Error("Error: El método 'Main' ya ha sido declarado.");
+    }
+    isMainDeclared = true;  // Marca que 'Main' ha sido declarado
+
+    // Verifica el paréntesis de apertura (debe haber paréntesis después del nombre de 'Main')
+    expect("parentesisApertura");
+
+    // Verifica que el parámetro sea exactamente "string[]" seguido de "args"
+    // Verifica que el tipo del parámetro sea "string[]"
+    if (tokens[currentIndex]?.value !== "string" || tokens[currentIndex + 1]?.value !== "[]") {
+        throw new Error(
+            `Error sintáctico: Se esperaba 'string[]' como tipo de parámetro, encontrado '${tokens[currentIndex]?.value} ${tokens[currentIndex + 1]?.value}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+        );
+    }
+    currentIndex += 2; // Avanza después de "string[]"
+
+    // Verifica que el siguiente token sea el identificador 'args'
+    if (tokens[currentIndex]?.type !== "palabraReservada" || tokens[currentIndex]?.value !== "args") {
+        throw new Error(
+            `Error sintáctico: Se esperaba el identificador 'args', encontrado '${tokens[currentIndex]?.value}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
+        );
+    }
+    currentIndex++; // Avanza después de "args"
+
+    // Verifica que no haya más parámetros ni comas, ya que solo debe haber 'string[] args'
+    if (tokens[currentIndex]?.type === "delimitador" || tokens[currentIndex]?.type === "identificador" || tokens[currentIndex]?.type === "palabraReservada") {
+        throw new Error(
+            "Error sintáctico: El método 'Main' solo puede aceptar el parámetro 'string[] args'."
+        );
+    }
+
+    // Verifica el paréntesis de cierre
+    expect("parentesisCierre");
+
+    // Verifica el bloque de código (debe ser un bloque de código vacío o con instrucciones dentro)
+    BLOQUE_CODIGO();  // 'Main' no debe devolver nada, por lo que 'false' es adecuado aquí
+}
+
+
+
 
 // -------------------------------------------------------------------------------------------------------------
 // METODOS COMPARTIDOS
@@ -882,8 +1007,36 @@ function parse(tokens)
         expect("llaveCierre"); // }
     }
 
+    function BLOQUE_CODIGO_CLASS() {
+        expect("llaveApertura"); // {
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type !== "llaveCierre"
+        ) {
+            
+            DECLARACION_MAIN();
+        }
+        expect("llaveCierre"); // }
+    }
+
+let isClassDeclarado=false;
+    function DECLARACION_CLASS(){
+        expect("palabraReservada");
+        expect("identificador");
+        BLOQUE_CODIGO_CLASS();
+        if (isClassDeclarado) {
+            throw new Error("Error:La clase ya ha sido creada.");
+        }
+    }
+
     // ------------------------------------------------------------------------------------------------------------------------------
     function INSTRUCCION() {
+       
+       if (isMainDeclared && tokens[currentIndex]?.value === "class") {
+        throw new Error(`Error sintáctico: No se puede declarar una clase dentro del método 'Main' en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+    }
+       
+       
         if (tokens[currentIndex]?.type === "comentarioLinea") {
             console.log("DECLARACION COMENTARIO");
             INSTRUCCION_COMENTARIO();
@@ -913,6 +1066,9 @@ function parse(tokens)
             } else if (tokens[currentIndex]?.value === "for") {
                 console.log("DECLARACION FOR");
                 INSTRUCCION_FOR();
+            } else if (tokens[currentIndex]?.value === "foreach"){
+                 INSTRUCCION_FOREACH();   
+            
             } else if (tokens[currentIndex]?.value === "try") {
                 console.log("DECLARACION TRY");
                 INSTRUCCION_TRYCATCH();
@@ -922,9 +1078,12 @@ function parse(tokens)
             } else if (tokens[currentIndex]?.value === "unchecked") {
                 console.log("DECLARACION UNCHECKED");
                 INSTRUCCION_UNCHECKED();
-            } else if (tokens[currentIndex]?.value === "using") {
+            } else if (tokens[currentIndex]?.value === "using") { // para que la recuerdes...
                 console.log("DECLARACION USING");
                 INSTRUCCION_USING();
+            } else if (tokens[currentIndex]?.value === "class") { // para que la recuerdes...
+                console.log("DECLARACION CLASS");
+                DECLARACION_CLASS();
             } else if (tokens[currentIndex]?.value === "array" && tokens[currentIndex + 1]?.type === "conector" && tokens[currentIndex + 2]?.value.toLowerCase() === "copy") {
                 console.log("DECLARACION ARRAY COPY");
                 INSTRUCCION_ARRAY_COPY();
@@ -963,9 +1122,17 @@ function parse(tokens)
         ) {
             console.log("DECLARACION READKEY");
             INSTRUCCION_READKEY();
-        } else if (tokens[currentIndex]?.type === "modificadoresAcceso") {
-            console.log("DECLARACION METODO");
-            DECLARACION_METODO();
+        } else if (tokens[currentIndex]?.type === "modificadoresAcceso") { // ESTA VA DENTRO DE CLASS
+            if (
+                tokens[currentIndex + 2]?.value === "Main" ||
+                tokens[currentIndex + 3]?.value === "Main"
+            ) {
+                console.log("DECLARACION MAIN");
+                DECLARACION_MAIN();
+            } else {
+                console.log("DECLARACION METODO");
+                DECLARACION_METODO();
+            }
         } else {
             throw new Error(`Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
         }
