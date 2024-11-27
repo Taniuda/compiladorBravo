@@ -26,7 +26,6 @@ const tokenDefinitions = [
     { type: "math", regex: /^math$/i },
     { type: "max", regex: /^max$/i },
     { type: "min", regex: /^min$/i },
-    { type: "length", regex: /^length$/i },
     { type: "copy", regex: /^copy$/i },
     { type: "return", regex: /^return$/i },
     

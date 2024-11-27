@@ -59,6 +59,8 @@ switch(opc){
 
 //checked garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
 //unchecked permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
+
+
 unchecked{
     //comentario
 }
@@ -71,6 +73,8 @@ try{
 } catch(Exception ex){
     //comentario
 }
+
+
 try{
     //comentario
 } catch(IndexOutOfRangeException c){
