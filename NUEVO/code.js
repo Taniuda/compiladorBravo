@@ -5,7 +5,11 @@ const tokenDefinitions = [
     { type: "decremento", regex: /^--/ },
     { type: "operadorAritmetico", regex: /^[+\-*/%]$/ }, // +, -, *, /, %
     { type: "operadorRelacional", regex: /^(<|>|<=|>=|==|!=)$/ }, // <, >, <=, >=, ==, !=
+    { type: "operadorBoleano", regex: /^(\&\&|\|\|)$/ },
     { type: "asignacion", regex: /^\=$/ },
+    { type: "operadorNegacion", regex: /^\!$/ },
+    { type: "intParse", regex: /^int\.parse$/i },
+    { type: "DoubleParse", regex: /^double\.parse$/i },
 
     // palabras reservadas
     { type: "palabraReservada", regex: /^(if|else|while|do|for|switch|case|default|break|checked|unchecked|try|catch|void|int|double|string|bool|using|system|array|length|Main|args|class|in)$/ },
@@ -72,6 +76,7 @@ function tokenize(code) {
             .replace(/([{}();,])/g, " $1 ") // Separar delimitadores comunes
             .replace(/(\[\])/g, " $1 ") // Separar [] como unidad
             .replace(/(\+\+|--|[+\-*/%=><!]=?)/g, " $1 ") // Separar operadores
+            //.replace(/(\()|(\))/g, " $1$2 ")
             .replace(/([a-zA-Z_]+\.[a-zA-Z_]+)/g, (match) => match.split(".").join(" . "))
             .trim()
             .match(/"[^"]*"|\S+/g); // Mantener cadenas y dividir palabras
@@ -877,19 +882,11 @@ function parse(tokens)
 
 // Función independiente para declarar el método Main
 function DECLARACION_MAIN() {
-    
-    
-    // Verifica que el primer token sea un modificador de acceso (por ejemplo, public)
     expect("modificadoresAcceso");
-
-    // Verifica si el siguiente token es 'static' (debe serlo para Main)
     if (tokens[currentIndex]?.type !== "static") {
-        throw new Error(
-            `Error sintáctico: Se esperaba 'static' en la declaración de 'Main' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
-        );
+        throw new Error(`Error sintáctico: Se esperaba 'static' en la declaración de 'Main' en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
     }
     currentIndex++; // Avanza al siguiente token después de 'static'
-
     // Verifica el tipo de retorno (debe ser 'void' para Main)
     const returnType = tokens[currentIndex]?.value;
     if (returnType !== "void") {
@@ -951,13 +948,82 @@ function DECLARACION_MAIN() {
 
 
 
+
+
+    let isClassDeclarado=false;
+    function DECLARACION_CLASS(){
+        expect("palabraReservada");
+        expect("identificador");
+        BLOQUE_CODIGO_CLASS();
+        if (isClassDeclarado) {
+            throw new Error("Error:La clase ya ha sido creada.");
+        }
+        isClassDeclarado = true;
+    }
+
+    function BLOQUE_CODIGO_CLASS() {
+        expect("llaveApertura"); // {
+        while (
+            currentIndex < tokens.length &&
+            tokens[currentIndex]?.type !== "llaveCierre"
+        ) {
+            
+            DECLARACION_MAIN();
+        }
+        expect("llaveCierre"); // }
+    }
+
+
+
+
+
+
+
+
+
+
 // -------------------------------------------------------------------------------------------------------------
 // METODOS COMPARTIDOS
-    function COMPARACION() {
-        ELEMENTO();
-        expect("operadorRelacional"); // ==, <, etc.
-        ELEMENTO();
+function COMPARACION() {
+    // Evaluar la primera parte de la comparación
+    PROCESAR_COMPARACION();
+
+    // Manejar operadores booleanos opcionales (AND, OR)
+    while (tokens[currentIndex]?.type === "operadorBoleano") {
+        currentIndex++; // Avanzar al operador booleano (&&, ||)
+        PROCESAR_COMPARACION(); // Evaluar la siguiente comparación
     }
+}
+
+// Función para procesar comparaciones con o sin negación
+function PROCESAR_COMPARACION() {
+    // Verificar si hay un operador de negación '!'
+    if (tokens[currentIndex]?.value === "!") {
+        currentIndex++; // Avanzar al operador '!'
+        if (tokens[currentIndex]?.type === "parentesisApertura") {
+            currentIndex++; // Abrir paréntesis
+            COMPARACION(); // Evaluar comparación dentro de los paréntesis
+            expect("parentesisCierre"); // Verificar que se cierre el paréntesis
+        } else {
+            // Evaluar la comparación fuera de paréntesis
+            ELEMENTO(); // Validar el primer elemento
+            expect("operadorRelacional"); // Validar operador relacional
+            ELEMENTO(); // Validar el segundo elemento
+        }
+    } else if (tokens[currentIndex]?.type === "parentesisApertura") {
+        // Si la comparación comienza con un paréntesis
+        currentIndex++; // Abrir paréntesis
+        COMPARACION(); // Evaluar comparación dentro del paréntesis
+        expect("parentesisCierre"); // Verificar que se cierre el paréntesis
+    } else {
+        // Evaluar comparación simple sin paréntesis ni negación
+        ELEMENTO(); // Validar el primer elemento
+        expect("operadorRelacional"); // Validar operador relacional
+        ELEMENTO(); // Validar el segundo elemento
+    }
+}
+
+
     function ELEMENTO() {
         if (
             tokens[currentIndex]?.type === "identificador" ||
@@ -970,6 +1036,7 @@ function DECLARACION_MAIN() {
             );
         }
     }
+      
     function ELEMENTO_INC_DEC() {
         if (
             tokens[currentIndex]?.type === "incremento" ||
@@ -994,7 +1061,7 @@ function DECLARACION_MAIN() {
         }
     }
     
-    // ------------------------------------------------------------------------------------------------------------------------------
+    
     // es el que permite bloques de codigo
     function BLOQUE_CODIGO() {
         expect("llaveApertura"); // {
@@ -1006,36 +1073,12 @@ function DECLARACION_MAIN() {
         }
         expect("llaveCierre"); // }
     }
-
-    function BLOQUE_CODIGO_CLASS() {
-        expect("llaveApertura"); // {
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type !== "llaveCierre"
-        ) {
-            
-            DECLARACION_MAIN();
-        }
-        expect("llaveCierre"); // }
-    }
-
-let isClassDeclarado=false;
-    function DECLARACION_CLASS(){
-        expect("palabraReservada");
-        expect("identificador");
-        BLOQUE_CODIGO_CLASS();
-        if (isClassDeclarado) {
-            throw new Error("Error:La clase ya ha sido creada.");
-        }
-    }
-
     // ------------------------------------------------------------------------------------------------------------------------------
     function INSTRUCCION() {
        
        if (isMainDeclared && tokens[currentIndex]?.value === "class") {
         throw new Error(`Error sintáctico: No se puede declarar una clase dentro del método 'Main' en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
     }
-       
        
         if (tokens[currentIndex]?.type === "comentarioLinea") {
             console.log("DECLARACION COMENTARIO");
@@ -1067,8 +1110,8 @@ let isClassDeclarado=false;
                 console.log("DECLARACION FOR");
                 INSTRUCCION_FOR();
             } else if (tokens[currentIndex]?.value === "foreach"){
-                 INSTRUCCION_FOREACH();   
-            
+                console.log("DECLARACION FOReach");
+                INSTRUCCION_FOREACH();   
             } else if (tokens[currentIndex]?.value === "try") {
                 console.log("DECLARACION TRY");
                 INSTRUCCION_TRYCATCH();
@@ -1124,7 +1167,7 @@ let isClassDeclarado=false;
             INSTRUCCION_READKEY();
         } else if (tokens[currentIndex]?.type === "modificadoresAcceso") { // ESTA VA DENTRO DE CLASS
             if (
-                tokens[currentIndex + 2]?.value === "Main" ||
+                tokens[currentIndex + 2]?.value === "Main" ||   //PREGUNTA SI EL NOMBRE DEL METODO ES MAIN
                 tokens[currentIndex + 3]?.value === "Main"
             ) {
                 console.log("DECLARACION MAIN");

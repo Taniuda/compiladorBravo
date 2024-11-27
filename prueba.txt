@@ -12,7 +12,7 @@ if(variable != 5){
 } else {
     // extra
 }
-if(variable <= 5){
+if(a >= 5 || a <= 10 && chopita != misopa){
     // condicion #1
 } else if (variable >= 5) {
     // condicion #2
@@ -119,4 +119,50 @@ public static void Hola() {
 public static int MetodoDevuelve() {
     // código
     return var;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+tamanio.length + 1;
+leer = int.Parse(console.readline());
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+using System;
+
+class Hola {
+    public static void Main(string[] args){
+    }
 }
