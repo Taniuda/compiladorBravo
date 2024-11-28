@@ -77,6 +77,7 @@ function tokenize(code) {
             if (tokenType) {
                 tokens.push({ type: tokenType, value: word, line: lineNumber + 1 });
                 console.log(`${tokenType},"${word}", Línea: ${lineNumber + 1}`);//MOSTRAR EN CONSOLA LOS TOKENS
+                
             } else {
                 errors.push(`Token no reconocido en la línea ${lineNumber + 1}: "${word}"`);
             }
@@ -654,17 +655,24 @@ function parse(tokens)
 
 
     function ASIGNACION_VARIABLE() {
-    // Verifica que el primer token sea un identificador
-    if (tokens[currentIndex]?.type === "identificador") {
-        const variable = tokens[currentIndex].value;
-        currentIndex++; // Avanza al siguiente token
-        
-        expect("asignacion");// Verifica el operador de asignación '='
-        EXPRESION();// Valida la expresión
-        expect("delimitador");// Verifica el delimitador ';'
-    } else {
-        throw new Error(`Error sintáctico: Se esperaba un identificador al inicio de la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
-    }
+        // Verifica que el primer token sea un identificador
+        if (tokens[currentIndex]?.type === "identificador") 
+        {
+            const variable = tokens[currentIndex].value;
+            currentIndex++; // Avanza al siguiente token
+            
+            expect("asignacion");// Verifica el operador de asignación '='
+            EXPRESION();// Valida la expresión
+            expect("delimitador");// Verifica el delimitador ';'
+
+            // Si se encuentra una declaración aritmética, generamos el árbol binario
+            //const arbolSintactico = analizarSintaxis(tokens);
+            //mostrarArbolSintactico(arbolSintactico, linea);
+            //aceptarSemanticaPorLinea[currentIndex] = true; // Activar semántica para esta línea
+        } else {
+            //aceptarSemanticaPorLinea[currentIndex] = false; // Desactivar semántica para esta línea
+            throw new Error(`Error sintáctico: Se esperaba un identificador al inicio de la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
+        }
     }
 
     function EXPRESION() {
@@ -1291,6 +1299,9 @@ function analyzeCode() {
 
     const { tokens, errors } = tokenize(codeInput);
 
+    // Mostrar tokens en la tabla
+    mostrarTokensEnTabla(tokens);
+
     if (errors.length > 0) {
         output.innerHTML = errors[0]; // Mostrar solo el primer error
         return;
@@ -1309,6 +1320,43 @@ function analyzeCode() {
 
 
 
+
+
+
+// analisis lexico
+function mostrarTokensEnTabla(tokens) {
+    const tablaTokens = document.getElementById("tablaTokens").getElementsByTagName('tbody')[0];
+
+    // Limpiar la tabla antes de agregar los nuevos tokens
+    tablaTokens.innerHTML = "";
+
+    // Iterar sobre los tokens y agregarlos a la tabla
+    tokens.forEach(token => {
+        const fila = tablaTokens.insertRow();
+
+        // Celda para el número de línea
+        const celdaLinea = fila.insertCell(0);
+        celdaLinea.textContent = token.line;
+
+        // Celda para el tipo de token
+        const celdaTipo = fila.insertCell(1);
+        celdaTipo.textContent = token.type;
+
+        // Celda para el valor del token
+        const celdaValor = fila.insertCell(2);
+        celdaValor.textContent = token.value;
+    });
+}
+
+//FUNCION PRINCIPAL
+function analizar() {
+    analyzeCode();
+    
+    const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
+    tablaSintactico.innerHTML = "";  // Esto limpiará las filas de la tabla
+    //validarSintaxis(tokensPorLinea);
+    MostrarSemantica(input);
+}
 
 
 
@@ -1369,181 +1417,7 @@ function analyzeCode() {
 
 
 //-------------------------------------------------------------------------------------------------------------------------------
-//FUNCION PRINCIPAL
-function analizar() {
-    analyzeCode();
 
-    //const texto = document.getElementById("input").value;
-    //const tokensPorLinea = analizarTexto(texto);
-    
-    // Obtener la tabla y limpiar las filas existentes
-    const tablaSintactico = document.getElementById('tablaSintactico').getElementsByTagName('tbody')[0];
-    tablaSintactico.innerHTML = "";  // Esto limpiará las filas de la tabla
-
-    //mostrarTokens(tokensPorLinea.flat()); // Mostrar tokens como antes
-    //validarSintaxis(tokensPorLinea);
-    //MostrarSemantica(texto);
-}
-
-// Diccionario de palabras reservadas y operadores
-const palabrasReservadas = {
-    "equipo": "Palabra Reservada - Equipo",
-    "nulo": "Palabra Reservada - Nulo",
-    "Mensaje": "Palabra Reservada - Mensaje",
-    "Principal": "Palabra Reservada - Principal",
-    "entero": "Tipo de Dato",
-    "flotante": "Tipo de Dato",
-    "boleano": "Tipo de Dato",
-    "caracter": "Tipo de Dato",
-    "cadena": "Tipo de Dato",
-    "publico": "Modificadores de Acceso",
-    "privado": "Modificadores de Acceso",
-    "protegido": "Modificadores de Acceso",
-    "estatico": "Palabra Reservada - Estatico",
-    "vacio": "Palabra Reservada - Vacio",
-    "nuevo": "Palabra Reservada - Nuevo",
-    "tipo": "Palabra Reservada - Tipo",
-    "clase": "Palabra Reservada - Clase",
-    "nombrentorno": "Palabra Reservada - Nombrentorno",
-    "argumentos": "Palabra Reservada - Argumentos",
-    "escribirConsola": "Palabra Reservada - Escribir",
-    "consola": "Palabra Reservada - Consola",
-    "si": "Palabra Reservada - Si",
-    "sino": "Palabra Reservada - Sino",
-    "contrario": "Palabra Reservada - Contrario",
-    "para": "Palabra Reservada - Para",
-    "paracadauno": "Palabra Reservada - Paracadauno",
-    "mientras": "Palabra Reservada - Mientras",
-    "hacer": "Palabra Reservada - Hacer",
-    "interruptor": "Palabra Reservada - Interruptor",
-    "caso": "Palabra Reservada - Caso",
-    "romper": "Palabra Reservada - Romper",
-    "xDefecto": "Palabra Reservada - XDefecto",
-    "devuelve": "Palabra Reservada - Devuelve",
-    "intenta": "Palabra Reservada - Intenta",
-    "atrapar": "Palabra Reservada - Atrapar",
-    "lanzar": "Palabra Reservada - Lanzar",
-    "Excepcion": "Palabra Reservada - Excepcion",
-    "DivideEntreZeroExcepcion": "Palabra Reservada - DivideEntreZeroExcepcion",
-    "esnuloovacio": "Palabra Reservada - EsNuloOVacio",
-    "argumentoExcepcion": "Palabra Reservada - ArgumentoExcepcion",
-    "OverflowExcepcion": "Palabra Reservada - OverflowExcepcion",
-    "ejecutar": "Palabra Reservada - Ejecutar",
-    "invoca": "Palabra Reservada - Invoca",
-    "Metodo": "Palabra Reservada - Metodo",
-    "hueco": "Palabra Reservada - Hueco",
-    "es": "Palabra Reservada - Es",
-    "leer": "Palabra Reservada - Leer",
-    "tamanio": "Palabra Reservada - Tamanio",
-    "copia": "Palabra Reservada - Copia",
-    "tamanioDe": "Palabra Reservada - TamanioDe",
-    "nombreDe": "Palabra Reservada - NombreDe",
-    "evento": "Palabra Reservada - Evento",
-    "Accion": "Palabra Reservada - Accion",
-    "bloquear": "Palabra Reservada - Bloquear",
-    "usando": "Palabra Reservada - Usando",
-    "leerTecla": "Palabra Reservada - LeerTecla",
-    "mate": "Palabra Reservada - Mate",
-    "mayor": "Palabra Reservada - Mayor",
-    "menor": "Palabra Reservada - Menor",
-    "formatoDe": "Palabra Reservada - FormatoDe",
-    "mayus": "Palabra Reservada - MAYUS",
-    "minus": "Palabra Reservada - MINUS",
-    "comprobado": "Palabra Reservada - Comprobado",
-    "noComprobar": "Palabra Reservada - NoComprobar",
-    "objeto": "Palabra Reservada - Objeto",
-    "estructura": "Palabra Reservada - Estructura",
-    "enumeracion": "Palabra Reservada - Enumeracion",
-    "remitente": "Palabra Reservada - Remitente",
-    "este": "Palabra Reservada - Este",
-    "tarea": "Palabra Reservada - Tarea",
-    "Sistema": "Palabra Reservada - Sistema",
-    "ES": "Palabra Reservada - ES",
-    "Lista": "Palabra Reservada - Lista",
-    "Agregar": "Palabta reservada - Agregar"
-};
-
-const operadores = {
-    "+": "Operador de Suma",
-    "-": "Operador de Resta",
-    "*": "Operador de Multiplicacion",
-    "/": "Operador de Division",
-    "%": "Operador de Modulo",
-    "=": "Operador de Asignacion",
-    "+=": "Operador de Asignacion",
-    "-=": "Operador de Asignacion",
-    "*=": "Operador de Asignacion",
-    "/=": "Operador de Asignacion",
-    "%=": "Operador de Asignacion",
-    "==": "Operador de Comparacion",
-    "!=": "Operador de Comparacion",
-    "<": "Operador de Comparacion",
-    ">": "Operador de Comparacion",
-    "<=": "Operador de Comparacion",
-    ">=": "Operador de Comparacion",
-    "AND": "Operador Logico",
-    "OR": "Operador Logico",
-    "NOT": "Operador Logico",
-    "++": "Operador de Incremento/Decremento",
-    "--": "Operador de Incremento/Decremento"
-};
-
-const literales = {
-    "verdadero": "Literal Booleano",
-    "falso": "Literal Booleano",
-    "nulo": "Literal Nulo"
-};
-
-const delimitadores = {
-    ";": "Delimitador",
-    ",": "Separador",
-    ".": "Conector",
-    ":": "Asignacion de Bloque de Codigo",
-    "(": "Parentesis de Apertura",
-    ")": "Parentesis de Cierre",
-    "[": "Corchetes de Apertura",
-    "]": "Corchetes de Cierre",
-    "{": "Llaves de Apertura",
-    "}": "Llaves de Cierre"
-};
-
-//-----------------------------ANALISIS LEXICO---------------------------------
-
-function analizarTexto(texto) {
-    const tokensPorLinea = [];
-    const regex = /==|!=|<=|>=|&&|\|\||\+\+|--|["][^"]*["]|['][^']*[']|["]|[']|\/\/.*|\/\*[\s\S]*?\*\/|\d+\.\d+|\d+|[\w]+|[-+*/%=&|!<>]=?|[{}()[\],;:.@]/g;
-    const lineas = texto.split('\n');
-    
-
-    lineas.forEach((linea, numeroLinea) => {
-        const palabras = linea.match(regex);
-        const lineaTokens = [];
-
-        if (palabras) {
-            palabras.forEach(palabra => {
-                let tokenTipo = "Simbolo Desconocido";
-
-                if (palabrasReservadas[palabra]) tokenTipo = palabrasReservadas[palabra];
-                else if (operadores[palabra]) tokenTipo = operadores[palabra];
-                else if (literales[palabra]) tokenTipo = literales[palabra];
-                else if (delimitadores[palabra]) tokenTipo = delimitadores[palabra];
-                else if (!isNaN(palabra)) tokenTipo = "Literal Numerico";
-                else if (/^".*"$/.test(palabra) || /^'.*'$/.test(palabra)) tokenTipo = "Literal de Cadena";
-                else if (/^["]$/.test(palabra) || /^['']$/.test(palabra)) tokenTipo = "Simbolo Desconocido";
-                else if (/^\/\/.*$/.test(palabra)) tokenTipo = "Comentario de una linea";
-                else if (/^\/\*.*\*\/$/.test(palabra)) tokenTipo = "Comentario de múltiples lineas";
-                else if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(palabra)) tokenTipo = "Identificador";
-                lineaTokens.push({ tipo: tokenTipo, valor: palabra });
-            });
-        }
-        if (lineaTokens.length > 0) {
-            tokensPorLinea.push({ linea: numeroLinea + 1, tokens: lineaTokens });
-        }
-        // Mostrar en consola los tokens de la línea actual
-        console.log(`Línea ${numeroLinea + 1}:`, lineaTokens);
-    });
-    return tokensPorLinea;
-}
 
 function mostrarTokens(tokensPorLinea) {
     const tablaTokens = document.getElementById("tablaTokens").getElementsByTagName('tbody')[0];
@@ -1942,7 +1816,7 @@ function analizarSemantico(codigo, index) {
     }
     let resultado = "";
     // Aquí analizas las asignaciones o declaraciones
-    if(aceptarSemanticaPorLinea[index] == true){
+    if(aceptarSemanticaPorLinea[currentIndex] == true){
         resultado = analizarAsignacion(codigo);
     }else{
         resultado = analizarInst(codigo);

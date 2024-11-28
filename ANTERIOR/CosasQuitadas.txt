@@ -1,0 +1,159 @@
+// Diccionario de palabras reservadas y operadores
+const palabrasReservadas = {
+    "equipo": "Palabra Reservada - Equipo",
+    "nulo": "Palabra Reservada - Nulo",
+    "Mensaje": "Palabra Reservada - Mensaje",
+    "Principal": "Palabra Reservada - Principal",
+    "entero": "Tipo de Dato",
+    "flotante": "Tipo de Dato",
+    "boleano": "Tipo de Dato",
+    "caracter": "Tipo de Dato",
+    "cadena": "Tipo de Dato",
+    "publico": "Modificadores de Acceso",
+    "privado": "Modificadores de Acceso",
+    "protegido": "Modificadores de Acceso",
+    "estatico": "Palabra Reservada - Estatico",
+    "vacio": "Palabra Reservada - Vacio",
+    "nuevo": "Palabra Reservada - Nuevo",
+    "tipo": "Palabra Reservada - Tipo",
+    "clase": "Palabra Reservada - Clase",
+    "nombrentorno": "Palabra Reservada - Nombrentorno",
+    "argumentos": "Palabra Reservada - Argumentos",
+    "escribirConsola": "Palabra Reservada - Escribir",
+    "consola": "Palabra Reservada - Consola",
+    "si": "Palabra Reservada - Si",
+    "sino": "Palabra Reservada - Sino",
+    "contrario": "Palabra Reservada - Contrario",
+    "para": "Palabra Reservada - Para",
+    "paracadauno": "Palabra Reservada - Paracadauno",
+    "mientras": "Palabra Reservada - Mientras",
+    "hacer": "Palabra Reservada - Hacer",
+    "interruptor": "Palabra Reservada - Interruptor",
+    "caso": "Palabra Reservada - Caso",
+    "romper": "Palabra Reservada - Romper",
+    "xDefecto": "Palabra Reservada - XDefecto",
+    "devuelve": "Palabra Reservada - Devuelve",
+    "intenta": "Palabra Reservada - Intenta",
+    "atrapar": "Palabra Reservada - Atrapar",
+    "lanzar": "Palabra Reservada - Lanzar",
+    "Excepcion": "Palabra Reservada - Excepcion",
+    "DivideEntreZeroExcepcion": "Palabra Reservada - DivideEntreZeroExcepcion",
+    "esnuloovacio": "Palabra Reservada - EsNuloOVacio",
+    "argumentoExcepcion": "Palabra Reservada - ArgumentoExcepcion",
+    "OverflowExcepcion": "Palabra Reservada - OverflowExcepcion",
+    "ejecutar": "Palabra Reservada - Ejecutar",
+    "invoca": "Palabra Reservada - Invoca",
+    "Metodo": "Palabra Reservada - Metodo",
+    "hueco": "Palabra Reservada - Hueco",
+    "es": "Palabra Reservada - Es",
+    "leer": "Palabra Reservada - Leer",
+    "tamanio": "Palabra Reservada - Tamanio",
+    "copia": "Palabra Reservada - Copia",
+    "tamanioDe": "Palabra Reservada - TamanioDe",
+    "nombreDe": "Palabra Reservada - NombreDe",
+    "evento": "Palabra Reservada - Evento",
+    "Accion": "Palabra Reservada - Accion",
+    "bloquear": "Palabra Reservada - Bloquear",
+    "usando": "Palabra Reservada - Usando",
+    "leerTecla": "Palabra Reservada - LeerTecla",
+    "mate": "Palabra Reservada - Mate",
+    "mayor": "Palabra Reservada - Mayor",
+    "menor": "Palabra Reservada - Menor",
+    "formatoDe": "Palabra Reservada - FormatoDe",
+    "mayus": "Palabra Reservada - MAYUS",
+    "minus": "Palabra Reservada - MINUS",
+    "comprobado": "Palabra Reservada - Comprobado",
+    "noComprobar": "Palabra Reservada - NoComprobar",
+    "objeto": "Palabra Reservada - Objeto",
+    "estructura": "Palabra Reservada - Estructura",
+    "enumeracion": "Palabra Reservada - Enumeracion",
+    "remitente": "Palabra Reservada - Remitente",
+    "este": "Palabra Reservada - Este",
+    "tarea": "Palabra Reservada - Tarea",
+    "Sistema": "Palabra Reservada - Sistema",
+    "ES": "Palabra Reservada - ES",
+    "Lista": "Palabra Reservada - Lista",
+    "Agregar": "Palabta reservada - Agregar"
+};
+
+const operadores = {
+    "+": "Operador de Suma",
+    "-": "Operador de Resta",
+    "*": "Operador de Multiplicacion",
+    "/": "Operador de Division",
+    "%": "Operador de Modulo",
+    "=": "Operador de Asignacion",
+    "+=": "Operador de Asignacion",
+    "-=": "Operador de Asignacion",
+    "*=": "Operador de Asignacion",
+    "/=": "Operador de Asignacion",
+    "%=": "Operador de Asignacion",
+    "==": "Operador de Comparacion",
+    "!=": "Operador de Comparacion",
+    "<": "Operador de Comparacion",
+    ">": "Operador de Comparacion",
+    "<=": "Operador de Comparacion",
+    ">=": "Operador de Comparacion",
+    "AND": "Operador Logico",
+    "OR": "Operador Logico",
+    "NOT": "Operador Logico",
+    "++": "Operador de Incremento/Decremento",
+    "--": "Operador de Incremento/Decremento"
+};
+
+const literales = {
+    "verdadero": "Literal Booleano",
+    "falso": "Literal Booleano",
+    "nulo": "Literal Nulo"
+};
+
+const delimitadores = {
+    ";": "Delimitador",
+    ",": "Separador",
+    ".": "Conector",
+    ":": "Asignacion de Bloque de Codigo",
+    "(": "Parentesis de Apertura",
+    ")": "Parentesis de Cierre",
+    "[": "Corchetes de Apertura",
+    "]": "Corchetes de Cierre",
+    "{": "Llaves de Apertura",
+    "}": "Llaves de Cierre"
+};
+
+//-----------------------------ANALISIS LEXICO---------------------------------
+
+function analizarTexto(texto) {
+    const tokensPorLinea = [];
+    const regex = /==|!=|<=|>=|&&|\|\||\+\+|--|["][^"]*["]|['][^']*[']|["]|[']|\/\/.*|\/\*[\s\S]*?\*\/|\d+\.\d+|\d+|[\w]+|[-+*/%=&|!<>]=?|[{}()[\],;:.@]/g;
+    const lineas = texto.split('\n');
+    
+
+    lineas.forEach((linea, numeroLinea) => {
+        const palabras = linea.match(regex);
+        const lineaTokens = [];
+
+        if (palabras) {
+            palabras.forEach(palabra => {
+                let tokenTipo = "Simbolo Desconocido";
+
+                if (palabrasReservadas[palabra]) tokenTipo = palabrasReservadas[palabra];
+                else if (operadores[palabra]) tokenTipo = operadores[palabra];
+                else if (literales[palabra]) tokenTipo = literales[palabra];
+                else if (delimitadores[palabra]) tokenTipo = delimitadores[palabra];
+                else if (!isNaN(palabra)) tokenTipo = "Literal Numerico";
+                else if (/^".*"$/.test(palabra) || /^'.*'$/.test(palabra)) tokenTipo = "Literal de Cadena";
+                else if (/^["]$/.test(palabra) || /^['']$/.test(palabra)) tokenTipo = "Simbolo Desconocido";
+                else if (/^\/\/.*$/.test(palabra)) tokenTipo = "Comentario de una linea";
+                else if (/^\/\*.*\*\/$/.test(palabra)) tokenTipo = "Comentario de múltiples lineas";
+                else if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(palabra)) tokenTipo = "Identificador";
+                lineaTokens.push({ tipo: tokenTipo, valor: palabra });
+            });
+        }
+        if (lineaTokens.length > 0) {
+            tokensPorLinea.push({ linea: numeroLinea + 1, tokens: lineaTokens });
+        }
+        // Mostrar en consola los tokens de la línea actual
+        console.log(`Línea ${numeroLinea + 1}:`, lineaTokens);
+    });
+    return tokensPorLinea;
+}

@@ -163,11 +163,9 @@ usando sistema;
 
 Clase Programa{
     publico estatico vacio Principal(cadena[] args){
-    // esto es un comentario...
-    consola.escribir("Hola Munhacer!");
-    consola.escribir(variable);
-    consola.escribir("Texto " + var);
+        x = 5 + 3;
     }
+
 }
 
 
