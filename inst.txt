@@ -132,9 +132,8 @@ ARREGLO.COPIA(origen, destino, 6);
 
 usando sistema;
 
-class Programa{
+Clase Programa{
+}
 
-    publico estatico vaio PRINCIPAL(){
-       
-    }
+publico estatico vacio Principal(cadena[] args){
 }

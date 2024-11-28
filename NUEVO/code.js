@@ -9,7 +9,7 @@ const tokenDefinitions = [
     { type: "asignacion", regex: /^\=$/ },
     { type: "operadorNegacion", regex: /^\!$/ },
     // palabras reservadas
-    { type: "palabraReservada", regex: /^(si|contrario|mientras|hacer|para|interruptor|caso|xdefecto|romper|comprobado|nocomprobado|intenta|atrapar|vacio|entero|doble|cadena|boleano|usando|sistema|ARREGLO|longitud|PRINCIPAL|args|CLASE)$/ },
+    { type: "palabraReservada", regex: /^(si|contrario|mientras|hacer|para|interruptor|caso|xdefecto|romper|comprobado|nocomprobado|intenta|atrapar|vacio|entero|doble|cadena|boleano|usando|sistema|ARREGLO|longitud|Principal|args|Clase)$/ },
     { type: "excepciones", regex: /^(Excepcion|ExcepcionDeIndiceFueraDeRango|ExcepcionDeReferenciaNula|ExcepcionDeFormato)$/ },
     { type: "modificadoresAcceso", regex: /^(publico|privado|protegido|interno)$/ },
     { type: "static", regex: /^estatico$/i },
@@ -933,10 +933,13 @@ function parse(tokens)
         expect("palabraReservada"); // system;
         expect("delimitador"); // ;
         if (isUsingDeclarado) {
-            throw new Error("Error:La clase ya ha sido creada.");
+            throw new Error("Error:El usando ya ha sido creado.");
         }
         isUsingDeclarado = true;
     }
+
+
+
 
     let isClassDeclarado=false;
     function DECLARACION_CLASS(){
@@ -951,12 +954,7 @@ function parse(tokens)
 
     function BLOQUE_CODIGO_CLASS() {
         expect("llaveApertura"); // {
-        while (
-            currentIndex < tokens.length &&
-            tokens[currentIndex]?.type !== "llaveCierre"
-        ) {
-            // aqui iba DECLARACION_MAIN();
-        }
+            //DECLARACION_MAIN();
         expect("llaveCierre"); // }
     }
 
@@ -979,7 +977,7 @@ function parse(tokens)
 
         // Verifica el identificador (el nombre del método debe ser "Main")
         const methodName = tokens[currentIndex]?.value;
-        if (methodName !== "Main") {
+        if (methodName !== "Principal") {
             throw new Error(
                 `Error sintáctico: Se esperaba 'Main' como nombre de método, encontrado '${methodName}' en la línea ${tokens[currentIndex]?.line || "desconocida"}`
             );
@@ -1050,6 +1048,12 @@ function parse(tokens)
             } else if (tokens[currentIndex]?.value === "si") {
                 console.log("DECLARACION IF");
                 INSTRUCCION_IF(); 
+            } else if (tokens[currentIndex]?.value === "Clase") {
+                console.log("DECLARACION CLASS");
+                DECLARACION_CLASS();
+            } else if (tokens[currentIndex]?.value === "usando") {
+                console.log("DECLARACION USANDO");
+                INSTRUCCION_USING();
             } else if (tokens[currentIndex]?.value === "hacer") {
                 console.log("DECLARACION DO");
                 INSTRUCCION_WHILE();
@@ -1110,8 +1114,16 @@ function parse(tokens)
             console.log("DECLARACION READKEY");
             INSTRUCCION_READKEY();
         } else if (tokens[currentIndex]?.type === "modificadoresAcceso") { // ESTA VA DENTRO DE CLASS
-            console.log("DECLARACION METODO");
-            DECLARACION_METODO();
+            if( tokens[currentIndex + 2]?.value === "Principal" ||
+                tokens[currentIndex + 3]?.value === "Principal"
+            ){
+                console.log("DECLARACION MAIN");
+                DECLARACION_MAIN();
+            } else {
+                console.log("DECLARACION METODO");
+                DECLARACION_METODO();
+            }
+            
         } else {
             throw new Error(`Error sintáctico: Instrucción no válida en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
         }

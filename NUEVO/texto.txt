@@ -1,0 +1,11 @@
+usando sistema;
+
+Clase {
+    
+    METODOS
+    DECLARACIONES DE VARIABLE
+    DECLARACIONES DE ARREGLOS
+
+    MAIN
+       INSTRUCCIONES
+}
