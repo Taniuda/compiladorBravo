@@ -1,0 +1,286 @@
+c-michi
+1. Imprimir una tabla de multiplicar
+usando.Sistema;
+
+Clase TablaMultiplicar {
+    publico estático vacío Principal(cadena[] args) {
+        entero numero = 5;
+        para(entero i = 1; i <= 10; i++) {
+            escribir(numero + " x " + i + " = " + (numero * i));
+        }
+    }
+}
+1.Imprimir una tabla de multiplicar c#
+using System;
+
+class TablaMultiplicar {
+    public static void Main(string[] args) {
+        int numero = 5;
+        for (int i = 1; i <= 10; i++) {
+            Console.WriteLine($"{numero} x {i} = {numero * i}");
+        }
+    }
+}
+
+
+
+2.Determinar si un número es par o impar C-MICHI
+usando.Sistema;
+
+Clase ParImpar {
+    publico estático vacio Principal(cadena[] args) {
+        entero numero = 7;
+        si(numero % 2 == 0) {
+            escribir(numero + " es par");
+        } contrario {
+            escribir(numero + " es impar");
+        }
+    }
+}
+2.Determinar si un número es par o impar
+using System;
+
+class ParImpar {
+    public static void Main(string[] args) {
+        int numero = 7;
+        if (numero % 2 == 0) {
+            Console.WriteLine($"{numero} es par");
+        } else {
+            Console.WriteLine($"{numero} es impar");
+        }
+    }
+}
+3. Encontrar el mayor de dos números c-michi
+usando.Sistema;
+
+Clase Mayor {
+    publico estático vacio Principal(cadena[] args) {
+        entero a = 8;
+        entero b = 10;
+        entero mayor = mate.max(a, b);
+        escribir("El mayor entre " + a + " y " + b + " es " + mayor);
+    }
+}
+3. Encontrar el mayor de dos números
+using System;
+
+class Mayor {
+    public static void Main(string[] args) {
+        int a = 8, b = 10;
+        int mayor = Math.Max(a, b);
+        Console.WriteLine($"El mayor entre {a} y {b} es {mayor}");
+    }
+}
+
+
+
+
+
+4.Contar del 1 al 10 c-michi
+usando.Sistema;
+
+Clase Contar {
+    publico estático vacio Principal(cadena[] args) {
+        para(entero i = 1; i <= 10; i++) {
+            escribir(i);
+        }
+    }
+}
+4.Contar del 1 al 10
+using System;
+
+class Contar {
+    public static void Main(string[] args) {
+        for (int i = 1; i <= 10; i++) {
+            Console.WriteLine(i);
+        }
+    }
+}
+
+
+
+
+
+
+5.Imprimir números hasta que el usuario ingrese 0 c-michi
+usando.Sistema;
+
+Clase LeerNumeros {
+    publico estático vacio Principal(cadena[] args) {
+        entero numero;
+        hacer {
+            escribir("Ingresa un número (0 para salir):");
+            numero = convertir.entero(consola.leer());
+            escribir("Número ingresado: " + numero);
+        } mientras(numero != 0);
+    }
+}
+5.Imprimir números hasta que el usuario ingrese 0
+using System;
+
+class LeerNumeros {
+    public static void Main(string[] args) {
+        int numero;
+        do {
+            Console.Write("Ingresa un número (0 para salir): ");
+            numero = int.Parse(Console.ReadLine());
+            Console.WriteLine($"Número ingresado: {numero}");
+        } while (numero != 0);
+    }
+}
+6.Calcular el factorial de un número c-michi
+usando.Sistema;
+
+Clase Factorial {
+    publico estatico vacio Principal(cadena[] args) {
+        entero numero = 5;
+        entero factorial = 1;
+        para(entero i = 1; i <= numero; i++) {
+            factorial *= i;
+        }
+        escribir("El factorial de " + numero + " es " + factorial);
+    }
+}
+6.Calcular el factorial de un número
+using System;
+
+class Factorial {
+    public static void Main(string[] args) {
+        int numero = 5;
+        int factorial = 1;
+        for (int i = 1; i <= numero; i++) {
+            factorial *= i;
+        }
+        Console.WriteLine($"El factorial de {numero} es {factorial}");
+    }
+}
+7.Convertir un texto a mayúsculas c-michi
+usando.Sistema;
+
+Clase ConvertirMayus {
+    publico estatico vacio Principal(cadena[] args) {
+        cadena texto = "hola mundo";
+        cadena mayus = texto.aMayus();
+        escribir("Texto en mayúsculas: " + mayus);
+    }
+}
+7.Convertir un texto a mayúsculas
+using System;
+
+class ConvertirMayus {
+    public static void Main(string[] args) {
+        string texto = "hola mundo";
+        string mayus = texto.ToUpper();
+        Console.WriteLine($"Texto en mayúsculas: {mayus}");
+    }
+}
+
+
+
+
+
+
+8.Determinar el tamaño de un arreglo c-michi
+usando.Sistema;
+
+Clase TamanioArreglo {
+    publico estatico vacio Principal(cadena[] args) {
+        entero[] numeros = {1, 2, 3, 4, 5};
+        entero tamanio = numeros.longitud;
+        escribir("El tamaño del arreglo es: " + tamanio);
+    }
+}
+8.Determinar el tamaño de un arreglo
+using System;
+
+class TamanioArreglo {
+    public static void Main(string[] args) {
+        int[] numeros = { 1, 2, 3, 4, 5 };
+        int tamanio = numeros.Length;
+        Console.WriteLine($"El tamaño del arreglo es: {tamanio}");
+    }
+}
+
+
+
+
+
+
+9.Imprimir los elementos de un arreglo c-michi
+usando.Sistema;
+
+Clase ImprimirArreglo {
+    publico estatico vacio Principal(cadena[] args) {
+        cadena[] colores = {"rojo", "azul", "verde"};
+        para(entero i = 0; i < colores.longitud; i++) {
+            escribir("Color: " + colores[i]);
+        }
+    }
+}
+9.Imprimir los elementos de un arreglo
+using System;
+
+class ImprimirArreglo {
+    public static void Main(string[] args) {
+        string[] colores = { "rojo", "azul", "verde" };
+        for (int i = 0; i < colores.Length; i++) {
+            Console.WriteLine($"Color: {colores[i]}");
+        }
+    }
+}
+
+
+
+
+10.Simular un menú con opciones c-michi
+usando.Sistema;
+
+Clase Menu {
+    publico estatico vacio Principal(cadena[] args) {
+        escribir("Selecciona una opción:");
+        escribir("1. Saludar");
+        escribir("2. Despedirse");
+        escribir("3. Salir");
+        entero opcion = convertir.entero(consola.leer());
+        Interruptor(opcion) {
+            caso 1:
+                escribir("¡Hola!");
+                romper;
+            caso 2:
+                escribir("¡Adiós!");
+                romper;
+            caso 3:
+                escribir("Saliendo...");
+                romper;
+            xdefecto:
+                escribir("Opción no válida");
+        }
+    }
+}
+
+10.Simular un menú con opciones 
+using System;
+
+class Menu {
+    public static void Main(string[] args) {
+        Console.WriteLine("Selecciona una opción:");
+        Console.WriteLine("1. Saludar");
+        Console.WriteLine("2. Despedirse");
+        Console.WriteLine("3. Salir");
+        int opcion = int.Parse(Console.ReadLine());
+        switch (opcion) {
+            case 1:
+                Console.WriteLine("¡Hola!");
+                break;
+            case 2:
+                Console.WriteLine("¡Adiós!");
+                break;
+            case 3:
+                Console.WriteLine("Saliendo...");
+                break;
+            default:
+                Console.WriteLine("Opción no válida");
+                break;
+        }
+    }
+}

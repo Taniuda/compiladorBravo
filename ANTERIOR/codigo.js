@@ -1292,6 +1292,9 @@ function parse(tokens)
 
 // --------------------------------------------------------------------------------------------
 // Analizar código
+
+let todoBien = false;
+
 function analyzeCode() {
     const codeInput = document.getElementById("input").value;
     const output = document.getElementById("output");
@@ -1309,14 +1312,25 @@ function analyzeCode() {
 
     try {
         parse(tokens);
-        output.innerHTML = "El código es válido.";
+        output.innerHTML = "El codigo es valido.";
+        // aqui debe de traducir el codigo:
+        
+        todoBien = true;
     } catch (e) {
+        todoBien = false;
         output.innerHTML = e.message; // Mostrar error sintáctico
     }
 }
 
 
+function TraducirCMICHI(){
+    if(todoBien == true){
+        const codigoEntrada = document.getElementById("input").value;
+        const codigoTraducido = traducirCodigo(codigoEntrada);
+        descargarArchivo("codigo.cs", codigoTraducido);
+    } 
 
+}
 
 
 
@@ -1392,6 +1406,273 @@ function analizar() {
 
 
 
+
+
+
+
+// Diccionario para traducción
+const diccionario = {
+    "usando": "using",
+    "sistema": "System",
+    "Clase": "Class",
+    "Programa": "Program",
+    "estatico": "static",
+    "vacio": "void",
+    "Principal":"Main",
+    "cadena": "string",
+    "argumentos":"args",
+    "consola":"Console",
+    "escribir":"WriteLine",
+    "if":"si",
+    "contrario":"else",
+    "mientras":"while",
+    "hacer":"do",
+    "for":"para",
+    "interruptor":"switch",
+    "caso":"case",
+    "xdefecto":"default",
+    "romper":"break",
+    "comprobado":"checked",
+    "nocomprobado":"unchecked",
+    "intenta":"try",
+    "atrapar":"catch",
+    "vacio":"void",
+    "entero":"int",
+    "doble":"double",
+    "cadena":"string",
+    "boleano":"bool",
+    "usando":"using",
+    "ARREGLO":"Array",
+    "longitud":"length",
+    "Principal":"Main",
+    "args":"args",
+    "Clase":"Class",
+    "Excepcion":"Exception",
+    "ExcepcionDeIndiceFueraDeRango":"IndexOutOfRangeException",
+    "ExcepcionDeReferenciaNula":"NullReferenceException",
+    "ExcepcionDeFormato":"FormatException",
+    "aMayus":"toUpper",
+    "aMinus":"toLower",
+    "leer":"ReadLine",
+    "leertecla":"ReadKey",
+    "mate":"Math",
+    "max":"Max",
+    "min":"Min",
+    "COPIA":"Copy",
+    "retorna":"return",
+    "parsear":"Parse",
+    "publico":"public",
+    "protegido":"protected",
+    "privado":"private",
+    "interno":"internal"
+  
+  
+  };
+  
+    
+    // Función de traducción
+    function traducirCodigo(codigo) {
+      const lineas = codigo.split("\n");
+      return lineas.map(linea => {
+        Object.keys(diccionario).forEach(palabra => {
+          const regex = new RegExp(`\\b${palabra}\\b`, "g");
+          linea = linea.replace(regex, diccionario[palabra]);
+        });
+        return linea;
+      }).join("\n");
+    }
+    
+    // Descargar archivo
+    function descargarArchivo(nombre, contenido) {
+      const enlace = document.createElement("a");
+      const blob = new Blob([contenido], { type: "text/plain" });
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = nombre;
+      enlace.click();
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Boton nuevo
+
+
+let nombreArchivoActual = null; // Variable para almacenar el nombre del archivo cargado
+
+// Función para guardar contenido
+function guardarContenido() {
+    // Obtén el contenido del textarea
+    const contenido = document.getElementById('input').value;
+
+    // Obtén el mensaje del contenedor de errores
+    let mensajeErrores = document.getElementById('output').innerText;
+
+    // Si el mensaje de errores está vacío o no contiene "Sintaxis correcta", analizamos de nuevo
+    if (!mensajeErrores.trim() || !mensajeErrores.includes('El codigo es valido')) {
+        analizar();  // Realiza el análisis
+        mensajeErrores = document.getElementById('output').innerText;  // Actualiza los errores
+    }
+
+    // Validamos los errores de sintaxis después de reanalizar
+    if (mensajeErrores.includes('El codigo es valido')) {
+        guardarArchivo(contenido);  // Guarda si la sintaxis es correcta
+    } else if (!mensajeErrores.includes('El codigo es valido')) {
+        alert('No se puede guardar el archivo debido a errores de sintaxis.');
+    } else {
+        alert('Error: No se pudo determinar el estado de la sintaxis.');
+    }
+}
+
+// Función para guardar el archivo
+function guardarArchivo(contenido) {
+    // Si no hay un archivo abierto, solicita un nombre
+    if (!nombreArchivoActual) {
+        nombreArchivoActual = prompt('Introduce un nombre para el archivo:', 'nuevoArchivo.CM');
+        if (!nombreArchivoActual) {
+            alert('El nombre del archivo no puede estar vacío.');
+            return;
+        }
+    }
+
+    // Crea un Blob con el contenido y especifica el tipo MIME
+    const blob = new Blob([contenido], { type: 'text/plain' });
+
+    // Crea un enlace para descargar el archivo
+    const enlace = document.createElement('a');
+    enlace.href = URL.createObjectURL(blob);
+    enlace.download = nombreArchivoActual; // Usa el nombre del archivo actual
+
+    // Simula un clic en el enlace para iniciar la descarga
+    enlace.click();
+
+    // Libera la memoria utilizada por el objeto URL
+    URL.revokeObjectURL(enlace.href);
+
+    alert(`Archivo "${nombreArchivoActual}" guardado exitosamente.`);
+
+    // Limpia el nombre del archivo después de guardar
+    nombreArchivoActual = null;
+}
+
+// Asocia la función al evento click del botón "Guardar"
+document.getElementById('guardar').addEventListener('click', guardarContenido);
+
+// Asocia el evento click al botón "Abrir" para mostrar el selector de archivo
+document.getElementById('abrir').addEventListener('click', function () {
+    // Dispara el evento de clic en el input oculto
+    document.getElementById('archivo').click();
+});
+
+// Asocia el evento change al input de archivo para cargar el contenido
+document.getElementById('archivo').addEventListener('change', function (event) {
+    const archivo = event.target.files[0]; // Obtiene el archivo seleccionado
+
+    if (archivo) {
+        const lector = new FileReader(); // Crea un lector de archivos
+
+        lector.onload = function (e) {
+            const contenido = e.target.result; // Obtiene el contenido del archivo
+            document.getElementById('input').value = contenido; // Carga el contenido en el textarea
+            nombreArchivoActual = archivo.name; // Guarda el nombre del archivo cargado
+        };
+
+        lector.onerror = function () {
+            alert('Error al leer el archivo.');
+        };
+
+        lector.readAsText(archivo); // Lee el archivo como texto
+    } else {
+        alert('No se seleccionó ningún archivo.');
+    }
+});
+
+
+
+// Boton nuevo
+
+// Función para manejar el clic en el botón "Nuevo"
+document.querySelector('a.dropdown-item[href="#"]').addEventListener('click', function() {
+    // Limpia el contenido del textarea
+    document.getElementById('input').value = '';
+
+    // Limpia el nombre del archivo actual
+    nombreArchivoActual = null;
+
+    // Limpia los errores de sintaxis
+    document.getElementById('erroresSintaxis').innerText = '';
+
+    // Opcional: Cambia el estado de los tabs (por si necesitas volver a mostrar los resultados de análisis)
+    document.getElementById('tab-lexico').style.display = 'none';
+    document.getElementById('tab-sintactico').style.display = 'none';
+    document.getElementById('tab-semantico').style.display = 'none';
+});
 
 
 
@@ -2336,32 +2617,45 @@ function equipo() {
 }
 
 //FUNCION PARA MOSTRAR TODAS LAS INSTRUCCIONES
+//FUNCION PARA MOSTRAR TODAS LAS INSTRUCCIONES
 function ingresarInstruccion() {
-    var instruccion0 = '//hola soy un comentario';
-    var instruccion00 = '\nequipo();';
-    
-    var instruccion01 = '\nescribirConsola("hola mundo");';
-    var instruccion02 = '\npara(entero i=0; i>5; i++){}';
-    var instruccion03 = '\nmientras(variable<=10){}';
-    var instruccion04 = '\ninterruptor(var){caso 1: caso 2: xDefecto:}';
-    var instruccion05 = '\nintenta{}atrapar(Excepcion ex){}';
-    var instruccion06 = '\nleer.consola();';
-    var instruccion07 = '\narreglitoVar.tamanio;';
-    var instruccion08 = '\narreglitoVar.copia(destino,longitud);';
+    var instruccion0 = 'consola.escribir("Texto " + var);';
+    var instruccion00 = 'si(a >= 5 || a <= 10 && !(chopita == misopa)){} contrario si(variable >= 5){} contrario {}';
+    var tipoDato1 = '\npara(entero i = 0; i < 5; i++){  }';
+    var instruccion01 = '\ninterruptor(opc){ caso 1 :  romper; caso 2 :  romper; caso 3 :  romper; xdefecto :  }';
+    var instruccion02 = '\ncomprobado{  }';
+    var instruccion03 = '\nnocomprobado{  } ';
+    var instruccion04 = '\nintenta{  } atrapar(Excepcion ex){  }';
+    var instruccion05 = '\nx = a + b;';
+    var instruccion06 = '\npromedio = (5 + id3 + var)/3;';
+    var instruccion07 = '\nprivado estatico entero Metohacer(entero variable){ retorna variable; }';
+    var instruccion08 = '\nentero variable1;';
     var instruccion09 = '\ntamanioDe(variable);';
-    var instruccion10 = '\nnombreDe(variable);';
-    var instruccion11 = '\nvariable.formatoDe(minus);';
-    var instruccion12 = '\nbloquear(variable){}';
-    var instruccion13 = '\nusando Sistema.ES;';
-    var instruccion14 = '\nleerTecla.consola();';
-    var instruccion15 = '\nmate.mayor(numero1, numero2);';
-    var instruccion16 = '\nid ES entero;';
-    var instruccion17 = '\ncomprobado{}';
-    var instruccion18 = '\nsi(5>id){}contrario{}';
-    var instruccion19 = '\npublico estatico vacio ola(){}';
-    var instruccion20 = '\nboleano var = 1;';
+    var instruccion10 = '\ndoble variable2;';
+    var instruccion11 = '\nboleano variable4;';
+    var instruccion12 = '\nentero variable_entera = 5;';
+    var instruccion13 = '\ndoble variable_decimal = 2.5;';
+    var instruccion14 = '\ncadena variable_texto = "Hola mundo";';
+    var instruccion15 = '\nboleano variable_boleana = falso;';
+    var instruccion16 = '\nentero [] arregloInt = { 1, 2, 3, 4, 5 };';
+    var instruccion17 = '\ndoble [] arreglohaceru = { 1.2, 3.4, 5.6 };';
+    var instruccion18 = '\ncadena [] arregloStr = { "Hola", "Mundo" };';
+    var instruccion19 = '\nboleano [] arregloBoo = { verdadero, falso, falso, verdadero };';
+    var instruccion20 = '\nmayus = txt.aMayus();';
+    var instruccion20 = '\nminus = txt.aMinus();';
+    var instruccion20 = '\nmayor = mate.max(5, 1);';
+    var instruccion20 = '\nmenor = mate.min(id, id2);';
+    var instruccion20 = '\nvariableLeida = consola.leer();';
+    var instruccion20 = '\ntamanio = arreglo.longitud;';
+    var instruccion20 = '\nARREGLO.COPIA(origen, destino, 6);';
+    var instruccion20 = '\n';
+    var instruccion20 = '\n';
+    var instruccion20 = '\n';
+    var instruccion20 = '\n';
+    var instruccion20 = '\n';
+    var instruccion20 = '\n';
     
-    var cadInst = instruccion0 + instruccion00  + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
+    var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
     document.getElementById("input").value = cadInst;
 }
 

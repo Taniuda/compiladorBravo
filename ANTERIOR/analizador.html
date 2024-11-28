@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Compilador</title>
 <link id="themeStylesheet" rel="stylesheet" href="estiloOscuro.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+crossorigin="anonymous"></script>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 </head>
@@ -21,6 +26,20 @@
             <p class="titulo">Compilador C#Michi</p>
             <p class="titulo">Grupo: 9°EJF - Equipo: Bravo</p>
             <img src="logogrifo.jpg" alt="Logo Derecho" class="logoDerecha">
+        </div>
+
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Archivo
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Nuevo</a></li>
+                <li><a class="dropdown-item" href="#" id="abrir">Abrir</a></li>
+                <input type="file" id="archivo" accept=".CM" style="display: none;">
+
+                <li><a class="dropdown-item" href="#" id="guardar">Guardar</a></li>
+            </ul>
         </div>
             
         <div id="container">
@@ -42,15 +61,13 @@
             <!-- Contenedor para los botones -->
             <div class="botonesConsola">
             <!--     <button class="boton" onclick="archivo()">Archivo</button>  -->
-                <button onclick="procesarCodigo()">Procesar</button>
-                <pre id="resultado"></pre>
-
-                <button class="boton" onclick="analizar()">Analizar</button>
-                <button class="boton" onclick="limpiar()">Limpiar</button>
-                <button class="boton" onclick="equipo()">Equipo</button>
                 
-                <button class="boton" onclick="ingresarInstruccion()">Sintaxis</button>
-                <button class="boton" onclick="salir()">Salir</button>
+                <pre id="resultado"></pre>
+                <button class="boton" onclick="TraducirCMICHI()">TRADUCIR</button>
+                <button class="boton" onclick="analizar()">COMPILAR</button>
+                <button class="boton" onclick="equipo()">EQUIPO</button>
+                <button class="boton" onclick="ingresarInstruccion()">SINTAXIS</button>
+                <button class="boton" onclick="salir()">SALIR</button>
                 
                 <div id="TEMITA" class="tema-container">
                     <p>Cambiar tema</p>
