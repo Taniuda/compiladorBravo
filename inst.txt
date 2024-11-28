@@ -124,3 +124,17 @@ ARREGLO.COPIA(origen, destino, 6);
 
 //tamanio = arreglo.longitud + 1; // o -1
 //numero = int.Parse(variableEntrada);
+
+//semantico
+
+
+
+
+usando sistema;
+
+class Programa{
+
+    publico estatico vaio PRINCIPAL(){
+       
+    }
+}
