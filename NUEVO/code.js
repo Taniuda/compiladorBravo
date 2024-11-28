@@ -23,8 +23,10 @@ const tokenDefinitions = [
     { type: "math", regex: /^mate$/i },
     { type: "max", regex: /^max$/i },
     { type: "min", regex: /^min$/i },
-    { type: "copy", regex: /^COPIA$/i },
-    { type: "return", regex: /^retorna$/i },
+    { type: "length", regex: /^length$/i },
+    { type: "copy", regex: /^copy$/i },
+    { type: "return", regex: /^return$/i },
+    
     // elementos de valores
     { type: "identificador", regex: /^[a-zA-Z_][a-zA-Z0-9_]*$/ },
     { type: "literalNumerica", regex: /^[0-9]+(\.[0-9]+)?(f|F)?$/ }, // Detectar números decimales correctamente
@@ -82,6 +84,20 @@ function tokenize(code) {
     });
     return { tokens, errors };
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
