@@ -1,18 +1,126 @@
-console.writeline
-if, else
-while, do
-for
-switch, case, default, break
-checked, unchecked
-try, catch, Exception, IndexOutOfRangeException, NullReferenceException, FormatException
-Console.ReadKey()
-using System.IO
-console.readline()
-Math.Max()
-Math.Min()
-ToLower()
-ToUpper()
-array.Length
-Array.Copy()
-metodo
-main
+// esto es un comentario...
+
+consola.escribir("Hola Munhacer!");
+consola.escribir(variable);
+consola.escribir("Texto " + var);
+
+si(variable == 5){
+    // bloque de codigo
+}
+si(variable != 5){
+    // condicion #1
+} contrario {
+    // extra
+}
+si(a >= 5 || a <= 10 && !(chopita == misopa)){
+    // condicion #1
+} contrario si (variable >= 5) {
+    // condicion #2
+} contrario {
+    // extra
+}
+
+mientras(variable > 5){
+    // bloque de codigo
+}
+// ESTA YA ME SALE
+hacer {
+    // bloque de codigo
+} mientras(variable > 5);
+
+para(i = 0; i < 5; i++){
+    // bloque de codigo
+}
+para(entero i = 0; i < 5; i++){
+    // bloque de codigo
+}
+
+
+
+
+interruptor(opc){
+    caso 1 :
+        // codigo #1
+        romper;
+    caso 2 : 
+        // codigo #2
+}
+interruptor(opc){
+    caso 1 :
+        // codigo #1
+        romper;
+    caso 2 : 
+        // codigo #2
+        romper;
+    caso 3 : 
+        // codigo #3
+        romper;
+    xdefecto :
+        // codigo x
+}
+
+
+//nocomprobado garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
+//comprobado permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
+comprobado{
+    //comentario
+}
+nocomprobado{
+    //comentario
+}
+
+intenta{
+    //comentario
+} atrapar(Excepcion ex){
+    //comentario
+}
+
+x = a + b;
+abc_123 = 1 + hola - (4 + 5);
+promedio = (5 + id3 + var)/3;
+x = (5);
+
+
+publico estatico vacio Metohacer(){
+    // bloque de codigo
+}
+privado estatico entero Metohacer(entero variable){
+    retorna variable;
+}
+
+
+entero variable1;
+doble variable2;
+cadena variable3;
+boleano variable4;
+
+entero variable_entera = 5;
+doble variable_decimal = 2.5;
+cadena variable_texto = "Hola mundo";
+boleano variable_boleana = falso;
+
+entero [] arregloInt = { 1, 2, 3, 4, 5 };
+doble [] arreglohaceru = { 1.2, 3.4, 5.6 };
+cadena [] arregloStr = { "Hola", "Mundo" };
+boleano [] arregloBoo = { verdadero, falso, falso, verdadero };
+
+
+
+
+mayus = txt.aMayus();
+minus = txt.aMinus();
+mayor = mate.max(5, 1);
+menor = mate.min(id, id2);
+variableLeida = consola.leer();
+tamanio = arreglo.longitud;
+ARREGLO.COPIA(origen, destino, 6);
+
+
+
+
+
+
+
+
+//tamanio = arreglo.longitud + 1; // o -1
+//numero = int.Parse(variableEntrada);
