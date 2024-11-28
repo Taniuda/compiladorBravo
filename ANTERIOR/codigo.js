@@ -323,13 +323,22 @@ function parse(tokens)
         expect("palabraReservada"); // default
         expect("bloqueCodigo"); // :
         
-        // Procesar instrucciones dentro del default
+        // Procesar instrucciones dentro del case
         while (
             currentIndex < tokens.length &&
+            tokens[currentIndex]?.type !== "palabraReservada" &&
             tokens[currentIndex]?.type !== "llaveCierre"
         ) {
             INSTRUCCION();
+
+            // Procesar break si existe
+            if (tokens[currentIndex]?.type === "palabraReservada" && tokens[currentIndex]?.value === "romper") {
+                expect("palabraReservada"); // break
+                expect("delimitador"); // ;
+                break;
+            }
         }
+
     }
 
 
@@ -406,7 +415,12 @@ function parse(tokens)
     }
 
 
-
+    function INVOCACION_METODO() {
+        expect("identificador"); // metodo;
+        expect("parentesisApertura"); // (
+        expect("parentesisCierre"); // )
+        expect("delimitador"); // ;
+    }
 
 
 
@@ -674,6 +688,7 @@ function parse(tokens)
             throw new Error(`Error sintáctico: Se esperaba un identificador al inicio de la asignación en la línea ${tokens[currentIndex]?.line || "desconocida"}`);
         }
     }
+    
 
     function EXPRESION() {
         // Procesa paréntesis al inicio de la expresión si están presentes
@@ -1259,6 +1274,9 @@ function parse(tokens)
             ) {
                 console.log("ASIGNACION FUNCIONES");
                 ASIGNACION_METODO();
+            } else if(tokens[currentIndex + 1]?.type === "parentesisApertura"){
+                console.log("INVOCACION METODO");
+                INVOCACION_METODO();
             } else {
                 console.log("ASIGNACION VARIABLE");
                 ASIGNACION_VARIABLE();
@@ -1414,7 +1432,6 @@ function analizar() {
 const diccionario = {
     "usando": "using",
     "sistema": "System",
-    "Clase": "Class",
     "Programa": "Program",
     "estatico": "static",
     "vacio": "void",
@@ -1423,11 +1440,11 @@ const diccionario = {
     "argumentos":"args",
     "consola":"Console",
     "escribir":"WriteLine",
-    "if":"si",
+    "si":"if",
     "contrario":"else",
     "mientras":"while",
     "hacer":"do",
-    "for":"para",
+    "para":"for",
     "interruptor":"switch",
     "caso":"case",
     "xdefecto":"default",
@@ -1446,7 +1463,7 @@ const diccionario = {
     "longitud":"length",
     "Principal":"Main",
     "args":"args",
-    "Clase":"Class",
+    "Clase":"class",
     "Excepcion":"Exception",
     "ExcepcionDeIndiceFueraDeRango":"IndexOutOfRangeException",
     "ExcepcionDeReferenciaNula":"NullReferenceException",
@@ -2617,45 +2634,144 @@ function equipo() {
 }
 
 //FUNCION PARA MOSTRAR TODAS LAS INSTRUCCIONES
-//FUNCION PARA MOSTRAR TODAS LAS INSTRUCCIONES
 function ingresarInstruccion() {
-    var instruccion0 = 'consola.escribir("Texto " + var);';
-    var instruccion00 = 'si(a >= 5 || a <= 10 && !(chopita == misopa)){} contrario si(variable >= 5){} contrario {}';
-    var tipoDato1 = '\npara(entero i = 0; i < 5; i++){  }';
-    var instruccion01 = '\ninterruptor(opc){ caso 1 :  romper; caso 2 :  romper; caso 3 :  romper; xdefecto :  }';
-    var instruccion02 = '\ncomprobado{  }';
-    var instruccion03 = '\nnocomprobado{  } ';
-    var instruccion04 = '\nintenta{  } atrapar(Excepcion ex){  }';
-    var instruccion05 = '\nx = a + b;';
-    var instruccion06 = '\npromedio = (5 + id3 + var)/3;';
-    var instruccion07 = '\nprivado estatico entero Metohacer(entero variable){ retorna variable; }';
-    var instruccion08 = '\nentero variable1;';
-    var instruccion09 = '\ntamanioDe(variable);';
-    var instruccion10 = '\ndoble variable2;';
-    var instruccion11 = '\nboleano variable4;';
-    var instruccion12 = '\nentero variable_entera = 5;';
-    var instruccion13 = '\ndoble variable_decimal = 2.5;';
-    var instruccion14 = '\ncadena variable_texto = "Hola mundo";';
-    var instruccion15 = '\nboleano variable_boleana = falso;';
-    var instruccion16 = '\nentero [] arregloInt = { 1, 2, 3, 4, 5 };';
-    var instruccion17 = '\ndoble [] arreglohaceru = { 1.2, 3.4, 5.6 };';
-    var instruccion18 = '\ncadena [] arregloStr = { "Hola", "Mundo" };';
-    var instruccion19 = '\nboleano [] arregloBoo = { verdadero, falso, falso, verdadero };';
-    var instruccion20 = '\nmayus = txt.aMayus();';
-    var instruccion20 = '\nminus = txt.aMinus();';
-    var instruccion20 = '\nmayor = mate.max(5, 1);';
-    var instruccion20 = '\nmenor = mate.min(id, id2);';
-    var instruccion20 = '\nvariableLeida = consola.leer();';
-    var instruccion20 = '\ntamanio = arreglo.longitud;';
-    var instruccion20 = '\nARREGLO.COPIA(origen, destino, 6);';
-    var instruccion20 = '\n';
-    var instruccion20 = '\n';
-    var instruccion20 = '\n';
-    var instruccion20 = '\n';
-    var instruccion20 = '\n';
-    var instruccion20 = '\n';
+    let codigo = `
+usando sistema;
+
+Clase Programa{
+    publico estatico vacio Principal(cadena[] args){
+        // esto es un comentario...
+
+        consola.escribir("Hola Munhacer!");
+        consola.escribir(variable);
+        consola.escribir("Texto " + var);
+
+        si(variable == 5){
+            // bloque de codigo
+        }
+        si(variable != 5){
+            // condicion #1
+        } contrario {
+            // extra
+        }
+        si(a >= 5 || a <= 10 && !(chopita == misopa)){
+            // condicion #1
+        } contrario si (variable >= 5) {
+            // condicion #2
+        } contrario {
+            // extra
+        }
+
+        mientras(variable > 5){
+            // bloque de codigo
+        }
+        // ESTA YA ME SALE
+        hacer {
+            // bloque de codigo
+        } mientras(variable > 5);
+
+        para(i = 0; i < 5; i++){
+            // bloque de codigo
+        }
+        para(entero i = 0; i < 5; i++){
+            // bloque de codigo
+        }
+
+
+
+
+
+        interruptor(opc){
+            caso 1 :
+                // codigo #1
+                romper;
+            caso 2 : 
+                // codigo #2
+                romper;
+            caso 3 : 
+                // codigo #3
+                romper;
+            xdefecto :
+                // codigo x
+                romper;
+        }
+
+
+        //nocomprobado garantiza que cualquier operación que cause un overflow arrojará una excepción en lugar de permitir el "wrap-around".
+        //comprobado permite que las operaciones de desbordamiento (overflow) no arrojen excepciones.
+        comprobado{
+            //comentario
+        }
+        nocomprobado{
+            //comentario
+        }
+
+        intenta{
+            //comentario
+        } atrapar(Excepcion ex){
+            //comentario
+        }
+
+        x = a + b;
+        abc_123 = 1 + hola - (4 + 5);
+        promedio = (5 + id3 + var)/3;
+        x = (5);
+
+
+        publico estatico vacio Metohacer(){
+            // bloque de codigo
+        }
+        privado estatico entero Metohacer(entero variable){
+            retorna variable;
+        }
+
+
+        entero variable1;
+        doble variable2;
+        cadena variable3;
+        boleano variable4;
+
+        entero variable_entera = 5;
+        doble variable_decimal = 2.5;
+        cadena variable_texto = "Hola mundo";
+        boleano variable_boleana = falso;
+
+        entero [] arregloInt = { 1, 2, 3, 4, 5 };
+        doble [] arreglohaceru = { 1.2, 3.4, 5.6 };
+        cadena [] arregloStr = { "Hola", "Mundo" };
+        boleano [] arregloBoo = { verdadero, falso, falso, verdadero };
+
+
+        mayus = txt.aMayus();
+        minus = txt.aMinus();
+        mayor = mate.max(5, 1);
+        menor = mate.min(id, id2);
+        variables = consola.leer();
+        numeroVar = entero.parsear(consola.leer());
+        tamanio = arreglo.longitud;
+        tamanio = arreglo.longitud + 1;
+        ARREGLO.COPIA(origen, destino, 6);
+
+        publico estatico entero MetodoChikito(entero var){
+            retorna var;
+        }
+    }
+
+    estatico entero variable_entera = 5;
+
+    publico estatico entero MetodoChikito(){
+        retorna var;
+    }
+
+    publico estatico cadena MetodoGrande(entero var){
+        retorna str;
+    }
+}
+
+
+`;
     
-    var cadInst = instruccion0 + instruccion00 + tipoDato1 + instruccion01 + instruccion02 + instruccion03 + instruccion04 + instruccion05 + instruccion06 + instruccion07 + instruccion08 + instruccion09 + instruccion10 + instruccion11 + instruccion12 + instruccion13 + instruccion14 + instruccion15 + instruccion16 + instruccion17 + instruccion18 + instruccion19 + instruccion20;
+    var cadInst = codigo;
     document.getElementById("input").value = cadInst;
 }
 
