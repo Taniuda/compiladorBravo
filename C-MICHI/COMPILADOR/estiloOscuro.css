@@ -340,3 +340,39 @@ p {
     align-items: center;
     gap: 10px; /* Espacio entre el título y el interruptor */
 }
+/*PESTAÑAS */
+
+/* Estilos para las pestañas */
+.tabs {
+    margin-top: 20px;
+    display: flex;
+    
+}
+
+.tab-button {
+    background-color: #007ce1; /* Color de fondo de las pestañas */
+    color: #ffffff; /* Color del texto */
+    border: 1px solid #151a20; /* Borde de las pestañas */
+    border-bottom: 2px solid transparent; /* Borde inferior transparente para efecto de selección */
+    padding: 16px 23px;
+    cursor: pointer;
+    font-size: 20px;
+    font-weight: bold;
+    margin-right: 2px; /* Espacio entre las pestañas */
+    border-radius: 5px 5px 0 0; /* Esquinas redondeadas en la parte superior */
+    transition: background-color 0.3s ease, border-bottom 0.3s ease; /* Transición suave */
+}
+
+
+
+.tab-button:hover {
+    background-color: #e5b71e; /* Fondo de la pestaña al pasar el ratón */
+    color: #000000;
+}
+
+.tab-content {
+    padding: 20px;
+    border: 1px solid #2a2a37; /* Borde del contenido de las pestañas */
+    border-radius: 0 0 5px 5px; /* Esquinas redondeadas en la parte inferior */
+    background-color: #2a2a37; /* Fondo del contenido de las pestañas */
+}
