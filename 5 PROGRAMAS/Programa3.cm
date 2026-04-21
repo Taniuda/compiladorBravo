@@ -1,0 +1,11 @@
+usando sistema;
+
+Clase Programa3 {
+publico estatico vacio Principal(cadena[] args) {
+entero a = 8;
+entero b = 10;
+entero mayor;
+mayor = mate.max(a, b);
+consola.escribir("El mayor entre " + a + " y " + b + " es " + mayor);
+}
+}

@@ -1,0 +1,8 @@
+usando sistema;
+Clase Programa1 {
+publico estatico vacio Principal(cadena[] args) {
+para(entero i = 1; i <= 10; i++) {
+consola.escribir(i);
+}
+}
+}

@@ -1,0 +1,15 @@
+usando sistema;
+
+Clase Programa2
+{
+    publico estatico vacio Principal(cadena[]args)
+    {
+    consola.escribir("hola_mundo");
+    consola.escribir("Escribe algo");
+
+    cadena texto;
+    texto=consola.leer();
+    consola.escribir("Texto ingresado"+texto);
+    }
+}
+

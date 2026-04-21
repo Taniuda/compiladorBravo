@@ -1,0 +1,204 @@
+usando sistema;
+Clase Programa0 {
+publico estatico vacio Principal(cadena[] args) {
+para(entero i = 1; i <= 10; i++) {
+consola.escribir(i);
+}
+}
+}
+
+
+
+
+usando sistema;
+
+Clase Programa1
+{
+    publico estatico vacio Principal(cadena[]args)
+    {
+    consola.escribir("hola_mundo");
+    consola.escribir("Escribe algo");
+
+    cadena texto;
+    texto=consola.leer();
+    consola.escribir("Texto ingresado"+texto);
+    }
+}
+
+usando sistema;
+
+Clase Programa3 {
+publico estatico vacio Principal(cadena[] args) {
+entero a = 8;
+entero b = 10;
+entero mayor;
+mayor = mate.max(a, b);
+consola.escribir("El mayor entre " + a + " y " + b + " es " + mayor);
+}
+}
+
+
+
+
+
+usando sistema;
+ 
+ Clase Progrma4{
+publico estatico vacio Principal(cadena[] args){
+
+publico entero sum(entero varA, entero varB){
+
+entero sumatoria=0;
+sumatoria = varA + varB;
+
+retorna sumatoria;
+}
+
+}
+ }
+
+
+
+
+
+ usando sistema;
+
+Clase Programa5
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+    // vamos a realizar un hola mundo...
+        consola.escribir("Hola Mundo!!");
+        consola.escribir("Escribe algo: ");
+        cadena texto;
+        texto = consola.leer();
+        consola.escribir("Texto ingresado: " + texto);
+    }
+}
+
+
+
+
+
+usando sistema;
+
+Clase Programa6
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        consola.escribir("Condicionales");
+        
+        entero numero = 5;
+
+        si(numero > 7){
+            consola.escribir("El numero es mayor a 7");
+        } contrario si(numero < 7) {
+            consola.escribir("El numero es menor a 7");
+        } contrario {
+            consola.escribir("El numero es igual a 7");
+        }
+    }
+}
+
+
+
+
+
+usando sistema;
+
+Clase Programa7
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        para(enteroi = 0; i < 100; i++)
+        {
+            consola.escribir("Te Amo <3");
+        }
+    }
+}
+
+
+
+usando sistema;
+
+Clase Programa8
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        consola.escribir("Ciclo While");
+        entero repetir = 1;
+
+        mientras(repetir == 1)
+        {
+            consola.escribir("ingresa valor A: ");
+            entero a = 0;
+            a = entero.parsear(consola.leer());
+
+            consola.escribir("ingresa valor A: ");
+            entero b = 0;
+            b = entero.parsear(consola.leer());
+
+            consola.escribir("Ingresa un numero del 1-4: ");
+            consola.escribir("1 - Sumatoria ");
+            consola.escribir("2 - Resta ");
+            consola.escribir("3 - Multiplicacion ");
+            consola.escribir("4 - Divison ");
+            consola.escribir("# - Salir al elegir cualquier otro numero ");
+
+            entero numeroIngresado;
+            numeroIngresado = entero.parsear(consola.leer());
+            entero c = 0;
+
+            interruptor(numeroIngresado)
+            {
+                caso 1 :
+                    c = a + b;
+                    consola.escribir("Sumatoria de a + b:" + c);
+                    romper;
+                caso 2 :
+                    c = a - b;
+                    consola.escribir("Resta de a - b:" + c);
+                    romper;
+                caso 3 :
+                    c = a * b;
+                    consola.escribir("Multiplicacion de a * b:" + c);
+                    romper;
+                caso 4 :
+                    c = a / b;
+                    consola.escribir("Division de a / b:" + c);
+                    romper;
+                xdefecto :
+                    consola.escribir("Salir del programa");
+                    repetir = 2;
+            }
+        }
+
+    }
+}
+
+
+
+
+
+
+usando sistema;
+
+Clase Programa9
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        entero mayor; 
+        mayor = mate.max(10, 20);
+        entero menor;
+        mayor = mate.min(10, 20);
+
+       consola.escribir("El mayor es: " + mayor );
+       consola.escribir("El menor es: " + menor);
+    }
+}
+
+
+
+
+
+

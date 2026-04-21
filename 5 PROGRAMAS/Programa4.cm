@@ -1,0 +1,15 @@
+usando sistema;
+ 
+ Clase Progrma4{
+publico estatico vacio Principal(cadena[] args){
+
+publico entero sum(entero varA, entero varB){
+
+entero sumatoria=0;
+sumatoria = varA + varB;
+
+retorna sumatoria;
+}
+
+}
+ }

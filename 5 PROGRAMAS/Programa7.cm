@@ -1,0 +1,12 @@
+usando sistema;
+
+Clase Programa7
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        para(enteroi = 0; i < 100; i++)
+        {
+            consola.escribir("Te Amo <3");
+        }
+    }
+}

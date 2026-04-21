@@ -1,0 +1,56 @@
+usando sistema;
+
+Clase Programa8
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        consola.escribir("Ciclo While");
+        entero repetir = 1;
+
+        mientras(repetir == 1)
+        {
+            consola.escribir("ingresa valor A: ");
+            entero a = 0;
+            a = entero.parsear(consola.leer());
+
+            consola.escribir("ingresa valor A: ");
+            entero b = 0;
+            b = entero.parsear(consola.leer());
+
+            consola.escribir("Ingresa un numero del 1-4: ");
+            consola.escribir("1 - Sumatoria ");
+            consola.escribir("2 - Resta ");
+            consola.escribir("3 - Multiplicacion ");
+            consola.escribir("4 - Divison ");
+            consola.escribir("# - Salir al elegir cualquier otro numero ");
+
+            entero numeroIngresado;
+            numeroIngresado = entero.parsear(consola.leer());
+            entero c = 0;
+
+            interruptor(numeroIngresado)
+            {
+                caso 1 :
+                    c = a + b;
+                    consola.escribir("Sumatoria de a + b:" + c);
+                    romper;
+                caso 2 :
+                    c = a - b;
+                    consola.escribir("Resta de a - b:" + c);
+                    romper;
+                caso 3 :
+                    c = a * b;
+                    consola.escribir("Multiplicacion de a * b:" + c);
+                    romper;
+                caso 4 :
+                    c = a / b;
+                    consola.escribir("Division de a / b:" + c);
+                    romper;
+                xdefecto :
+                    consola.escribir("Salir del programa");
+                    repetir = 2;
+            }
+        }
+
+    }
+}

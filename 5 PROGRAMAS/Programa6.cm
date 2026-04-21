@@ -1,0 +1,20 @@
+usando sistema;
+
+Clase Programa6
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        consola.escribir("Condicionales");
+        
+        entero numero = 5;
+
+        si(numero > 7){
+            consola.escribir("El numero es mayor a 7");
+        } contrario si(numero < 7) {
+            consola.escribir("El numero es menor a 7");
+        } contrario {
+            consola.escribir("El numero es igual a 7");
+        }
+    }
+}
+

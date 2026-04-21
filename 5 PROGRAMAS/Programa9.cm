@@ -1,0 +1,15 @@
+usando sistema;
+
+Clase Programa9
+{
+    publico estatico vacio Principal(cadena[] args)
+    {
+        entero mayor; 
+        mayor = mate.max(10, 20);
+        entero menor;
+        mayor = mate.min(10, 20);
+
+       consola.escribir("El mayor es: " + mayor );
+       consola.escribir("El menor es: " + menor);
+    }
+}
