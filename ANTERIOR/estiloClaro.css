@@ -80,7 +80,11 @@ p {
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 125.5%;
+<<<<<<< Updated upstream
     height: 100px;
+=======
+    height: 200px;
+>>>>>>> Stashed changes
     overflow: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
     font-size: 20px;
     color: #000000;

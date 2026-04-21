@@ -42,7 +42,7 @@ p {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Sombra más fuerte */
     padding: 20px;
-    width: 1000px;
+    width: 100%;
     margin: 20px auto;
     position: relative;
 }
@@ -63,7 +63,11 @@ p {
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 125.5%;
+<<<<<<< Updated upstream
     height: 500px;
+=======
+    height: 400px;
+>>>>>>> Stashed changes
     overflow: hidden;
     background-color: #222222; /* Fondo oscuro */
     flex: 1; /* Asegura que ocupe el espacio disponible */
@@ -77,7 +81,11 @@ p {
     border-radius: 10px;
     font-family: 'Montserrat', sans-serif; /* Fuente profesional */
     width: 125.5%;
+<<<<<<< Updated upstream
     height: 100px;
+=======
+    height: 200px;
+>>>>>>> Stashed changes
     overflow: auto; /* Permite el desplazamiento si el contenido es demasiado grande */
     font-size: 20px;
     color: #ffffff;
